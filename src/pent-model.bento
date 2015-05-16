@@ -1,0 +1,372 @@
+/**  pent-model.bento
+ *
+ *   Object model for Pent.
+ *
+ *
+ **/
+
+site pent [=
+
+
+    game_sequence [=
+        keep: play[] plays(play[] pp) = pp
+    
+        dynamic add_play(play p) [=
+            eval(plays(: plays + p :));
+        =]
+    
+        this;    
+    =]
+
+    play(piece p, pent_position pp) [=
+        keep: this piece = p
+        keep: pent_position position = pp
+        
+        this;
+    =]
+
+    static pent_position[64] cell_mask = [ 
+        [ #80,0,0,0,0,0,0,0 ], [ #40,0,0,0,0,0,0,0 ], [ #20,0,0,0,0,0,0,0 ], [ #10,0,0,0,0,0,0,0 ], [ #08,0,0,0,0,0,0,0 ], [ #04,0,0,0,0,0,0,0 ], [ #02,0,0,0,0,0,0,0 ], [ #01,0,0,0,0,0,0,0 ],
+        [ 0,#80,0,0,0,0,0,0 ], [ 0,#40,0,0,0,0,0,0 ], [ 0,#20,0,0,0,0,0,0 ], [ 0,#10,0,0,0,0,0,0 ], [ 0,#08,0,0,0,0,0,0 ], [ 0,#04,0,0,0,0,0,0 ], [ 0,#02,0,0,0,0,0,0 ], [ 0,#01,0,0,0,0,0,0 ],
+        [ 0,0,#80,0,0,0,0,0 ], [ 0,0,#40,0,0,0,0,0 ], [ 0,0,#20,0,0,0,0,0 ], [ 0,0,#10,0,0,0,0,0 ], [ 0,0,#08,0,0,0,0,0 ], [ 0,0,#04,0,0,0,0,0 ], [ 0,0,#02,0,0,0,0,0 ], [ 0,0,#01,0,0,0,0,0 ],
+        [ 0,0,0,#80,0,0,0,0 ], [ 0,0,0,#40,0,0,0,0 ], [ 0,0,0,#20,0,0,0,0 ], [ 0,0,0,#10,0,0,0,0 ], [ 0,0,0,#08,0,0,0,0 ], [ 0,0,0,#04,0,0,0,0 ], [ 0,0,0,#02,0,0,0,0 ], [ 0,0,0,#01,0,0,0,0 ],
+        [ 0,0,0,0,#80,0,0,0 ], [ 0,0,0,0,#40,0,0,0 ], [ 0,0,0,0,#20,0,0,0 ], [ 0,0,0,0,#10,0,0,0 ], [ 0,0,0,0,#08,0,0,0 ], [ 0,0,0,0,#04,0,0,0 ], [ 0,0,0,0,#02,0,0,0 ], [ 0,0,0,0,#01,0,0,0 ],
+        [ 0,0,0,0,0,#80,0,0 ], [ 0,0,0,0,0,#40,0,0 ], [ 0,0,0,0,0,#20,0,0 ], [ 0,0,0,0,0,#10,0,0 ], [ 0,0,0,0,0,#08,0,0 ], [ 0,0,0,0,0,#04,0,0 ], [ 0,0,0,0,0,#02,0,0 ], [ 0,0,0,0,0,#01,0,0 ],
+        [ 0,0,0,0,0,0,#80,0 ], [ 0,0,0,0,0,0,#40,0 ], [ 0,0,0,0,0,0,#20,0 ], [ 0,0,0,0,0,0,#10,0 ], [ 0,0,0,0,0,0,#08,0 ], [ 0,0,0,0,0,0,#04,0 ], [ 0,0,0,0,0,0,#02,0 ], [ 0,0,0,0,0,0,#01,0 ], 
+        [ 0,0,0,0,0,0,0,#80 ], [ 0,0,0,0,0,0,0,#40 ], [ 0,0,0,0,0,0,0,#20 ], [ 0,0,0,0,0,0,0,#10 ], [ 0,0,0,0,0,0,0,#08 ], [ 0,0,0,0,0,0,0,#04 ], [ 0,0,0,0,0,0,0,#02 ], [ 0,0,0,0,0,0,0,#01 ]
+    ]         
+
+    pent_board(game_sequence seq) [=
+        keep: int[] cells [=
+                      plays_to_cells(seq.plays);
+                      eval(mask);
+                  =] 
+        keep: pent_position mask = cells_to_mask 
+        
+        dynamic int[] rows[] = [ for int row from 0 to 8 [= 
+                                     [ for int col from 0 to 8 [= cells[8*row + col] =] ]
+                                 =] ]        
+
+        /---- adapters ----/
+        
+        dynamic int[] plays_to_cells(play[] plays) = [
+                                for int i from 0 to 64 [=    
+                                    plays_to_cell(plays, cell_mask[i])
+                                =] ] 
+        
+        dynamic int plays_to_cell(play[] plays, pent_position cell_pos) [=
+            for p in plays where hit(p.position, cell_pos) [=
+                p.piece.id;
+            =]
+        =]
+        
+        
+
+        dynamic pent_position cells_to_mask = [ 
+                      for int row = 0 to 8 [=
+                          (cell[8*row]     ? #80 : 0) | (cell[8*row + 1] ? #40 : 0) | 
+                          (cell[8*row + 2] ? #20 : 0) | (cell[8*row + 3] ? #10 : 0) |
+                          (cell[8*row + 2] ? #08 : 0) | (cell[8*row + 3] ? #04 : 0) |
+                          (cell[8*row + 2] ? #02 : 0) | (cell[8*row + 3] ? #01 : 0)
+                      =]
+                  ]
+        
+    =]
+    
+    byte[8] pent_board_mask(pent_board b) = [ for int row from 0 to 8 [= vals_to_mask(b.rows[row]) =] ]
+
+    
+    dynamic byte vals_to_mask(int[] vals) = (vals[0] ? #80 : 0) | (vals[1] ? #40 : 0) | 
+                                            (vals[2] ? #20 : 0) | (vals[3] ? #10 : 0) | 
+                                            (vals[4] ? #08 : 0) | (vals[5] ? #04 : 0) | 
+                                            (vals[6] ? #02 : 0) | (vals[7] ? #01 : 0)
+    
+    dynamic int[8] mask_to_vals(byte mask) = [ (mask & #80 ? 1 : 0), (mask & #40 ? 1 : 0),
+                                               (mask & #20 ? 1 : 0), (mask & #10 ? 1 : 0),
+                                               (mask & #08 ? 1 : 0), (mask & #04 ? 1 : 0),
+                                               (mask & #02 ? 1 : 0), (mask & #01 ? 1 : 0) ]
+    
+    
+    byte[8] pent_position = [ 0, 0, 0, 0, 0, 0, 0, 0 ]
+
+    dynamic pent_position shift_down(pent_position pp, int num_rows) = [ 
+                                pp[ (8 - num_rows)  & 7 ], pp[ (9 - num_rows)  & 7 ],
+                                pp[ (10 - num_rows) & 7 ], pp[ (11 - num_rows) & 7 ],
+                                pp[ (12 - num_rows) & 7 ], pp[ (13 - num_rows) & 7 ],
+                                pp[ (14 - num_rows) & 7 ], pp[ (15 - num_rows) & 7 ] ]
+
+    dynamic pent_position shift_right(pent_position pp, int num_cols) = [ 
+                                (pp[0] >> num_cols), (pp[1] >> num_cols),
+                                (pp[2] >> num_cols), (pp[3] >> num_cols),
+                                (pp[4] >> num_cols), (pp[5] >> num_cols),
+                                (pp[6] >> num_cols), (pp[7] >> num_cols) ]
+
+
+
+    piece [=
+        name [?]
+        classic_name [?]
+        int value [?]
+        
+        int rotations [?]
+        int chirality [?]
+        int width [?]
+        int height [?]
+
+        pent_position[] protos = []        
+
+        int num_positions = rotations * chirality * (9 - width) * (9 - height)
+      /------------  
+        pent_position[] all_positions = [
+                                // do row 0 separately to avoid the call
+                                for pent_position p in protos [=
+                                      
+          --------------------/
+    =]
+
+    piece[12] pieces = [
+        utah,
+        faucet,
+        long_L,
+        snake,
+        pipe,
+        C_piece,
+        L_square,
+        T_square,
+        stairs,
+        zigzag,
+        bar,
+        plus
+    ]
+    
+    piece utah [=
+        int id = 1
+        name = "Utah"
+        classic_name = "P"
+        int value = 10
+
+        int rotations = 4
+        int chirality = 2
+        int width = 2
+        int height = 3
+        
+        pent_position[] protos = [ [ #80, #C0, #C0, 0, 0, 0, 0, 0 ],
+                                   [ #E0, #C0,   0, 0, 0, 0, 0, 0 ],
+                                   [ #C0, #C0, #40, 0, 0, 0, 0, 0 ],
+                                   [ #60, #E0,   0, 0, 0, 0, 0, 0 ],
+
+                                   [ #40, #C0, #C0, 0, 0, 0, 0, 0 ],
+                                   [ #C0, #E0,   0, 0, 0, 0, 0, 0 ],
+                                   [ #C0, #C0, #80, 0, 0, 0, 0, 0 ],
+                                   [ #E0, #60,   0, 0, 0, 0, 0, 0 ] ]
+    =]
+    
+    piece faucet [=
+        int id = 2
+        name = "Faucet"
+        classic_name = "F"
+        int value = 9
+
+        int rotations = 4
+        int chirality = 2
+        int width = 3
+        int height = 3
+        
+        pent_position[] protos = [ [ #40, #E0, #20, 0, 0, 0, 0, 0 ],
+                                   [ #40, #60, #C0, 0, 0, 0, 0, 0 ],
+                                   [ #80, #E0, #40, 0, 0, 0, 0, 0 ],
+                                   [ #60, #C0, #40, 0, 0, 0, 0, 0 ],
+
+                                   [ #40, #E0, #80, 0, 0, 0, 0, 0 ],
+                                   [ #C0, #60, #40, 0, 0, 0, 0, 0 ],
+                                   [ #20, #E0, #40, 0, 0, 0, 0, 0 ],
+                                   [ #40, #C0, #60, 0, 0, 0, 0, 0 ] ]
+    =]
+        
+    piece long_L [=
+        int id = 3
+        name = "Long L"
+        classic_name = "L"
+        int value = 8
+
+        int rotations = 4
+        int chirality = 2
+        int width = 2
+        int height = 4
+        
+        pent_position[] protos = [ [ #80, #80, #80, #C0, 0, 0, 0, 0 ],
+                                   [ #F0, #80,   0,   0, 0, 0, 0, 0 ],
+                                   [ #C0, #40, #40, #40, 0, 0, 0, 0 ],
+                                   [ #10, #F0,   0,   0, 0, 0, 0, 0 ],
+
+                                   [ #40, #40, #40, #C0, 0, 0, 0, 0 ],
+                                   [ #80, #F0,   0,   0, 0, 0, 0, 0 ],
+                                   [ #C0, #80, #80, #80, 0, 0, 0, 0 ],
+                                   [ #F0, #10,   0,   0, 0, 0, 0, 0 ] ]
+    =]
+        
+    piece snake [=
+        int id = 4
+        name = "Snake"
+        classic_name = "N"
+        int value = 8
+
+        int rotations = 4
+        int chirality = 2
+        int width = 2
+        int height = 4
+        
+        pent_position[] protos = [ [ #80, #80, #C0, #40, 0, 0, 0, 0 ],
+                                   [ #70, #C0,   0,   0, 0, 0, 0, 0 ],
+                                   [ #80, #C0, #40, #40, 0, 0, 0, 0 ],
+                                   [ #30, #E0,   0,   0, 0, 0, 0, 0 ],
+
+                                   [ #40, #40, #C0, #80, 0, 0, 0, 0 ],
+                                   [ #C0, #70,   0,   0, 0, 0, 0, 0 ],
+                                   [ #40, #C0, #80, #80, 0, 0, 0, 0 ],
+                                   [ #E0, #30,   0,   0, 0, 0, 0, 0 ] ]
+    =]
+       
+    piece pipe [=
+        int id = 5
+        name = "Pipe"
+        classic_name = "Y"
+        int value = 8
+
+        int rotations = 4
+        int chirality = 2
+        int width = 2
+        int height = 4
+        
+        pent_position[] protos = [ [ #80, #80, #C0, #80, 0, 0, 0, 0 ],
+                                   [ #F0, #40,   0,   0, 0, 0, 0, 0 ],
+                                   [ #40, #C0, #40, #40, 0, 0, 0, 0 ],
+                                   [ #20, #F0,   0,   0, 0, 0, 0, 0 ],
+
+                                   [ #40, #40, #C0, #40, 0, 0, 0, 0 ],
+                                   [ #40, #F0,   0,   0, 0, 0, 0, 0 ],
+                                   [ #80, #C0, #80, #80, 0, 0, 0, 0 ],
+                                   [ #F0, #20,   0,   0, 0, 0, 0, 0 ] ]
+    =]
+       
+    
+    piece C_piece [=
+        int id = 6
+        name = "C"
+        classic_name = "U"
+        int value = 5
+        
+        int rotations = 4
+        int chirality = 1
+        int width = 2
+        int height = 3
+        
+        pent_position[] protos = [ [ #C0, #80, #C0, 0, 0, 0, 0, 0 ],
+                                   [ #E0, #A0,   0, 0, 0, 0, 0, 0 ],
+                                   [ #C0, #40, #C0, 0, 0, 0, 0, 0 ],
+                                   [ #A0, #E0,   0, 0, 0, 0, 0, 0 ] ]
+    =]
+        
+
+    piece L_square [=
+        int id = 7
+        name = "L-square"
+        classic_name = "V"
+        int value = 4
+
+        int rotations = 4
+        int chirality = 1
+        int width = 3
+        int height = 3
+        
+        pent_position[] protos = [ [ #80, #80, #E0, 0, 0, 0, 0, 0 ],
+                                   [ #E0, #80, #80, 0, 0, 0, 0, 0 ],
+                                   [ #E0, #20, #20, 0, 0, 0, 0, 0 ],
+                                   [ #20, #20, #E0, 0, 0, 0, 0, 0 ] ]
+    =]        
+
+    piece T_square [=
+        int id = 8
+        name = "T-square"
+        classic_name = "T"
+        int value = 4
+
+        int rotations = 4
+        int chirality = 1
+        int width = 3
+        int height = 3
+        
+        pent_position[] protos = [ [ #E0, #40, #40, 0, 0, 0, 0, 0 ],
+                                   [ #20, #E0, #20, 0, 0, 0, 0, 0 ],
+                                   [ #40, #40, #E0, 0, 0, 0, 0, 0 ],
+                                   [ #80, #E0, #80, 0, 0, 0, 0, 0 ] ]
+    =]
+        
+    piece stairs [=
+        int id = 9
+        name = "Stairs"
+        classic_name = "W"
+        int value = 4
+
+        int rotations = 4
+        int chirality = 1
+        int width = 3
+        int height = 3
+        
+        pent_position[] protos = [ [ #80, #C0, #30, 0, 0, 0, 0, 0 ],
+                                   [ #30, #C0, #80, 0, 0, 0, 0, 0 ],
+                                   [ #C0, #30, #20, 0, 0, 0, 0, 0 ],
+                                   [ #20, #30, #C0, 0, 0, 0, 0, 0 ] ]
+    =]
+        
+    piece zigzag [=
+        int id = 10
+        name = "Zigzag"
+        classic_name = "Z"
+        int value = 4
+
+        int rotations = 2
+        int chirality = 2
+        int width = 3
+        int height = 3
+        
+        pent_position[] protos = [ [ #C0, #40, #60, 0, 0, 0, 0, 0 ],
+                                   [ #20, #E0, #80, 0, 0, 0, 0, 0 ],
+
+                                   [ #60, #40, #C0, 0, 0, 0, 0, 0 ],
+                                   [ #80, #E0, #20, 0, 0, 0, 0, 0 ] ]
+    =]
+      
+    piece bar [=
+        int id = 11
+        name = "Bar"
+        classic_name = "I"
+        int value = 2
+
+        int rotations = 2
+        int chirality = 1
+        int width = 1
+        int height = 5
+        
+        pent_position[] protos = [ [ #80, #80, #80, #80, #80, 0, 0, 0 ],
+                                   [ #F8,   0,   0,   0,   0, 0, 0, 0 ] ]
+    =]
+        
+    piece plus [=
+        int id = 12
+        name = "Plus"
+        classic_name = "X"
+        int value = 1
+
+        int rotations = 1
+        int chirality = 1
+        int width = 3
+        int height = 3
+        
+        pent_position[] protos = [ [ #40, #E0, #40, 0, 0, 0, 0, 0 ] ]
+    =]
+        
+
+
+
+=]

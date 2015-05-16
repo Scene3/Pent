@@ -1,0 +1,374 @@
+/**  pent.bento
+ *
+ *   Web site of Pent.
+ *
+ *
+ **/
+
+site pent [=
+
+    /-------- global values -----------------------/
+
+    global User_Table(utbl{}){} = utbl
+    global Admin_User_Table(atbl{}){} = atbl
+
+    /-------- initialization ----------------------/
+
+    init [=
+        load_users("users", "admins");
+    =]
+    
+    session_init [=
+    =]
+
+    load_users(ufilename, afilename) [=
+        file user_file = file(ufilename)
+        file admin_file = file(afilename)
+        
+        dynamic table_loader(str){} = table.parse(str)
+        
+        log("looking for user file " + user_file.canonical_path + " and admin file " + admin_file.canonical_path);
+        
+        if (!user_file.exists) [=
+            log("user file not found; aborting");
+            redirect error("User file " + ufilename + " not found.")
+
+        =] else if (!admin_file.exists) [=
+            log("admin file not found; aborting");
+            redirect error("Admin file " + afilename + " not found.")
+
+        =] else [=
+            eval(User_Table(table_loader(user_file.contents)));
+            eval(Admin_User_Table(table_loader(admin_file.contents)));
+        =]
+        
+        if (!User_Table) [=
+            redirect error("Invalid user file " + ufilename + ".")
+        =]
+        if (!Admin_User_Table) [=
+            redirect error("Invalid admin file " + afilename + ".")
+        =]
+    =]
+    
+    /-------- error handling ----------------------/
+
+    component error(msg) [=
+        component_class = "error_msg"
+        message = msg
+        
+        "Error: ";
+        msg;
+    =]
+
+
+    /-------- login status and information --------/
+
+    this_username(u) = u
+
+    boolean logged_in(boolean flag) = flag
+
+    dynamic boolean authenticate(username, password) [=
+        if (User_Table{username} == password) [=
+            eval(this_username(: username :));
+            true;
+        =] else [=
+            false;
+        =]
+    =]
+
+    dynamic boolean authenticate_admin(username) [=
+        if (Admin_User_Table{username}) [=
+            true;
+        =] else [=
+            false;
+        =]
+    =]
+
+
+    /-------- session status ---------------------/
+
+    current_game(game_id) = game_id
+    
+
+    /-------- log file ---------------------------/
+
+    static LOG_FILE = "/var/log/pent.log"
+
+    /-------- parameter constants ----------------/
+    
+    static USERNAME_PARAM = "user"
+    static PASSWORD_PARAM = "pass"
+
+    /-------- styles and appearance constants -----/
+
+    static SPLASH_LOGO = "images/pent-logo-488x100.png"
+    static HEADER_LOGO = "images/pent-logo-244x50.png"
+
+    color main_bgcolor = "#FFFFFF"
+
+
+    /-------- base page ---------------------------/
+
+    page(*) base_page(params{}) [=
+        boolean ajax_enabled = true
+    
+        boolean needs_login [?]    
+        boolean needs_admin = false
+ 
+        style [| 
+            html, body { 
+                width: 100%;
+                height: 100%;
+                margin: 0 0 0 0;
+                background-color: [= main_bgcolor; =];
+                font-family: "Arial", sans-serif;
+            }
+
+            .centered_container {
+                width: 100%;
+                height: 100%;
+                margin: 0 0 0 0;
+                position: relative;
+            }
+            
+            .centered_high_box {
+                position: absolute;
+                left: 50%;
+                top: 38%;
+                margin-right: -50%;
+                transform: translate(-50%, -50%);
+                width: 36em;
+            }
+            
+            .centered_div  {
+                width: 100%;
+                text-align: center;
+             }
+            
+            .centered_div table {
+                margin-left: auto;
+                margin-right: auto;
+            }
+
+            .centered_div td {
+                padding: 0.125em 0.5em;
+            }
+            
+            .centered_div div {
+                padding: 0.75em 4em;
+            }
+            
+            .header_bar {
+                width: 100%;
+                padding: 0.75em 0;
+            }
+
+            .header_bar img {
+                display: block;
+                margin-left: auto;
+                margin-right: auto;
+            }
+            
+           .labeled_edit {
+                text-align: center;
+                font-weight: bold;
+                padding:0.5em;
+            }
+
+            #splash_image_holder img {
+                display: block;
+                margin-left: auto;
+                margin-right: auto;
+            }
+            
+            #login_splash_box {
+                color: purple;
+                font-size: 1em;
+                font-weight: bold;
+                font-family: "Arial", sans-serif;
+            }
+            
+            #login_button {
+                width: 10em;
+            }
+            
+            #ok_button {
+                width: 10em;
+            }
+
+            #cancel_button {
+                width: 10em;
+            }
+
+            #tc_container {
+                width: 100%;
+                height: 100%;
+            }
+            
+            #tc {
+                width: 100%;
+                height: 100%;
+            }
+            
+            #destination_box input {
+                color: black;
+                font-size: 1.125em;
+                background-color: #EEFFFF;
+            }
+        |]        
+ 
+        component splash_image_holder(img_url) [=
+            id = "splash_image_holder"
+            [| <img src="[= img_url; =]"> |]
+        =]
+        
+        dynamic component login_splash_box [=
+            id = "login_splash_box"
+            component_class = "centered_container"
+            
+            [| <div class="centered_high_box"> |]
+            splash_image_holder(SPLASH_LOGO);
+            login_component(page_name);
+            [| </div> |]
+        =]
+        
+        component header_bar [=
+            component_class = "header_bar"
+            
+            [| <img src="[= HEADER_LOGO; =]"> |]
+        =]
+     
+        component menu_bar [=
+            component_class = "menu_bar"
+            
+            
+        =]
+        
+        base_page this_page = owner
+        page_name = owner.type
+        boolean is_admin = authenticate_admin(this_username)
+
+        log("constructing base_page, this_username is " + this_username);
+        if (needs_login && !logged_in) [=
+            log("needs login");
+            login_splash_box;
+
+        =] else if (!needs_admin || is_admin) [=
+            log("we're good");
+            sub;
+
+        =] else [=
+            log("access to " + page_name + " by " + this_username + " denied");
+            "fail";
+        =]   
+    
+    =]
+    
+    base_page(*) play_page(params{}) [=
+         game_viewer(current_game);    
+    =]
+
+    base_page(*) work_page(params{}) [=
+        boolean needs_login = true
+        boolean needs_admin = true
+    
+        [| <div class="page_wrapper"> |]
+        header_bar;
+        menu_bar;
+        [| <div class="content_box"> |]
+        sub;
+        [| </div></div> |]
+    =]
+    
+
+    /-------- basic tools -------------------------/
+
+
+    component piece_viewer(params{}) [=
+    
+    
+    =]
+
+
+    /-------- login mechanics ---------------------/
+
+    dynamic component login_component(params{}),(page_name) [=
+        goto_page = page_name ? page_name : goto_param
+        goto_param [= with (params) [= params{"goto"}; =] else [| index |] =]
+        component this_component = owner
+        field_ids[] = [ USERNAME_PARAM, PASSWORD_PARAM ]
+        submit_params{} = { "goto": goto_page } 
+        
+        
+        log(" login component params: " + params);
+        log(" login submit params: " + submit_params);
+        
+        if (params{USERNAME_PARAM}) [=
+            log("trying to authenticate " + params{USERNAME_PARAM});
+            eval(logged_in(: authenticate(params{USERNAME_PARAM}, params{PASSWORD_PARAM}) :)); 
+        =]
+        if (logged_in) [=
+            log("logged in, redirecting to " + goto_page);
+            redirect [[ goto_page ]]
+
+        =] else [=
+            [| <div class="centered_div"><table><tr> |]
+            if (params{USERNAME_PARAM}) [|
+                <td colspan="2" style="background-color: white; color: red; text-align: center;">Login unsuccessful.  Try again.</td>
+            |] else [|
+                <td colospan="2">&nbsp;</td>
+            |]
+            [| </tr><tr><td><table><tr><td>Username:</td><td> |]
+            textedit(USERNAME_PARAM, this_username, 20);
+            [| </td></tr><tr><td>Password:</td><td> |]
+            passwordedit(PASSWORD_PARAM, "", 20);
+            [| </td></tr></table> |]
+            [| </td><td> |]
+            submit_button("login", "Login", "/" + this_component.id, field_ids, submit_params);
+            [| </td></tr></table></div> |]
+        =]
+        
+    =]    
+
+
+
+    /-------- home page ---------------------------/
+
+    base_page(*) index(params{}) [=
+        boolean needs_login = true    
+
+        if (is_admin) [=
+            work_page(params);
+        =] else [=
+            play_page(params);
+        =]
+    =]
+    
+    base_page show_logs [=
+        boolean needs_login = true
+        boolean needs_admin = true
+
+        [| <h3>log</h3><pre> |]
+        include_file(LOG_FILE);
+        [| </pre> |]
+    =]
+
+
+    /---- pseudofiles ----/
+
+    js [=
+        lib [=
+        =]
+    =]
+
+
+    /-------- error page --------------------------/
+    page error_page(request r) [=
+        boolean needs_login = false    
+        title = [| Error |]
+        color bgcolor = "#AAEEDD"
+
+        error_div(r);        
+    =]    
+
+=]

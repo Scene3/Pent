@@ -1,0 +1,17 @@
+/**  pent-view.bento
+ *
+ *   Game viewer for Pent.
+ *
+ *
+ **/
+
+site pent [=
+
+    component game_viewer(game_id) [=
+    
+    
+    
+    =]
+
+
+=]
