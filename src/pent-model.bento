@@ -25,6 +25,8 @@ site pent [=
         this;
     =]
 
+    byte[8] pent_position = [ 0, 0, 0, 0, 0, 0, 0, 0 ]
+
     static pent_position[64] cell_mask = [ 
         [ #80,0,0,0,0,0,0,0 ], [ #40,0,0,0,0,0,0,0 ], [ #20,0,0,0,0,0,0,0 ], [ #10,0,0,0,0,0,0,0 ], [ #08,0,0,0,0,0,0,0 ], [ #04,0,0,0,0,0,0,0 ], [ #02,0,0,0,0,0,0,0 ], [ #01,0,0,0,0,0,0,0 ],
         [ 0,#80,0,0,0,0,0,0 ], [ 0,#40,0,0,0,0,0,0 ], [ 0,#20,0,0,0,0,0,0 ], [ 0,#10,0,0,0,0,0,0 ], [ 0,#08,0,0,0,0,0,0 ], [ 0,#04,0,0,0,0,0,0 ], [ 0,#02,0,0,0,0,0,0 ], [ 0,#01,0,0,0,0,0,0 ],
@@ -48,7 +50,7 @@ site pent [=
                                  =] ]        
 
         /---- adapters ----/
-        
+       
         dynamic int[] plays_to_cells(play[] plays) = [
                                 for int i from 0 to 64 [=    
                                     plays_to_cell(plays, cell_mask[i])
@@ -60,17 +62,16 @@ site pent [=
             =]
         =]
         
-        
 
         dynamic pent_position cells_to_mask = [ 
-                      for int row = 0 to 8 [=
+                      for int row from 0 to 8 [=
                           (cell[8*row]     ? #80 : 0) | (cell[8*row + 1] ? #40 : 0) | 
                           (cell[8*row + 2] ? #20 : 0) | (cell[8*row + 3] ? #10 : 0) |
-                          (cell[8*row + 2] ? #08 : 0) | (cell[8*row + 3] ? #04 : 0) |
-                          (cell[8*row + 2] ? #02 : 0) | (cell[8*row + 3] ? #01 : 0)
+                          (cell[8*row + 4] ? #08 : 0) | (cell[8*row + 5] ? #04 : 0) |
+                          (cell[8*row + 6] ? #02 : 0) | (cell[8*row + 7] ? #01 : 0)
                       =]
                   ]
-        
+
     =]
     
     byte[8] pent_board_mask(pent_board b) = [ for int row from 0 to 8 [= vals_to_mask(b.rows[row]) =] ]
@@ -87,8 +88,6 @@ site pent [=
                                                (mask & #02 ? 1 : 0), (mask & #01 ? 1 : 0) ]
     
     
-    byte[8] pent_position = [ 0, 0, 0, 0, 0, 0, 0, 0 ]
-
     dynamic pent_position shift_down(pent_position pp, int num_rows) = [ 
                                 pp[ (8 - num_rows)  & 7 ], pp[ (9 - num_rows)  & 7 ],
                                 pp[ (10 - num_rows) & 7 ], pp[ (11 - num_rows) & 7 ],
