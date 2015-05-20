@@ -7,4 +7,30 @@
 
 site pent [=
 
+    /---- phases of game play ----/
+    
+    pent_phase [?]
+    
+    pent_phase BEFORE_GAME [/]
+    pent_phase SELECT_ORDER [/] 
+    pent_phase CHOOSE_TEAM [/] 
+    pent_phase READY_TO_PLAY [/] 
+    pent_phase GAME_PLAY [/] 
+    pent_phase AFTER_GAME [/] 
+
+    /---- a team ----/
+    
+    pent_piece[6] pent_team = []
+    
+
+    /---- a game ----/
+
+    pent_game [=
+        keep: pent_phase phase(pent_phase pp) = p
+    
+    
+    
+    =]
+    
+    
 =]

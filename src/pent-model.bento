@@ -57,8 +57,9 @@ site pent [=
                                 =] ] 
         
         dynamic int plays_to_cell(play[] plays, pent_position cell_pos) [=
-            for p in plays where hit(p.position, cell_pos) [=
-                p.piece.id;
+            int cell_val(int val) = val
+            for p in plays where hit(p.position, cell_pos) until cell_val [=
+                cell_val(: p.piece.id :);
             =]
         =]
         
