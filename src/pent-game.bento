@@ -11,12 +11,57 @@ site pent [=
     
     pent_phase [?]
     
+    /** When the player first arrives at the site, until the player clicks on the
+     *  start button, the application is in the Before Game phase.
+     **/
     pent_phase BEFORE_GAME [/]
-    pent_phase SELECT_ORDER [/] 
+
+    /** In the Choose Players phase, Player A and Player B are chosen.  By default,
+     *  the user plays the first game as Player A, and chooses Player B, either by 
+     *  selecting one of the available computer opponents or inviting another person 
+     *  to play.  If the players continue beyond the first game, this phase involves
+     *  selecting between playing another game between the same opponents, or choosing
+     *  a new opponent.  If the choice is to play another game between the same 
+     *  opponents, by default they switch sides, i.e., Player A becomes Player B and 
+     *  Player B becomes Player A, and this phase is skipped.    
+     **/ 
+    pent_phase CHOOSE_PLAYERS [/]
+
+    /** Once the players are chosen, Player A must choose the order in which the
+     *  players select pieces for their teams.  This also establishes the order of
+     *  play for the Play Game phase; the player that chooses first plays second,
+     *  and the player that chooses second plays first.
+     **/ 
+    pent_phase CHOOSE_ORDER [/] 
+
+    /** The Choose Team phase involves this players selecting pieces for their
+     *  team.  This is a turn-based phase that continues until all pieces are
+     *  selected and each player has a six-piece team.
+     **/ 
     pent_phase CHOOSE_TEAM [/] 
-    pent_phase READY_TO_PLAY [/] 
-    pent_phase GAME_PLAY [/] 
-    pent_phase AFTER_GAME [/] 
+
+    /** Actual game play begins once the teams are chosen.  The player who went
+     *  second in the Choose Team phase goes first in the Play Game phase, after
+     *  which players alternate playing turns.  In each turn, the player selects
+     *  an unplayed piece from her team and places it on the board such that the
+     *  piece is entirely on the board, aligned such that each square of the
+     *  piece covers exactly one square of the board, and no part of the piece
+     *  overlaps any pieces already on the board.  The Play Game phase continues
+     *  until one of the players is unable to play, either because all of the
+     *  player's pieces have been played, or none of the player's remaining pieces
+     *  fit into the remaining open spaces on the board.
+     **/
+    pent_phase PLAY_GAME [/] 
+
+    pent_phase BETWEEN_GAMES [/] 
+
+    /---- a player ----/
+    
+    pent_player [?]
+    
+    pent_player Player_A [/]
+    pent_player Player_B [/]
+
 
     /---- a team ----/
     
@@ -27,7 +72,18 @@ site pent [=
 
     pent_game [=
         keep: pent_phase phase(pent_phase pp) = p
+        keep: piece[] team_A(piece[] pcs) = pcs
+        keep: play[] plays(play[] pls) = pls
     
+        dynamic add_play(play p) [=
+            eval(plays(: plays + p :));
+        =]
+    
+        this;    
+    =]
+
+        
+        
     
     
     =]

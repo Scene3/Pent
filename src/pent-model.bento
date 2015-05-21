@@ -8,16 +8,6 @@
 site pent [=
 
 
-    game_sequence [=
-        keep: play[] plays(play[] pp) = pp
-    
-        dynamic add_play(play p) [=
-            eval(plays(: plays + p :));
-        =]
-    
-        this;    
-    =]
-
     play(piece p, pent_position pp) [=
         keep: this piece = p
         keep: pent_position position = pp
@@ -38,9 +28,9 @@ site pent [=
         [ 0,0,0,0,0,0,0,#80 ], [ 0,0,0,0,0,0,0,#40 ], [ 0,0,0,0,0,0,0,#20 ], [ 0,0,0,0,0,0,0,#10 ], [ 0,0,0,0,0,0,0,#08 ], [ 0,0,0,0,0,0,0,#04 ], [ 0,0,0,0,0,0,0,#02 ], [ 0,0,0,0,0,0,0,#01 ]
     ]         
 
-    pent_board(game_sequence seq) [=
+    pent_board(play[] plays) [=
         keep: int[] cells [=
-                      plays_to_cells(seq.plays);
+                      plays_to_cells(plays);
                       eval(mask);
                   =] 
         keep: pent_position mask = cells_to_mask 
@@ -131,8 +121,8 @@ site pent [=
         snake,
         pipe,
         C_piece,
-        L_square,
-        T_square,
+        square_L,
+        T_piece,
         stairs,
         zigzag,
         bar,
@@ -268,9 +258,9 @@ site pent [=
     =]
         
 
-    piece L_square [=
+    piece square_L [=
         int id = 7
-        name = "L-square"
+        name = "Square L"
         classic_name = "V"
         int value = 4
 
@@ -285,9 +275,9 @@ site pent [=
                                    [ #20, #20, #E0, 0, 0, 0, 0, 0 ] ]
     =]        
 
-    piece T_square [=
+    piece T_piece [=
         int id = 8
-        name = "T-square"
+        name = "T"
         classic_name = "T"
         int value = 4
 
