@@ -19,11 +19,9 @@ site pent [=
     /** In the Choose Players phase, Player A and Player B are chosen.  By default,
      *  the user plays the first game as Player A, and chooses Player B, either by 
      *  selecting one of the available computer opponents or inviting another person 
-     *  to play.  If the players continue beyond the first game, this phase involves
-     *  selecting between playing another game between the same opponents, or choosing
-     *  a new opponent.  If the choice is to play another game between the same 
-     *  opponents, by default they switch sides, i.e., Player A becomes Player B and 
-     *  Player B becomes Player A, and this phase is skipped.    
+     *  to play.  If the players continue beyond the first game, by default they 
+     *  switch sides after each game, i.e., Player A becomes Player B and Player B 
+     *  becomes Player A.    
      **/ 
     pent_phase CHOOSE_PLAYERS [/]
 
@@ -53,6 +51,18 @@ site pent [=
      **/
     pent_phase PLAY_GAME [/] 
 
+    /** Immediately after the last piece has been played, the game is declared over,
+     *  the winner is announced, the score is tallied and, if the same two opponents
+     *  played previously, the cumulative results of all games played is displayed.
+     *  This is the Between Games phase.  At this point the player may exit, or
+     *  may accept one of two invitations: an invitation to play again against the 
+     *  same opponent, and an invitation to play against a different opponent.  If
+     *  the invitation to play again with the same opponent is accepted, the 
+     *  application enters the Choose Order phase, with Player A and Player B 
+     *  switched, so that the choice of order falls to the player who did not choose 
+     *  the order in the game just completed.  If the invitation to choose another 
+     *  opponent is accepted, the application enters the Choose Players phase.
+     **/
     pent_phase BETWEEN_GAMES [/] 
 
     /---- a player ----/
@@ -73,20 +83,20 @@ site pent [=
     pent_game [=
         keep: pent_phase phase(pent_phase pp) = p
         keep: piece[] team_A(piece[] pcs) = pcs
+        keep: piece[] team_B(piece[] pcs) = pcs
         keep: play[] plays(play[] pls) = pls
     
         dynamic add_play(play p) [=
             eval(plays(: plays + p :));
         =]
     
+        eval(phase(BEFORE_GAME));
         this;    
     =]
 
         
         
     
-    
-    =]
     
     
 =]
