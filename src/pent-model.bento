@@ -106,12 +106,12 @@ site pent [=
         pent_position[] protos = []        
 
         int num_positions = rotations * chirality * (9 - width) * (9 - height)
-      /------------  
+/----------------
         pent_position[] all_positions = [
                                 // do row 0 separately to avoid the call
                                 for pent_position p in protos [=
-                                      
-          --------------------/
+----------/
+        this;                                      
     =]
 
     piece[12] pieces = [
@@ -128,6 +128,8 @@ site pent [=
         bar,
         plus
     ]
+    
+    piece{} piece_table = { for piece p in pieces [= p.id: p =] }
     
     piece utah [=
         int id = 1
