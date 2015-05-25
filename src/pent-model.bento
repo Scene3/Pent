@@ -94,6 +94,7 @@ site pent [=
 
 
     piece [=
+        int id [?]
         name [?]
         classic_name [?]
         int value [?]
@@ -102,6 +103,9 @@ site pent [=
         int chirality [?]
         int width [?]
         int height [?]
+        
+        /-- the pieces array contains all pieces in id order, starting from 1 --/
+        dynamic int index_for_id(id) = (id - 1)
 
         pent_position[] protos = []        
 

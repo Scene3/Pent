@@ -14,29 +14,28 @@ site pent [=
     /** When the player first arrives at the site, until the player clicks on the
      *  start button, the application is in the Before Game phase.
      **/
-    pent_phase BEFORE_GAME [/]
+    pent_phase BEFORE_GAME = "Before Game"
 
     /** In the Choose Players phase, Player A and Player B are chosen.  By default,
-     *  the user plays the first game as Player A, and chooses Player B, either by 
-     *  selecting one of the available computer opponents or inviting another person 
-     *  to play.  If the players continue beyond the first game, by default they 
-     *  switch sides after each game, i.e., Player A becomes Player B and Player B 
-     *  becomes Player A.    
+     *  the user plays as Player A, and chooses Player B, either by selecting one 
+     *  of the available computer opponents or inviting another person to play.
      **/ 
-    pent_phase CHOOSE_PLAYERS [/]
+    pent_phase CHOOSE_PLAYERS = "Choose Players"
 
     /** Once the players are chosen, Player A must choose the order in which the
      *  players select pieces for their teams.  This also establishes the order of
      *  play for the Play Game phase; the player that chooses first plays second,
-     *  and the player that chooses second plays first.
+     *  and the player that chooses second plays first.  If play continues beyond
+     *  a single game, the players alternate order (whoever picked first last game
+     *  picks second this game and vice versa) and this phase is skipped.
      **/ 
-    pent_phase CHOOSE_ORDER [/] 
+    pent_phase CHOOSE_ORDER = "Choose Order"
 
     /** The Choose Team phase involves this players selecting pieces for their
      *  team.  This is a turn-based phase that continues until all pieces are
      *  selected and each player has a six-piece team.
      **/ 
-    pent_phase CHOOSE_TEAM [/] 
+    pent_phase CHOOSE_TEAM = "Choose Team"
 
     /** Actual game play begins once the teams are chosen.  The player who went
      *  second in the Choose Team phase goes first in the Play Game phase, after
@@ -49,7 +48,7 @@ site pent [=
      *  player's pieces have been played, or none of the player's remaining pieces
      *  fit into the remaining open spaces on the board.
      **/
-    pent_phase PLAY_GAME [/] 
+    pent_phase PLAY_GAME = "Play Game"
 
     /** Immediately after the last piece has been played, the game is declared over,
      *  the winner is announced, the score is tallied and, if the same two opponents
@@ -58,39 +57,90 @@ site pent [=
      *  may accept one of two invitations: an invitation to play again against the 
      *  same opponent, and an invitation to play against a different opponent.  If
      *  the invitation to play again with the same opponent is accepted, the 
-     *  application enters the Choose Order phase, with Player A and Player B 
-     *  switched, so that the choice of order falls to the player who did not choose 
-     *  the order in the game just completed.  If the invitation to choose another 
-     *  opponent is accepted, the application enters the Choose Players phase.
+     *  application enters the Choose Team phase.  If the invitation to choose 
+     *  another opponent is accepted, the application enters the Choose Players 
+     *  phase.
      **/
-    pent_phase BETWEEN_GAMES [/] 
+    pent_phase BETWEEN_GAMES = "Between Games"
 
     /---- a player ----/
     
-    pent_player [?]
+    game_player(*) pent_player(name, id) [?]
     
-    pent_player Player_A [/]
-    pent_player Player_B [/]
-
 
     /---- a team ----/
     
-    pent_piece[6] pent_team = []
+    piece[6] pent_team = []
+    boolean[6] pent_team_played = [ false, false, false, false, false, false ]
     
 
     /---- a game ----/
 
     pent_game [=
-        keep: pent_phase phase(pent_phase pp) = p
+        /** the players **/
+        keep: pent_player player_A(pent_player plyr) = plyr
+        keep: pent_player player_B(pent_player plyr) = plyr
+        keep: boolean a_picks_first(boolean flag) = flag
+
+        /** the teams **/
         keep: piece[] team_A(piece[] pcs) = pcs
         keep: piece[] team_B(piece[] pcs) = pcs
+
+        /** the plays **/
         keep: play[] plays(play[] pls) = pls
     
+        /** the game phase and turn **/
+        keep: pent_phase phase(pent_phase pp) = pp
+        keep: int turn(int t) = t
+
+        /---- the game API ----/ 
+    
+        dynamic add_piece_by_id(id, boolean to_team_A) [=
+            add_piece(pieces[piece.index_for_id(id)], to_team_A);
+        =]
+        
+        dynamic add_piece(piece p, boolean to_team_A) [=
+            if (to_team_A) [=
+                eval(team_A(: team_A + p :));
+            =] else [=
+                eval(team_B(: team_B + p :));
+            =]
+            eval(turn(: team_A.count + team_B.count + 1 :));
+            if (turn == 13) [=
+                eval(turn(: 1 :));
+                set_phase(PLAY_GAME);
+            =]
+        =]
+
+        
         dynamic add_play(play p) [=
             eval(plays(: plays + p :));
         =]
     
-        eval(phase(BEFORE_GAME));
+        dynamic set_player(name, id, boolean is_player_a) [=
+            if (is_player_a) [=
+                eval(player_A(: pent_player(name, id) :));
+            =] else [=
+                eval(player_B(: pent_player(name, id) :));
+            =] 
+             
+             /-- if both players are set, advance to the next phase --/
+             if (player_A && player_B) [=
+                 set_phase(CHOOSE_ORDER);
+             =]
+        =]
+
+        dynamic set_a_picks_first(boolean flag) [=
+            eval(a_picks_first(: flag :));
+            set_phase(CHOOSE_TEAM);
+        =]
+        
+        
+        dynamic set_phase(pent_phase pp) [= 
+            eval(phase(: pp :));
+        =]
+        
+        set_phase(BEFORE_GAME);
         this;    
     =]
 

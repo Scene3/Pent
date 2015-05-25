@@ -1,0 +1,19 @@
+/**  pent-user.bento
+ *
+ *   User model for Pent.
+ *
+ *
+ **/
+
+site pent [=
+
+    game_player(player_name, player_id) [=
+        keep: name = player_name
+        keep: id = player_id
+        
+        this;
+    =]
+
+
+
+=]

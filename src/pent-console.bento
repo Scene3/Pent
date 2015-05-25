@@ -1,0 +1,239 @@
+/**  pent-console.bento
+ *
+ *   Game console for Pent.
+ *
+ *
+ **/
+
+site pent [=
+
+    /** Standard console parameters and events **/
+
+    param_key [?]
+    param_key COMMAND = "do"
+    param_key SET_NAME = "name"
+    param_key SET_TYPE = "type"
+    param_key SET_ID = "id"
+    param_key FIRST_PICK = "first"
+    param_key PLAYER = "player"
+    param_key PIECE = "piece"
+    param_key PUT = "put"
+    param_key ROTATE = "rot"
+    param_key FLIP = "flip"
+    param_key TURN = "turn"
+    param_key CONFIRM = "confirm"
+         
+
+    /** Standard parameter values.  # means any number.  * means any
+     *  string.
+     **/
+    param_val [?]
+    param_val START = "start"
+    param_val STOP = "stop"
+    param_val BACK = "back"
+    param_val CONTINUE = "continue"
+    param_val CHOOSE = "pick"
+    param_val COMPUTER_PLAYER = "comp"
+    param_val HUMAN_PLAYER = "human"
+    param_val ID = "#"
+    param_val PLAYER_A = "A"
+    param_val PLAYER_B = "B"
+    param_val CELL = "#"
+    param_val NAME = "*"
+    param_val QTR_TURNS = "#"
+    param_val FLIPS = "#" 
+    param_val TURN_NUM = "#"
+    param_val YES = "yes"
+    param_val NO = "no"
+
+    
+    /** Allowed parameters in each game state. **/
+
+    param_key[] param_keys = []
+    
+    param_keys{} allowed_params = {
+        BEFORE_GAME:    [ COMMAND ],
+        CHOOSE_PLAYERS: [ COMMAND, CONFIRM, PLAYER, SET_NAME, SET_TYPE, SET_ID ],
+        CHOOSE_ORDER:   [ COMMAND, CONFIRM, FIRST_PICK ],
+        CHOOSE_TEAM:    [ COMMAND, CONFIRM, TURN, PIECE ],
+        PLAY_GAME:      [ COMMAND, CONFIRM, TURN, PIECE, ROTATE, FLIP, PUT ],
+        BETWEEN_GAMES:  [ COMMAND ]
+    }
+        
+    /** Allowed values for specific parameters in each game state. **/
+
+    param_val[] param_vals = []
+    
+    param_vals{}{} allowed_vals = {
+    
+        BEFORE_GAME: {
+            COMMAND:    [ START ]
+        },
+        
+        CHOOSE_PLAYERS: { 
+            COMMAND:    [ CHOOSE, STOP, BACK ],
+            PLAYER:     [ PLAYER_A, PLAYER_B ],
+            SET_NAME:   [ NAME ],
+            SET_TYPE:   [ COMPUTER_PLAYER, HUMAN_PLAYER ],
+            SET_ID:     [ ID ]
+        },
+        
+        CHOOSE_ORDER: { 
+            COMMAND:    [ STOP, BACK ],
+            FIRST_PICK: [ PLAYER_A, PLAYER_B ]
+        },
+        
+        CHOOSE_TEAM: { 
+            COMMAND:    [ STOP, BACK ],
+            TURN:       [ TURN_NUM ],
+            PIECE:      [ ID ]
+        },
+        
+        PLAY_GAME: { 
+            COMMAND:    [ STOP ],
+            TURN:       [ TURN_NUM ],
+            PIECE:      [ ID ],
+            PUT:        [ CELL ],
+            ROTATE:     [ QTR_TURNS ],
+            FLIP:       [ FLIPS ]
+        },
+        
+        BETWEEN_GAMES: {
+            COMMAND:    [ CONTINUE, START ]
+        }
+    }
+        
+        
+        
+        
+
+    /**
+     *  Pent Console logic
+     *
+     *  The console plays the role of controller.  It assembles and displays
+     *  a set of view components depending on the state of game, and also
+     *  changes the state of the game in response to events.
+     *
+     **/
+
+    /** console base class **/
+    component console [=
+
+    =]
+
+
+    /** pent-specific console **/
+    console pent_console(params{}),(pent_game gm) [=
+        /** the current game **/
+        keep: pent_game game = gm
+     
+        /** parameter shortcuts **/
+        command = params{COMMAND}
+        set_name = params{SET_NAME}
+        set_type = params{SET_TYPE}
+        set_id = params{SET_ID}
+        first_pick = params{FIRST_PICK}
+        selected_player = params{PLAYER}
+        selected_piece = params{PIECE}
+        position = params{PUT}
+        int rotations = (int) params{ROTATE}
+        int flips = (int) params{FLIP}
+        int turn = (int) params{TURN}
+        boolean confirmed = (params{CONFIRM} == YES)
+        
+        dynamic boolean is_odd(int n) = ((n & 1) == 1)
+                
+        dynamic boolean a_picks_next = (is_odd(turn) == game.a_picks_first)
+        dynamic boolean a_plays_next = (is_odd(turn) != game.a_picks_first)
+        
+        dynamic pent_view[] views = [
+            if (game.phase == BEFORE_GAME) [=
+             
+             
+            =]  
+        ]
+
+
+        /---- implementation ----/
+        
+        /**
+         *  State logic.
+         *
+         *  The state of both the console and the game changes in response to 
+         *  events, which arrive via params.  Console state includes player
+         *  names and ids, team colors and styles, console configuration, and game
+         *  sequence state (won-lost tally, running scores and player order
+         *  for the current series of games).  Game state includes the current
+         *  phase (game phases are defined in pent-game.bento) as well as the
+         *  current turn (for phases that have turns) and the state of the game
+         *  board.
+         *
+         *  The game object itself handles game state changes in response to the
+         *  game API. So what the console calls the game API to play a piece, for
+         *  example, the game object will determine if the play ends the game,
+         *  and if so will change the phase from PLAY_GAME to BETWEEN_GAMES.
+         *   
+         **/
+
+         if (command == STOP) [=
+             if (confirmed) [=
+                 game.set_phase(BETWEEN_GAMES);
+             =]
+ 
+         =] else if (command == BACK) [=
+             if (game.phase == CHOOSE_PLAYERS) [=
+                 game.set_phase(BEFORE_GAME);
+             =] else if (game.phase == CHOOSE_ORDER) [=
+                 game.set_phase(CHOOSE_PLAYERS);
+             /-- backing up from Choose Team is only available before the first pick --/
+             =] else if (game.phase == CHOOSE_TEAM && game.turn == 1) [=
+                 game.set_phase(CHOOSE_ORDER);
+             =]
+
+         =] else if (command == START) [=
+             game.set_phase(CHOOSE_PLAYER);
+
+         =] else if (command == CONTINUE) [=   
+             game.set_phase(CHOOSE_TEAM);
+
+         /---- phase-dependent logic ----/
+         
+         /-- in the Choose Player phase, we accept name/id choices for either player --/
+         =] else if (game.phase == CHOOSE_PLAYERS) [=
+             if (selected_player == PLAYER_A) [=
+                 game.set_player(set_name, set_id, true);
+             =] else if (selected_player == PLAYER_B) [=
+                 game.set_player(set_name, set_id, false);
+             =]
+       
+         =] else if (game.phase == CHOOSE_ORDER) [=
+             if (first_pick) [=
+                 game.set_a_picks_first((first_pick == PLAYER_A));
+             =]           
+         
+         =] else if (game.phase == CHOOSE_TEAM) [=
+             if (selected_piece && turn) [=
+                 if (turn != game.turn) [=
+                     redirect error("piece selected out of turn");
+                 =]
+                 game.add_piece_by_id(selected_piece);     
+             =]
+         
+         =] else if (game.phase == PLAY_GAME) [=
+             if (selected_piece && turn) [=
+                 if (turn != game.turn) [=
+                     redirect error("piece selected out of turn");
+                 =]
+                 game.play_piece_by_id(selected_piece, position, a_plays_next);     
+                 
+                 if (game.phase == BETWEEN_GAMES) [=
+                     // game just ended
+                 =]
+             =]
+         =]
+  
+    =]
+
+
+
+=]

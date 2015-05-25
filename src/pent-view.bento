@@ -1,17 +1,55 @@
 /**  pent-view.bento
  *
- *   Game viewer for Pent.
+ *   View components for Pent.
  *
  *
  **/
 
 site pent [=
 
-    component game_viewer(game_id) [=
+    /---- site-level view options ----/
     
+    int STANDARD_MODE = 0
+    int TEXT_MODE = 1
+
+    int view_mode(int mode) = mode 
+
+
+    /---- piece attributes ----/
+
+
+    /---- view components ----/
+
+    component pent_view [=
+        component_class = "view " + owner.type
+        
+        int x [?]
+        int y [?]
+    =]
+
+    pent_view team_view(team_name, pent_team team, pent_team_played played) [=
+
+        if (view_mode == TEXT_MODE) [=
+            
+        
+        =] else [=
+        
+        
+        =]    
     
     
     =]
+    
+    pent_view set_view(piece[] removed) [=
+    
+    =]
+    
+    
+    pent_view board_view(pent_game game) [=
+    
+    
+    =]
+
 
 
 =]

@@ -12,15 +12,15 @@ site pent [=
     global User_Table(utbl{}){} = utbl
     global Admin_User_Table(atbl{}){} = atbl
 
-    /-------- initialization ----------------------/
+    /-------- site initialization -----------------/
 
     init [=
         load_users("users", "admins");
+        
+        /---- until we implement the fancy stuff ----/
+        view_mode(TEXT_MODE);
     =]
     
-    session_init [=
-    =]
-
     load_users(ufilename, afilename) [=
         file user_file = file(ufilename)
         file admin_file = file(afilename)
@@ -49,6 +49,13 @@ site pent [=
             redirect error("Invalid admin file " + afilename + ".")
         =]
     =]
+
+
+    /-------- session initialization --------------/
+
+    session_init [=
+    =]
+
     
     /-------- error handling ----------------------/
 
@@ -89,6 +96,9 @@ site pent [=
 
     current_game(game_id) = game_id
     
+    /** if work_mode is true, we are managing the game site rather than playing the game **/
+    boolean work_mode(boolean do_work) = do_work
+
 
     /-------- log file ---------------------------/
 
@@ -101,10 +111,10 @@ site pent [=
 
     /-------- styles and appearance constants -----/
 
-    static SPLASH_LOGO = "images/pent-logo-488x100.png"
-    static HEADER_LOGO = "images/pent-logo-244x50.png"
+    static SPLASH_LOGO = "images/pent-logo-358x78.png"
+    static HEADER_LOGO = "images/pent-logo-358x78.png"
 
-    color main_bgcolor = "#FFFFFF"
+    color main_bgcolor = "#CCE1DB"
 
 
     /-------- base page ---------------------------/
@@ -210,7 +220,7 @@ site pent [=
                 height: 100%;
             }
             
-            #destination_box input {
+            #input_box input {
                 color: black;
                 font-size: 1.125em;
                 background-color: #EEFFFF;
@@ -265,7 +275,10 @@ site pent [=
     =]
     
     base_page(*) play_page(params{}) [=
-         game_viewer(current_game);    
+        boolean needs_login = false
+        boolean needs_admin = false
+    
+        pent_console(current_game);    
     =]
 
     base_page(*) work_page(params{}) [=
@@ -284,11 +297,7 @@ site pent [=
     /-------- basic tools -------------------------/
 
 
-    component piece_viewer(params{}) [=
-    
-    
-    =]
-
+ 
 
     /-------- login mechanics ---------------------/
 
@@ -334,10 +343,8 @@ site pent [=
 
     /-------- home page ---------------------------/
 
-    base_page(*) index(params{}) [=
-        boolean needs_login = true    
-
-        if (is_admin) [=
+    page index(params{}) [=
+        if (work_mode) [=
             work_page(params);
         =] else [=
             play_page(params);
