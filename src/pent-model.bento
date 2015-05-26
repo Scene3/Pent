@@ -110,11 +110,17 @@ site pent [=
         pent_position[] protos = []        
 
         int num_positions = rotations * chirality * (9 - width) * (9 - height)
-/----------------
+
         pent_position[] all_positions = [
                                 // do row 0 separately to avoid the call
                                 for pent_position p in protos [=
-----------/
+                                
+                                =]
+                            ]
+
+
+
+
         this;                                      
     =]
 

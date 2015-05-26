@@ -42,8 +42,29 @@ site pent [=
     test_runner pent_model_tests [=
     
         test_base test_pieces [=
-            expected = "ABC"
+            expected = "A"
+            
+            int num_problems(int n) = n
+            
+            for piece p in pieces [=
+                if (p.protos.count != p.rotations * p.chirality) [=
+                    eval(num_problems(: num_problems + 1 :));
+                =]
+            =]
+            
+            if (!num_problems) [=
+                test_log("all pieces have correct number of protos");
+                "A";
+            =] else [=
+                if (num_problems == 1) [=
+                    test_log("one piece has incorrect number of protos");
+                =] else [=
+                    test_log(num_problems + " pieces have incorrect number of protos");
+                =]
+                eval(num_promblems(: 0 :));
+            =]
+                
             
         =]
-   
+    =]
 =]
