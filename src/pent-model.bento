@@ -112,14 +112,35 @@ site pent [=
         int num_positions = rotations * chirality * (9 - width) * (9 - height)
 
         pent_position[] all_positions = [
-                                // do row 0 separately to avoid the call
-                                for pent_position p in protos [=
+                            for pent_position p in protos [=
+                                // do the first row and the first column in 
+                                // each row separately to avoid a call
+
+                                /---- row 0, col 0 ----/
+                                p, 
                                 
+                                /---- row 0. cols 1-7 ----/
+                                for int num_cols from 1 to 8 [=
+                                    shift_right(p, num_cols),
                                 =]
-                            ]
+                                /---- rows 1-7 ----/                                  
 
+                                    shift_down(p, num_rows)
 
-
+/------------------------------------
+                                for int num_rows from 1 to 8 [=
+                              
+                                    /---- col 0 ----/
+                                    shift_down(p, num_rows)
+                                    
+                                    /---- cols 1-7 ----/
+                                    for int num_cols from 1 to 8 [=
+                                        shift_down(shift_right(p, num_cols), num_rows),
+                                    =]
+                                =]
+    -----------------------/
+                            =]
+                        ]
 
         this;                                      
     =]
