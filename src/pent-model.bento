@@ -111,36 +111,40 @@ site pent [=
 
         int num_positions = rotations * chirality * (9 - width) * (9 - height)
 
+        /** the proto array includes rotations, so width and height alternate from
+         *  proto to proto.  The nominal width and height apply to the 0th and
+         *  subsequent even-numbered protos, while for odd-numbered protos the 
+         *  width and height are swapped.
+         **/   
+        dynamic int width_for_proto(int n) = (n & 1 ? height : width)
+        dynamic int height_for_proto(int n) = (n & 1 ? width : height)
+         
         pent_position[] all_positions = [
-                            for pent_position p in protos [=
-                                // do the first row and the first column in 
-                                // each row separately to avoid a call
+                    for pent_position p in protos and int ix from 0 [=
+                        // do the first row and the first column in 
+                        // each row separately to avoid a call
 
-                                /---- row 0, col 0 ----/
-                                p, 
-                                
-                                /---- row 0. cols 1-7 ----/
-                                for int num_cols from 1 to 8 [=
-                                    shift_right(p, num_cols),
-                                =]
-                                /---- rows 1-7 ----/                                  
+                        /---- row 0, col 0 ----/
+                        p, 
+                        
+                        /---- row 0, cols 1-7 ----/
+                        for int num_cols from 1 to (9 - width_for_proto(ix)) [=
+                            shift_right(p, num_cols),
+                        =],
 
-                                    shift_down(p, num_rows)
+                        /---- rows 1-7 ----/                                  
+                        for int num_rows from 1 to (9 - height_for_proto(ix)) [=
 
-/------------------------------------
-                                for int num_rows from 1 to 8 [=
-                              
-                                    /---- col 0 ----/
-                                    shift_down(p, num_rows)
-                                    
-                                    /---- cols 1-7 ----/
-                                    for int num_cols from 1 to 8 [=
-                                        shift_down(shift_right(p, num_cols), num_rows),
-                                    =]
-                                =]
-    -----------------------/
+                            /---- col 0 ----/
+                            shift_down(p, num_rows),
+                            
+                            /---- cols 1-7 ----/
+                            for int num_cols from 1 to (9 - width_for_proto(ix)) [=
+                                shift_down(shift_right(p, num_cols), num_rows),
                             =]
-                        ]
+                        =]
+                    =]
+                ]
 
         this;                                      
     =]

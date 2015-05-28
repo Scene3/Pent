@@ -42,7 +42,7 @@ site pent [=
     test_runner pent_model_tests [=
     
         test_base test_pieces [=
-            expected = "A"
+            expected = "AB"
             
             int num_problems(int n) = n
             
@@ -61,9 +61,28 @@ site pent [=
                 =] else [=
                     test_log(num_problems + " pieces have incorrect number of protos");
                 =]
-                eval(num_promblems(: 0 :));
+                eval(num_problems(: 0 :));
+            =]
+
+            for piece p in pieces [=
+                if (p.all_positions.count != p.num_positions) [=
+                    test_log("piece " + p.id + " num positions should be " + p.num_positions + " but is " + p.all_positions.count);
+                    eval(num_problems(: num_problems + 1 :));
+                =]
             =]
                 
+            if (!num_problems) [=
+                test_log("all pieces have correct number of positions");
+                "B";
+            =] else [=
+                if (num_problems == 1) [=
+                    test_log("one piece has incorrect number of positions");
+                =] else [=
+                    test_log(num_problems + " pieces have incorrect number of positions");
+                =]
+                eval(num_problems(: 0 :));
+            =]
+
             
         =]
     =]
