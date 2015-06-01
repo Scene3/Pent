@@ -42,7 +42,7 @@ site pent [=
     test_runner pent_model_tests [=
     
         test_base test_pieces [=
-            expected = "AB"
+            expected = "ABC"
             
             int num_problems(int n) = n
             
@@ -87,7 +87,7 @@ site pent [=
             pent_position full_plus = [ #7C, #FF, #FF, #FF, #FF, #FF, #FF, #7C ]
             
             for piece p in pieces [=
-                eval(pos_accumulator(: empty_position :));
+                eval(pos_accumulator(: empty_board :));
                 for pent_position pos in p.all_positions [=
                     eval(pos_accumulator(: pos_accumulator | pos :));
                 =]
