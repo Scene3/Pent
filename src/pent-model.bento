@@ -15,7 +15,10 @@ site pent [=
         this;
     =]
 
-    byte[8] pent_position = [ 0, 0, 0, 0, 0, 0, 0, 0 ]
+    byte[8] pent_position = []
+    
+    pent_position empty_board = [ 0, 0, 0, 0, 0, 0, 0, 0 ]
+    pent_position full_board = [ #FF, #FF, #FF, #FF, #FF, #FF, #FF, #FF ] 
 
     static pent_position[64] cell_mask = [ 
         [ #80,0,0,0,0,0,0,0 ], [ #40,0,0,0,0,0,0,0 ], [ #20,0,0,0,0,0,0,0 ], [ #10,0,0,0,0,0,0,0 ], [ #08,0,0,0,0,0,0,0 ], [ #04,0,0,0,0,0,0,0 ], [ #02,0,0,0,0,0,0,0 ], [ #01,0,0,0,0,0,0,0 ],
@@ -29,6 +32,9 @@ site pent [=
     ]         
 
     pent_board(play[] plays) [=
+
+        /---- the board, in various forms ----/
+
         keep: int[] cells [=
                       plays_to_cells(plays);
                       eval(mask);
@@ -38,6 +44,14 @@ site pent [=
         dynamic int[] rows[] = [ for int row from 0 to 8 [= 
                                      [ for int col from 0 to 8 [= cells[8*row + col] =] ]
                                  =] ]        
+
+
+        /---- testers -----/
+        
+        dynamic boolean is_empty(pent_position pos) = !(pos[0] | pos[1] | pos[2] | pos[3] | pos[4] | pos[5] | pos[6] | pos[7]) 
+        
+        dynamic boolean is_position_open(pent_position pos) = is_empty(pos & mask)
+
 
         /---- adapters ----/
        
@@ -163,6 +177,20 @@ site pent [=
         bar,
         plus
     ]
+    
+    static int UTAH_ID = 1
+    static int FAUCET_ID = 2
+    static int LONG_L_ID = 3
+    static int SNAKE_ID = 4
+    static int PIPE_ID = 5
+    static int C_PIECE_ID = 6
+    static int SQUARE_L_ID = 7
+    static int T_PIECE_ID = 8
+    static int STAIRS_ID = 9
+    static int ZIGZAG_ID = 10
+    static int BAR_ID = 11
+    static int PLUS_ID = 12
+    
     
     piece{} piece_table = { for piece p in pieces [= p.id: p =] }
     

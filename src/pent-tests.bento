@@ -82,8 +82,40 @@ site pent [=
                 =]
                 eval(num_problems(: 0 :));
             =]
-
             
+            pent_position pos_accumulator(pent_position pos) = pos
+            pent_position full_plus = [ #7C, #FF, #FF, #FF, #FF, #FF, #FF, #7C ]
+            
+            for piece p in pieces [=
+                eval(pos_accumulator(: empty_position :));
+                for pent_position pos in p.all_positions [=
+                    eval(pos_accumulator(: pos_accumulator | pos :));
+                =]
+                
+                if (p.id != PLUS_ID) [=
+                    if (pos_accumulator != full_board) [=
+                        test_log("all_positions incorrect for piece " + id);
+                        eval(num_problems(: num_problems + 1 :));
+                    =]
+                =] else [=
+                    if (pos_accumulator != full_plus) [=
+                        test_log("all_positions incorrect for plus");
+                        eval(num_problems(: num_problems + 1 :));
+                    =]
+                =]
+            
+            =]
+            if (!num_problems) [=
+                test_log("all pieces have correct all_positions");
+                "C";
+                eval(num_problems(: 0 :));
+            =]
+            
+        =]
+        
+        test_board [=
+        
+        
         =]
     =]
 =]
