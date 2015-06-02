@@ -118,4 +118,21 @@ site pent [=
         
         =]
     =]
+    
+    /------ informal tests ------/
+    
+    page show_all_positions(params{}) [=
+    
+        piece p = (params{"piece"} ? params{"piece"} : pieces[0])
+       
+        p.name;
+        br; br; 
+        [| <ol> |]
+        for pent_position pos in p.all_positions [=
+            [| <li> |]
+            pos;
+            [| </li> |]
+        =]
+        [| </ol> |]
+    =]
 =]
