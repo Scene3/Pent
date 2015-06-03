@@ -135,4 +135,8 @@ site pent [=
         =]
         [| </ol> |]
     =]
+    
+    show_a_pos [=
+        utah.all_positions[0];
+    =]
 =]
