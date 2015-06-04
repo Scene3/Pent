@@ -84,7 +84,7 @@ site pent [=
             =]
             
             pent_position pos_accumulator(pent_position pos) = pos
-            pent_position full_plus = [ #7C, #FF, #FF, #FF, #FF, #FF, #FF, #7C ]
+            pent_position full_plus = [ #7E, #FF, #FF, #FF, #FF, #FF, #FF, #7E ]
             
             for piece p in pieces [=
                 eval(pos_accumulator(: empty_board :));

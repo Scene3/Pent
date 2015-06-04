@@ -105,6 +105,11 @@ site pent [=
                                 (pp[4] >> num_cols), (pp[5] >> num_cols),
                                 (pp[6] >> num_cols), (pp[7] >> num_cols) ]
 
+    dynamic pent_position shift_down_right(pent_position pp, int num_cols, int num_rows) = [ 
+                                (pp[ (8 - num_rows)  & 7 ] >> num_cols), (pp[ (9 - num_rows)  & 7 ] >> num_cols),
+                                (pp[ (10 - num_rows) & 7 ] >> num_cols), (pp[ (11 - num_rows) & 7 ] >> num_cols),
+                                (pp[ (12 - num_rows) & 7 ] >> num_cols), (pp[ (13 - num_rows) & 7 ] >> num_cols),
+                                (pp[ (14 - num_rows) & 7 ] >> num_cols), (pp[ (15 - num_rows) & 7 ] >> num_cols) ]
 
 
     piece [=
@@ -154,7 +159,7 @@ site pent [=
                             
                             /---- cols 1-7 ----/
                             for int num_cols from 1 to (9 - width_for_proto(ix)) [=
-                                shift_down(shift_right(p, num_cols), num_rows),
+                                shift_down_right(p, num_cols, num_rows),
                             =]
                         =]
                     =]
