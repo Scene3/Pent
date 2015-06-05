@@ -138,7 +138,9 @@ site pent [=
         dynamic int width_for_proto(int n) = (n & 1 ? height : width)
         dynamic int height_for_proto(int n) = (n & 1 ? width : height)
          
-        pent_position[] all_positions = [
+        pent_position[] all_positions = []
+        
+        dynamic pent_position[] compute_all_positions = [
                     for pent_position p in protos and int ix from 0 [=
                         // do the first row and the first column in 
                         // each row separately to avoid a call
@@ -219,6 +221,9 @@ site pent [=
                                    [ #C0, #E0,   0, 0, 0, 0, 0, 0 ],
                                    [ #C0, #C0, #80, 0, 0, 0, 0, 0 ],
                                    [ #E0, #60,   0, 0, 0, 0, 0, 0 ] ]
+
+        pent_position[] all_positions = compute_all_positions
+
     =]
     
     global piece faucet [=
@@ -241,6 +246,8 @@ site pent [=
                                    [ #C0, #60, #40, 0, 0, 0, 0, 0 ],
                                    [ #20, #E0, #40, 0, 0, 0, 0, 0 ],
                                    [ #40, #C0, #60, 0, 0, 0, 0, 0 ] ]
+
+        pent_position[] all_positions = compute_all_positions
     =]
         
     global piece long_L [=
@@ -263,6 +270,8 @@ site pent [=
                                    [ #80, #F0,   0,   0, 0, 0, 0, 0 ],
                                    [ #C0, #80, #80, #80, 0, 0, 0, 0 ],
                                    [ #F0, #10,   0,   0, 0, 0, 0, 0 ] ]
+
+        pent_position[] all_positions = compute_all_positions
     =]
         
     global piece snake [=
@@ -285,6 +294,8 @@ site pent [=
                                    [ #C0, #70,   0,   0, 0, 0, 0, 0 ],
                                    [ #40, #C0, #80, #80, 0, 0, 0, 0 ],
                                    [ #E0, #30,   0,   0, 0, 0, 0, 0 ] ]
+
+        pent_position[] all_positions = compute_all_positions
     =]
        
     global piece pipe [=
@@ -307,6 +318,8 @@ site pent [=
                                    [ #40, #F0,   0,   0, 0, 0, 0, 0 ],
                                    [ #80, #C0, #80, #80, 0, 0, 0, 0 ],
                                    [ #F0, #20,   0,   0, 0, 0, 0, 0 ] ]
+
+        pent_position[] all_positions = compute_all_positions
     =]
        
     
@@ -325,6 +338,8 @@ site pent [=
                                    [ #E0, #A0,   0, 0, 0, 0, 0, 0 ],
                                    [ #C0, #40, #C0, 0, 0, 0, 0, 0 ],
                                    [ #A0, #E0,   0, 0, 0, 0, 0, 0 ] ]
+
+        pent_position[] all_positions = compute_all_positions
     =]
         
 
@@ -343,6 +358,8 @@ site pent [=
                                    [ #E0, #80, #80, 0, 0, 0, 0, 0 ],
                                    [ #E0, #20, #20, 0, 0, 0, 0, 0 ],
                                    [ #20, #20, #E0, 0, 0, 0, 0, 0 ] ]
+
+        pent_position[] all_positions = compute_all_positions
     =]        
 
     global piece T_piece [=
@@ -360,6 +377,8 @@ site pent [=
                                    [ #20, #E0, #20, 0, 0, 0, 0, 0 ],
                                    [ #40, #40, #E0, 0, 0, 0, 0, 0 ],
                                    [ #80, #E0, #80, 0, 0, 0, 0, 0 ] ]
+
+        pent_position[] all_positions = compute_all_positions
     =]
         
     global piece stairs [=
@@ -377,6 +396,8 @@ site pent [=
                                    [ #30, #C0, #80, 0, 0, 0, 0, 0 ],
                                    [ #C0, #30, #20, 0, 0, 0, 0, 0 ],
                                    [ #20, #30, #C0, 0, 0, 0, 0, 0 ] ]
+
+        pent_position[] all_positions = compute_all_positions
     =]
         
     global piece zigzag [=
@@ -395,6 +416,8 @@ site pent [=
 
                                    [ #60, #40, #C0, 0, 0, 0, 0, 0 ],
                                    [ #80, #E0, #20, 0, 0, 0, 0, 0 ] ]
+
+        pent_position[] all_positions = compute_all_positions
     =]
       
     global piece bar [=
@@ -410,6 +433,8 @@ site pent [=
         
         pent_position[] protos = [ [ #80, #80, #80, #80, #80, 0, 0, 0 ],
                                    [ #F8,   0,   0,   0,   0, 0, 0, 0 ] ]
+
+        pent_position[] all_positions = compute_all_positions
     =]
         
     global piece plus [=
@@ -424,7 +449,8 @@ site pent [=
         int height = 3
         
         pent_position[] protos = [ [ #40, #E0, #40, 0, 0, 0, 0, 0 ] ]
-    =]
 
+        pent_position[] all_positions = compute_all_positions
+    =]
 
 =]
