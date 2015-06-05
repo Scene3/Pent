@@ -199,7 +199,7 @@ site pent [=
     
     piece{} piece_table = { for piece p in pieces [= p.id: p =] }
     
-    piece utah [=
+    global piece utah [=
         int id = 1
         name = "Utah"
         classic_name = "P"
@@ -221,7 +221,7 @@ site pent [=
                                    [ #E0, #60,   0, 0, 0, 0, 0, 0 ] ]
     =]
     
-    piece faucet [=
+    global piece faucet [=
         int id = 2
         name = "Faucet"
         classic_name = "F"
@@ -243,7 +243,7 @@ site pent [=
                                    [ #40, #C0, #60, 0, 0, 0, 0, 0 ] ]
     =]
         
-    piece long_L [=
+    global piece long_L [=
         int id = 3
         name = "Long L"
         classic_name = "L"
@@ -265,7 +265,7 @@ site pent [=
                                    [ #F0, #10,   0,   0, 0, 0, 0, 0 ] ]
     =]
         
-    piece snake [=
+    global piece snake [=
         int id = 4
         name = "Snake"
         classic_name = "N"
@@ -287,7 +287,7 @@ site pent [=
                                    [ #E0, #30,   0,   0, 0, 0, 0, 0 ] ]
     =]
        
-    piece pipe [=
+    global piece pipe [=
         int id = 5
         name = "Pipe"
         classic_name = "Y"
@@ -310,7 +310,7 @@ site pent [=
     =]
        
     
-    piece C_piece [=
+    global piece C_piece [=
         int id = 6
         name = "C"
         classic_name = "U"
@@ -328,7 +328,7 @@ site pent [=
     =]
         
 
-    piece square_L [=
+    global piece square_L [=
         int id = 7
         name = "Square L"
         classic_name = "V"
@@ -345,7 +345,7 @@ site pent [=
                                    [ #20, #20, #E0, 0, 0, 0, 0, 0 ] ]
     =]        
 
-    piece T_piece [=
+    global piece T_piece [=
         int id = 8
         name = "T"
         classic_name = "T"
@@ -362,7 +362,7 @@ site pent [=
                                    [ #80, #E0, #80, 0, 0, 0, 0, 0 ] ]
     =]
         
-    piece stairs [=
+    global piece stairs [=
         int id = 9
         name = "Stairs"
         classic_name = "W"
@@ -379,7 +379,7 @@ site pent [=
                                    [ #20, #30, #C0, 0, 0, 0, 0, 0 ] ]
     =]
         
-    piece zigzag [=
+    global piece zigzag [=
         int id = 10
         name = "Zigzag"
         classic_name = "Z"
@@ -397,7 +397,7 @@ site pent [=
                                    [ #80, #E0, #20, 0, 0, 0, 0, 0 ] ]
     =]
       
-    piece bar [=
+    global piece bar [=
         int id = 11
         name = "Bar"
         classic_name = "I"
@@ -412,7 +412,7 @@ site pent [=
                                    [ #F8,   0,   0,   0,   0, 0, 0, 0 ] ]
     =]
         
-    piece plus [=
+    global piece plus [=
         int id = 12
         name = "Plus"
         classic_name = "X"
@@ -425,8 +425,6 @@ site pent [=
         
         pent_position[] protos = [ [ #40, #E0, #40, 0, 0, 0, 0, 0 ] ]
     =]
-        
-
 
 
 =]
