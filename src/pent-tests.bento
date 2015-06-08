@@ -139,4 +139,14 @@ site pent [=
     show_a_pos [=
         utah.all_positions[0];
     =]
+    
+    show_num_pos [=
+        for piece p in pieces [=
+            "id: ";
+            p.id;
+            "   num positions: ";
+            p.num_positions;
+            br;
+        =]
+    =]
 =]
