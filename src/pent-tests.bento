@@ -113,9 +113,51 @@ site pent [=
             
         =]
         
-        test_board [=
+        test_base, pent_board test_board_testers [=
+            expected = "ABCDEF"
         
+            // empty board
+            pent_position z = [ 0, 0, 0, 0, 0, 0, 0, 0 ]
         
+            // three squares.  a and b overlap, so do b and c.  a and c do not
+            
+            pent_position a = [ #C0, #C0, 0, 0, 0, 0, 0, 0 ]
+            pent_position b = [ 0, #18, #18, 0, 0, 0, 0, 0 ]
+            pent_position c = [ #30, #30, 0, 0, 0, 0, 0, 0 ]
+
+            // test is_empty
+            if (is_empty(z)) [=
+                "A";
+            =] else [=
+                test_log("is_empty failed on empty position");
+            =]
+            if (!is_empty(a) && !is_empty(b) && !is_empty(c)) [=
+                "B";
+            =] else [=
+                test_log("is_empty failed on non-empty position");
+            =]
+            
+            // test is_hit
+            if (is_hit(a, b) && is_hit(b, c)) [=
+                "C";
+            =] else [=
+                test_log("is_hit failed to detect hit with overlapping positions");
+            =]
+            if (is_hit(a, a) && is_hit(b, b) && is_hit(c, c)) [=
+                "D";
+            =] else [=
+                test_log("is_hit failed to detect hit with self");
+            =]
+            if (!is_hit(a, z) && !is_hit(b, z) && !is_hit(c, z) && !is_hit(z, z)) [=
+                "E";
+            =] else [=
+                test_log("is_hit detected impossible hit (on empty)");
+            =]
+            if (!is_hit(a, c)) [=
+                "F";
+            =] else [=
+                test_log("is_hit detected nonexistent hit (positions do not overlap)");
+            =]
         =]
     =]
     

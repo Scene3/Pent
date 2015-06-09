@@ -37,7 +37,7 @@ site pent [=
 
         keep: int[] cells [=
                       plays_to_cells(plays);
-                      eval(mask);
+                      eval(mask(: :));
                   =] 
         keep: pent_position mask = cells_to_mask 
         
@@ -49,6 +49,8 @@ site pent [=
         /---- testers -----/
         
         dynamic boolean is_empty(pent_position pos) = !(pos[0] | pos[1] | pos[2] | pos[3] | pos[4] | pos[5] | pos[6] | pos[7]) 
+        dynamic boolean is_hit(pent_position pos1, pent_position pos2) = ((pos1[0] & pos2[0]) || (pos1[1] & pos2[1]) || (pos1[2] & pos2[2]) || (pos1[3] & pos2[3])
+                                                                       || (pos1[4] & pos2[4]) || (pos1[5] & pos2[5]) || (pos1[6] & pos2[6]) || (pos1[7] & pos2[7]))
         
         dynamic boolean is_position_open(pent_position pos) = is_empty(pos & mask)
 
@@ -62,7 +64,7 @@ site pent [=
         
         dynamic int plays_to_cell(play[] plays, pent_position cell_pos) [=
             int cell_val(int val) = val
-            for p in plays where hit(p.position, cell_pos) until cell_val [=
+            for p in plays where is_hit(p.position, cell_pos) until cell_val [=
                 cell_val(: p.piece.id :);
             =]
         =]
@@ -138,10 +140,15 @@ site pent [=
         dynamic int width_for_proto(int n) = (n & 1 ? height : width)
         dynamic int height_for_proto(int n) = (n & 1 ? width : height)
          
-        pent_position[] all_positions = compute_all_positions
+        pent_position[] all_positions [=
+            log("computing all positions for " + owner.name + "...");
+            compute_all_positions;
+        =]
         
         dynamic pent_position[] compute_all_positions = [
+
                     for pent_position p in protos and int ix from 0 [=
+                    
                         // do the first row and the first column in 
                         // each row separately to avoid a call
 
