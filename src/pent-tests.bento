@@ -87,6 +87,7 @@ site pent [=
             pent_position full_plus = [ #7E, #FF, #FF, #FF, #FF, #FF, #FF, #7E ]
             
             for piece p in pieces [=
+                log("testing piece " + p.id);
                 eval(pos_accumulator(: empty_board :));
                 for pent_position pos in p.all_positions [=
                     eval(pos_accumulator(: pos_accumulator | pos :));
@@ -189,6 +190,16 @@ site pent [=
             [| </li> |]
         =]
         [| </ol> |]
+    =]
+    
+    show_pos_count [=
+        for piece p in pieces [=
+            log("checking " + p.name);
+            if (p.all_positions.count == p.num_positions) [=
+                p.name;
+                " is good<br>";
+            =]
+        =]
     =]
     
     show_a_pos [=

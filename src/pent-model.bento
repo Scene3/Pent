@@ -140,7 +140,7 @@ site pent [=
         dynamic int width_for_proto(int n) = (n & 1 ? height : width)
         dynamic int height_for_proto(int n) = (n & 1 ? width : height)
          
-        pent_position[] all_positions [=
+        keep: pent_position[] all_positions [=
             log("computing all positions for " + owner.name + "...");
             compute_all_positions;
         =]
