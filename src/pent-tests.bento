@@ -128,11 +128,13 @@ site pent [=
             // test is_empty
             if (is_empty(z)) [=
                 "A";
+                test_log("is_empty works on empty position");
             =] else [=
                 test_log("is_empty failed on empty position");
             =]
             if (!is_empty(a) && !is_empty(b) && !is_empty(c)) [=
                 "B";
+                test_log("is_empty works on non-empty position");
             =] else [=
                 test_log("is_empty failed on non-empty position");
             =]
@@ -140,21 +142,25 @@ site pent [=
             // test is_hit
             if (is_hit(a, b) && is_hit(b, c)) [=
                 "C";
+                test_log("is_hit detects overlap");
             =] else [=
                 test_log("is_hit failed to detect hit with overlapping positions");
             =]
             if (is_hit(a, a) && is_hit(b, b) && is_hit(c, c)) [=
                 "D";
+                test_log("is_hit detects hit with self");
             =] else [=
                 test_log("is_hit failed to detect hit with self");
             =]
             if (!is_hit(a, z) && !is_hit(b, z) && !is_hit(c, z) && !is_hit(z, z)) [=
                 "E";
+                test_log("is_hit works (returns false) with empty position");
             =] else [=
                 test_log("is_hit detected impossible hit (on empty)");
             =]
             if (!is_hit(a, c)) [=
                 "F";
+                test_log("is_hit works (returns false) on non-overlapping positions");
             =] else [=
                 test_log("is_hit detected nonexistent hit (positions do not overlap)");
             =]
@@ -165,12 +171,19 @@ site pent [=
     
     page show_all_positions(params{}) [=
     
-        piece p = (params{"piece"} ? params{"piece"} : pieces[0])
+        piece p = (params{"piece"} ? piece_table{params{"piece"}} : pieces[0])
+        pent_position[] all_pos = p.all_positions
        
         p.name;
         br; br; 
+        p.all_positions.count;
+        [/ positions: |]
         [| <ol> |]
+        
+        /----- this breaks
         for pent_position pos in p.all_positions [=
+        -----------------------/
+        for pent_position pos in all_pos [=
             [| <li> |]
             pos;
             [| </li> |]
