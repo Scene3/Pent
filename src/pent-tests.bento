@@ -114,7 +114,7 @@ site pent [=
             
         =]
         
-        test_base, pent_board test_board_testers [=
+        test_base, pent_board test_board_stateless_testers [=
             expected = "ABCDEF"
         
             // empty board
@@ -166,14 +166,83 @@ site pent [=
                 test_log("is_hit detected nonexistent hit (positions do not overlap)");
             =]
         =]
+        
+
+        test_base, pent_board test_board_stateful_testers [=
+            expected = "ABC"
+        
+            // empty board
+            pent_board empty_board [/]
+            
+            // modified boards
+            pent_board board_with_no_openings [=
+                keep: int[] cells = [ for int i from 0 to 60 [= 7 =], 0, 0, 0, 0 ]
+            =]
+            
+            pent_board board_with_24_openings [=
+                keep: int[] cells = [ for int i from 0 to 52 [= 7 =],
+                                      0, 0, 0, 0, 9, 9, 9, 9, 0, 0, 0, 0 ]
+            =]
+
+            int num_positions(int n) = n            
+            
+            // empty board: every position should be open
+            
+            
+            // board with 60 out of 64 cells full: no position should be open
+            
+            
+            // board with 2 X 4 opening: 24 positions should be open
+            // (8 for utah, 4 each for snake, pipe, long_L and C_piece)
+            
+            
+        =]
+
+        test_base test_plays [=
+            expected = "ABCD"
+            
+            play p1 = play(utah, 0)
+            pent_position pp1 = [ #80, #C0, #C0, 0, 0, 0, 0, 0 ]
+            
+            if (p1.piece.name == "Utah") [=
+                "A";
+                test_log("first play has correct piece");
+            =] else [=
+                test_log("first play has wrong piece");
+            =]
+            
+            if (p1.position == pp1) [=
+                "B";
+                test_log("first play has correct position");
+            =] else [=
+                test_log("first play has wrong position");
+            =]
+              
+            play p2 = play(bar, 63)
+            pent_position pp2 = [ 0, 0, 0, 0, 0, 0, 0, #1F ]
+        
+            if (p2.piece.id == 11) [=
+                "C";
+                test_log("second play has correct piece");
+            =] else [=
+                test_log("second play has wrong piece");
+            =]
+            
+            if (p2.position == pp2) [=
+                "D";
+                test_log("second play has correct position");
+            =] else [=
+                test_log("second play has wrong position: " + (string) p2.position);
+            =]
+        =]
     =]
     
     /------ informal tests ------/
     
     page show_all_positions(params{}) [=
     
-        piece p = (params{"piece"} ? piece_table{params{"piece"}} : pieces[0])
-        pent_position[] all_pos = p.all_positions
+        int ix = params{"piece"} ? (int) params{"piece"} : 0
+        piece p = pieces[ix]
        
         p.name;
         br; br; 
@@ -181,10 +250,7 @@ site pent [=
         [/ positions: |]
         [| <ol> |]
         
-        /----- this breaks
         for pent_position pos in p.all_positions [=
-        -----------------------/
-        for pent_position pos in all_pos [=
             [| <li> |]
             pos;
             [| </li> |]

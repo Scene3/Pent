@@ -8,10 +8,9 @@
 site pent [=
 
 
-    play(piece p, pent_position pp) [=
+    play(piece p, int position_index) [=
         keep: this piece = p
-        keep: pent_position position = pp
-        
+        keep: pent_position position = p.all_positions[position_index]
         this;
     =]
 
@@ -35,10 +34,7 @@ site pent [=
 
         /---- the board, in various forms ----/
 
-        keep: int[] cells [=
-                      plays_to_cells(plays);
-                      eval(mask(: :));
-                  =] 
+        keep: int[] cells = plays_to_cells(plays)
         keep: pent_position mask = cells_to_mask 
         
         dynamic int[] rows[] = [ for int row from 0 to 8 [= 
@@ -52,7 +48,7 @@ site pent [=
         dynamic boolean is_hit(pent_position pos1, pent_position pos2) = ((pos1[0] & pos2[0]) || (pos1[1] & pos2[1]) || (pos1[2] & pos2[2]) || (pos1[3] & pos2[3])
                                                                        || (pos1[4] & pos2[4]) || (pos1[5] & pos2[5]) || (pos1[6] & pos2[6]) || (pos1[7] & pos2[7]))
         
-        dynamic boolean is_position_open(pent_position pos) = is_empty(pos & mask)
+        dynamic boolean is_open(pent_position pos) = is_empty(pos & mask)
 
 
         /---- adapters ----/
