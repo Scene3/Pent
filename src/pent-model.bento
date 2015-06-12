@@ -16,8 +16,8 @@ site pent [=
 
     byte[8] pent_position = []
     
-    pent_position empty_board = [ 0, 0, 0, 0, 0, 0, 0, 0 ]
-    pent_position full_board = [ #FF, #FF, #FF, #FF, #FF, #FF, #FF, #FF ] 
+    pent_position empty_board_mask = [ 0, 0, 0, 0, 0, 0, 0, 0 ]
+    pent_position full_board_mask = [ #FF, #FF, #FF, #FF, #FF, #FF, #FF, #FF ] 
 
     static pent_position[64] cell_mask = [ 
         [ #80,0,0,0,0,0,0,0 ], [ #40,0,0,0,0,0,0,0 ], [ #20,0,0,0,0,0,0,0 ], [ #10,0,0,0,0,0,0,0 ], [ #08,0,0,0,0,0,0,0 ], [ #04,0,0,0,0,0,0,0 ], [ #02,0,0,0,0,0,0,0 ], [ #01,0,0,0,0,0,0,0 ],
