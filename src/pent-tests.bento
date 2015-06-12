@@ -168,7 +168,7 @@ site pent [=
         =]
         
 
-        test_base, pent_board test_board_stateful_testers [=
+        test_base test_board_stateful_testers [=
             expected = "ABC"
         
             // empty board
@@ -184,19 +184,90 @@ site pent [=
                                       0, 0, 0, 0, 9, 9, 9, 9, 0, 0, 0, 0 ]
             =]
 
-            int num_positions(int n) = n            
+            int num_positions(int n) = n
+            
+            /--------
+            /--- ideal syntax: expression comprehension ---/
+            int total_positions = pieces[0].num_positions + for int i = 1 to 12 [= pieces[i].num_positions =]
+
+            /--- not so ideal syntax: dynamic code, but it works ---/              
+            int total_positions = [%  "("; for int i from 0 to 11 [= "pieces["; i; "].num_positions + "; =] "pieces[11].num_positions);"; %]              
+            ----/
+            
+            int total_positions [=
+                int total(n) = n
+                
+                for int i = 0 to 12 [=
+                    eval(total(: total + pieces[i].num_positions :));
+                =]
+                
+                total;
+            =]
+                                         
+            log("total positions: " + total_positions);
             
             // empty board: every position should be open
+            log("computing positions for empty board...");
+            eval(num_positions(: 0 :));
+
+            for piece p in pieces [=
+                for pent_position pos in p.all_positions [=
+                    if (empty_board.is_open(pos)) [=
+                        eval(num_positions(: num_positions + 1 :));
+                    =]
+                =]
+            =]
+            
+            if (num_positions == total_positions) [=
+                "A";
+                test_log("correct number of open positions on empty board");
+            
+            =] else [=
+                test_log("incorrect number of open positions on empty board: " + num_positions);
+            =]
             
             
             // board with 60 out of 64 cells full: no position should be open
+            log("computing positions for board with 4 squares open...");
+            eval(num_positions(: 0 :));
+            for piece p in pieces [=
+                for pent_position pos in p.all_positions [=
+                    if (board_with_no_openings.is_open(pos)) [=
+                        eval(num_positions(: num_positions + 1 :));
+                    =]
+                =]
+            =]
+            
+            if (num_positions == 0) [=
+                "B";
+                test_log("correct number of open positions on board with only four squares open");
+            
+            =] else [=
+                test_log("incorrect number of open positions on board with only four squares open: " + num_positions);
+            =]
             
             
             // board with 2 X 4 opening: 24 positions should be open
             // (8 for utah, 4 each for snake, pipe, long_L and C_piece)
+            log("computing positions for board with 2 X 4 opening...");
+            eval(num_positions(: 0 :));
+            for piece p in pieces [=
+                for pent_position pos in p.all_positions [=
+                    if (board_with_24_openings.is_open(pos)) [=
+                        eval(num_positions(: num_positions + 1 :));
+                    =]
+                =]
+            =]
             
+            if (num_positions == 24) [=
+                "C";
+                test_log("correct number of open positions on board with 2 X 4 opening");
             
+            =] else [=
+                test_log("incorrect number of open positions on board with 2 X 4 opening: " + num_positions);
+            =]    
         =]
+
 
         test_base test_plays [=
             expected = "ABCD"
