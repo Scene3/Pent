@@ -68,10 +68,10 @@ site pent [=
 
         dynamic pent_position cells_to_mask = [ 
                       for int row from 0 to 8 [=
-                          (cell[8*row]     ? #80 : 0) | (cell[8*row + 1] ? #40 : 0) | 
-                          (cell[8*row + 2] ? #20 : 0) | (cell[8*row + 3] ? #10 : 0) |
-                          (cell[8*row + 4] ? #08 : 0) | (cell[8*row + 5] ? #04 : 0) |
-                          (cell[8*row + 6] ? #02 : 0) | (cell[8*row + 7] ? #01 : 0)
+                          (cells[8*row]     ? #80 : 0) | (cells[8*row + 1] ? #40 : 0) | 
+                          (cells[8*row + 2] ? #20 : 0) | (cells[8*row + 3] ? #10 : 0) |
+                          (cells[8*row + 4] ? #08 : 0) | (cells[8*row + 5] ? #04 : 0) |
+                          (cells[8*row + 6] ? #02 : 0) | (cells[8*row + 7] ? #01 : 0)
                       =]
                   ]
 

@@ -85,16 +85,18 @@ site pent [=
             
             pent_position pos_accumulator(pent_position pos) = pos
             pent_position full_plus = [ #7E, #FF, #FF, #FF, #FF, #FF, #FF, #7E ]
+            pent_position empty_position = [ 0, 0, 0, 0, 0, 0, 0, 0 ]
+            pent_position full_position = [ #FF, #FF, #FF, #FF, #FF, #FF, #FF, #FF ]
             
             for piece p in pieces [=
                 log("testing piece " + p.id);
-                eval(pos_accumulator(: empty_board :));
+                eval(pos_accumulator(: empty_position :));
                 for pent_position pos in p.all_positions [=
                     eval(pos_accumulator(: pos_accumulator | pos :));
                 =]
                 
                 if (p.id != PLUS_ID) [=
-                    if (pos_accumulator != full_board) [=
+                    if (pos_accumulator != full_position) [=
                         test_log("all_positions incorrect for piece " + id);
                         eval(num_problems(: num_problems + 1 :));
                     =]
@@ -167,12 +169,85 @@ site pent [=
             =]
         =]
         
+        test_base test_cell_mask_converters [=
+            expected = "ABCD"
+        
+            pent_position empty_mask = [ 0, 0, 0, 0, 0, 0, 0, 0 ]
+            pent_position full_mask = [ #FF, #FF, #FF, #FF, #FF, #FF, #FF, #FF ]
+            pent_position horizontal_half_mask = [ #FF, #FF, #FF, #FF, 0, 0, 0, 0 ]
+            pent_position vertical_half_mask = [ #F0, #F0, #F0, #F0, #F0, #F0, #F0, #F0 ]
+
+
+            // empty cells to mask
+            pent_board empty_cells_board [=
+                keep: int[] cells = [ for int i from 0 to 64 [= 0 =] ]
+            =]
+
+            if (empty_cells_board.mask == empty_mask) [=
+                "A";
+                test_log("empty cells correctly converted to mask");
+             =] else [=
+                test_log("empty cells incorrectly converted to mask: " + empty_cells_board.mask);
+             =]
+            
+            // full cells to mask
+            pent_board full_cells_board [=
+                keep: int[] cells = [ for int i from 0 to 64 [= (i % 12 + 1) =] ]
+            =]
+
+            if (full_cells_board.mask == full_mask) [=
+                "B";
+                test_log("full cells correctly converted to mask");
+             =] else [=
+                test_log("full cells incorrectly converted to mask: " + full_cells_board.mask);
+             =]
+            
+            // partial cells to mask
+            pent_board horizontal_half_cells_board [=
+                keep: int[] cells = [ for int i from 0 to 32 [= (12 - (i % 12)) =] ]
+            =]
+
+            pent_board vertical_half_cells_board [=
+                keep: int[] cells = [ for int i from 0 to 64 [= 
+                                          if (i % 8 < 4) [= (i + 1) =]
+                                          else [= 0 =]
+                                      =] ]
+            =]
+
+            if (horizontal_half_cells_board.mask == horizontal_half_mask) [=
+                "C";
+                test_log("horizontal half cells correctly converted to mask");
+            =] else [=
+                test_log("horizontal half cells incorrectly converted to mask: " + horizontal_half_cells_board.mask);
+            =]            
+            
+            if (vertical_half_cells_board.mask == vertical_half_mask) [=
+                "D";
+                test_log("vertical half cells correctly converted to mask");
+            =] else [=
+                test_log("vertical half cells incorrectly converted to mask: " + vertical_half_cells_board.mask);
+            =]            
+            
+        
+
+            // empty mask to cells
+            
+            
+            // full mask to cells
+            
+            
+            // partial mask to cells 
+
+        
+        =]
 
         test_base test_board_stateful_testers [=
             expected = "ABC"
         
             // empty board
-            pent_board empty_board [/]
+            pent_board empty_board [=
+                keep: pent_position mask = empty_board_mask
+            =]
             
             // modified boards
             pent_board board_with_no_openings [=
@@ -203,7 +278,7 @@ site pent [=
                 
                 total;
             =]
-                                         
+                                    
             log("total positions: " + total_positions);
             
             // empty board: every position should be open
@@ -225,7 +300,7 @@ site pent [=
             =] else [=
                 test_log("incorrect number of open positions on empty board: " + num_positions);
             =]
-            
+
             
             // board with 60 out of 64 cells full: no position should be open
             log("computing positions for board with 4 squares open...");
