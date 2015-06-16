@@ -204,7 +204,8 @@ site pent [=
             
             // partial cells to mask
             pent_board horizontal_half_cells_board [=
-                keep: int[] cells = [ for int i from 0 to 32 [= (12 - (i % 12)) =] ]
+                keep: int[] cells = [ for int i from 0 to 32 [= (12 - (i % 12)) =],
+                                      for int i from 0 to 32 [= 0 =] ]
             =]
 
             pent_board vertical_half_cells_board [=
@@ -218,7 +219,9 @@ site pent [=
                 "C";
                 test_log("horizontal half cells correctly converted to mask");
             =] else [=
-                test_log("horizontal half cells incorrectly converted to mask: " + horizontal_half_cells_board.mask);
+                log("horizontal half cells count: " + horizontal_half_cells_board.cells.count);
+                log("  ...cell[63]: " + horizontal_half_cells_board.cells[63]);
+                test_log("horizontal half cells incorrectly converted to mask: " + (string) horizontal_half_cells_board.mask);
             =]            
             
             if (vertical_half_cells_board.mask == vertical_half_mask) [=
@@ -240,6 +243,7 @@ site pent [=
 
         
         =]
+
 
         test_base test_board_stateful_testers [=
             expected = "ABC"
@@ -427,4 +431,15 @@ site pent [=
             br;
         =]
     =]
+
+
+    hhcb [=
+
+        pent_board horizontal_half_cells_board [=
+            keep: int[] cells = [ for int i from 0 to 32 [= (12 - (i % 12)) =],
+                                      for int i from 0 to 32 [= 0 =] ]
+        =]
+        horizontal_half_cells_board.mask;
+    =]
+
 =]
