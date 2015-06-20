@@ -30,11 +30,11 @@ site pent [=
         [ 0,0,0,0,0,0,0,#80 ], [ 0,0,0,0,0,0,0,#40 ], [ 0,0,0,0,0,0,0,#20 ], [ 0,0,0,0,0,0,0,#10 ], [ 0,0,0,0,0,0,0,#08 ], [ 0,0,0,0,0,0,0,#04 ], [ 0,0,0,0,0,0,0,#02 ], [ 0,0,0,0,0,0,0,#01 ]
     ]         
 
-    pent_board(play[] plays) [=
+    pent_board(play[] play_list) [=
 
         /---- the board, in various forms ----/
 
-        keep: int[] cells = plays_to_cells(plays)
+        keep: int[] cells = plays_to_cells(play_list)
         keep: pent_position mask = cells_to_mask 
         
         dynamic int[] rows[] = [ for int row from 0 to 8 [= 
@@ -55,12 +55,16 @@ site pent [=
        
         dynamic int[] plays_to_cells(play[] plays) = [
                                 for int i from 0 to 64 [=    
-                                    plays_to_cell(plays, cell_mask[i])
+                                    plays_to_cell(plays, i)
                                 =] ] 
         
-        dynamic int plays_to_cell(play[] plays, pent_position cell_pos) [=
+        /** Determine if any of the piece positions in an array of plays
+         *  intersect with the cell at the specified index.
+         **/ 
+        dynamic int plays_to_cell(play[] plays, int cell_index) [=
+            pent_position cell_pos = cell_mask[cell_index]
             int cell_val(int val) = val
-            for p in plays where is_hit(p.position, cell_pos) until cell_val [=
+            for play p in plays where is_hit(p.position, cell_pos) until cell_val [=
                 cell_val(: p.piece.id :);
             =]
         =]
@@ -74,7 +78,6 @@ site pent [=
                           (cells[8*row + 6] ? #02 : 0) | (cells[8*row + 7] ? #01 : 0)
                       =]
                   ]
-
     =]
     
     byte[8] pent_board_mask(pent_board b) = [ for int row from 0 to 8 [= vals_to_mask(b.rows[row]) =] ]

@@ -230,18 +230,6 @@ site pent [=
             =] else [=
                 test_log("vertical half cells incorrectly converted to mask: " + vertical_half_cells_board.mask);
             =]            
-            
-        
-
-            // empty mask to cells
-            
-            
-            // full mask to cells
-            
-            
-            // partial mask to cells 
-
-        
         =]
 
 
@@ -348,7 +336,7 @@ site pent [=
         =]
 
 
-        test_base test_plays [=
+        test_base, pent_board test_plays [=
             expected = "ABCD"
             
             play p1 = play(utah, 0)
@@ -384,6 +372,28 @@ site pent [=
             =] else [=
                 test_log("second play has wrong position: " + (string) p2.position);
             =]
+            
+            // test the logic that sets cell values correctly according to an 
+            // array of plays. First we test a single play on two cells, one which
+            // intersects and one which doesn't. 
+            
+            play[] p1_array = [ p1 ]
+            if (plays_to_cell(p1_array, 0) == p1.piece.id) [=
+                "E";
+                test_log("cell 0 (a hit) correctly initialized by first play");
+            =] else [=
+                test_log("cell 0 not initialized correctly by first play");
+            =]
+            
+            if (plays_to_cell(p1_array, 1) == 0) [=
+                "F";
+                test_log("cell 1 (a miss) correctly initialized by first play");
+            =] else [=
+                test_log("cell 0 not initialized correctly by first play");
+            =]
+
+
+            
         =]
     =]
     
