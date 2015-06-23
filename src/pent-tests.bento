@@ -337,7 +337,7 @@ site pent [=
 
 
         test_base, pent_board test_plays [=
-            expected = "ABCD"
+            expected = "ABCDEF"
             
             play p1 = play(utah, 0)
             pent_position pp1 = [ #80, #C0, #C0, 0, 0, 0, 0, 0 ]
@@ -399,7 +399,7 @@ site pent [=
     
     /------ informal tests ------/
     
-    page show_all_positions(params{}) [=
+    show_all_positions(params{}) [=
     
         int ix = params{"piece"} ? (int) params{"piece"} : 0
         piece p = pieces[ix]
