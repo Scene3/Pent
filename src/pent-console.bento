@@ -169,7 +169,7 @@ site pent [=
          *  board.
          *
          *  The game object itself handles game state changes in response to the
-         *  game API. So what the console calls the game API to play a piece, for
+         *  game API. So when the console calls the game API to play a piece, for
          *  example, the game object will determine if the play ends the game,
          *  and if so will change the phase from PLAY_GAME to BETWEEN_GAMES.
          *   

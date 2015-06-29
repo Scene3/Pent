@@ -369,13 +369,25 @@ site pent [=
     =]
 
 
-    /-------- error page --------------------------/
-    page error_page(request r) [=
-        boolean needs_login = false    
-        title = [| Error |]
-        color bgcolor = "#AAEEDD"
-
-        error_div(r);        
-    =]    
+    /-------- error handling --------------------------/
+    
+    page error_page(msg, ctx) [=
+        error_panel(msg, ctx);
+    =]
+    
+    
+    component error_panel(msg, ctx) [=
+        [| <h2>Error: /]            
+        msg;
+        [| </h2> |]
+        
+        with (ctx) [=
+            ctx;
+        =]
+    =]   
+    
+    /-------- defined errors --------------------------/
+    
+    error_panel("Illegal action for phase: " + msg, ctx) illegal_action_for_phase_error(msg, ctx) [/]
 
 =]

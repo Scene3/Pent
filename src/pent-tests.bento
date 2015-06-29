@@ -6,7 +6,9 @@
 
 site pent [=
 
-    test_runner[] test_runners = [ pent_model_tests ]
+    test_runner[] test_runners = [ pent_model_tests,
+                                   pent_game_tests
+                                 ]
     
 
     page(*) tests(params{}) [=
@@ -391,10 +393,43 @@ site pent [=
             =] else [=
                 test_log("cell 0 not initialized correctly by first play");
             =]
-
-
-            
         =]
+
+    =]
+
+    test_runner pent_game_tests [=
+
+        test_base test_pent_game_initial_state [=
+            expected = "ABC"
+            
+            this pent_game [/]
+            
+            eval(pent_game);
+            
+            // when first created, a pent_game is in the BEFORE_GAME phase and
+            // has no players or team members
+            if (pent_game.phase == BEFORE_GAME) [=
+                "A";
+                test_log("pent_game starts in correct phase");
+            =] else [=
+                test_log("pent_game starts in wrong phase: " + pent_game.phase);
+            =]
+            
+            if (!pent_game.player_A && !pent_game.player_B) [=
+                "B";
+                test_log("pent_game correctly starts with no players");
+            =] else [=
+                test_log("pent_game incorrectly starts with one or more players");
+            =]
+            
+            if (pent_game.team_A.count == 0 && pent_game.team_B.count == 0) [=
+                "C";
+                test_log("pent_game correctly starts with empty teams");
+            =] else [=
+                test_log("pent_game incorrectly starts with nonempty teams; Team A count: " + pent_game.team_A.count + "  Team B count: " + pent_game.team_B.count);
+            =]
+        =]
+
     =]
     
     /------ informal tests ------/
@@ -410,7 +445,7 @@ site pent [=
         [/ positions: |]
         [| <ol> |]
         
-        for pent_position pos in p.all_positions [=
+        for pent_position pos in pieces[ix].all_positions [=
             [| <li> |]
             pos;
             [| </li> |]
@@ -430,6 +465,13 @@ site pent [=
     
     show_a_pos [=
         utah.all_positions[0];
+    =]
+    
+    show_all_utah_pos [=
+        for pent_position p in utah.all_positions [=
+            p;
+            br;
+        =]
     =]
     
     show_num_pos [=

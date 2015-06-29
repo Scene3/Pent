@@ -83,8 +83,8 @@ site pent [=
         keep: boolean a_picks_first(boolean flag) = flag
 
         /** the teams **/
-        keep: piece[] team_A(piece[] pcs) = pcs
-        keep: piece[] team_B(piece[] pcs) = pcs
+        keep: pent_team team_A(pent_team tm) = tm
+        keep: pent_team team_B(pent_team tm) = tm
 
         /** the plays **/
         keep: play[] plays(play[] pls) = pls
@@ -100,15 +100,19 @@ site pent [=
         =]
         
         dynamic add_piece(piece p, boolean to_team_A) [=
-            if (to_team_A) [=
-                eval(team_A(: team_A + p :));
+            if (phase == CHOOSE_TEAM) [=
+                if (to_team_A) [=
+                    eval(team_A(: team_A + p :));
+                =] else [=
+                    eval(team_B(: team_B + p :));
+                =]
+                eval(turn(: team_A.count + team_B.count + 1 :));
+                if (turn == 13) [=
+                    eval(turn(: 1 :));
+                    set_phase(PLAY_GAME);
+                =]
             =] else [=
-                eval(team_B(: team_B + p :));
-            =]
-            eval(turn(: team_A.count + team_B.count + 1 :));
-            if (turn == 13) [=
-                eval(turn(: 1 :));
-                set_phase(PLAY_GAME);
+                redirect illegal_action_for_phase("add_piece", here);
             =]
         =]
 
@@ -118,15 +122,18 @@ site pent [=
         =]
     
         dynamic set_player(name, id, boolean is_player_a) [=
-            if (is_player_a) [=
-                eval(player_A(: pent_player(name, id) :));
-            =] else [=
-                eval(player_B(: pent_player(name, id) :));
-            =] 
-             
-             /-- if both players are set, advance to the next phase --/
-             if (player_A && player_B) [=
-                 set_phase(CHOOSE_ORDER);
+        
+            if (phase == CHOOSE_PLAYERS) [=
+                if (is_player_a) [=
+                    eval(player_A(: pent_player(name, id) :));
+                =] else [=
+                    eval(player_B(: pent_player(name, id) :));
+                =] 
+                 
+                 /-- if both players are set, advance to the next phase --/
+                 if (player_A && player_B) [=
+                     set_phase(CHOOSE_ORDER);
+                 =]
              =]
         =]
 
