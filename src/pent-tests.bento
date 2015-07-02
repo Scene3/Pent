@@ -400,7 +400,7 @@ site pent [=
     test_runner pent_game_tests [=
 
         test_base test_pent_game_initial_state [=
-            expected = "ABC"
+            expected = "ABCDEF"
             
             this pent_game [/]
             
@@ -428,7 +428,93 @@ site pent [=
             =] else [=
                 test_log("pent_game incorrectly starts with nonempty teams; Team A count: " + pent_game.team_A.count + "  Team B count: " + pent_game.team_B.count);
             =]
-        =]
+            
+            // functions that are meaningful only in other phases should redirect
+            // to an illegal_action_for_phase error
+            [=
+                pent_game.set_player("A Player", "A", true);
+                test_log("pent_game incorrectly allows call to set_player in initial state");
+
+            =] catch illegal_action_for_phase [=
+                "D";
+                test_log("pent_game correctly redirects on call to set_player in initial state");
+            =]
+            
+            [=
+                pent_game.set_a_picks_first(true);
+                test_log("pent_game incorrectly allows call to set_a_picks_first in initial state");
+
+            =] catch illegal_action_for_phase [=
+                "E";
+                test_log("pent_game correctly redirects on call to set_a_picks_first in initial state");
+            =]
+
+            [=
+                pent_game.add_piece_by_id(1, true);
+                test_log("pent_game incorrectly allows call to add_piece_by_id in initial state");
+
+            =] catch illegal_action_for_phase [=
+                "F";
+                test_log("pent_game correctly redirects on call to add_piece_by_id in initial state");
+            =]
+       =]
+
+        test_base test_pent_game_start [=
+            expected = "ABCDE"
+            
+            this pent_game [/]
+            
+            eval(pent_game);
+            
+            [=
+                pent_game.start;
+                
+                "A";
+                test_log("pent_game correctly starts without redirection");
+
+            =] catch [=
+                test_log("pent_game incorrectly redirects on call to start");
+            =]
+            
+            
+            // when first started, a pent_game enters the CHOOSE_PLAYERS phase
+            if (pent_game.phase == CHOOSE_PLAYERS) [=
+                "B";
+                test_log("pent_game in correct phase after call to start");
+            =] else [=
+                test_log("pent_game in wrong phase after call to start: " + pent_game.phase);
+            =]
+            
+            
+            // functions that are meaningful only in other phases should redirect
+            // to an illegal_action_for_phase error
+            [=
+                pent_game.start;
+                test_log("pent_game incorrectly allows call to start after already started");
+
+            =] catch illegal_action_for_phase [=
+                "C";
+                test_log("pent_game correctly redirects on call to start");
+            =]
+            
+            [=
+                pent_game.set_a_picks_first(true);
+                test_log("pent_game incorrectly allows call to set_a_picks_first");
+
+            =] catch illegal_action_for_phase [=
+                "D";
+                test_log("pent_game correctly redirects on call to set_a_picks_first");
+            =]
+
+            [=
+                pent_game.add_piece_by_id(1, true);
+                test_log("pent_game incorrectly allows call to add_piece_by_id");
+
+            =] catch illegal_action_for_phase [=
+                "E";
+                test_log("pent_game correctly redirects on call to add_piece_by_id");
+            =]
+       =]
 
     =]
     

@@ -70,7 +70,7 @@ site pent [=
 
     /---- a team ----/
     
-    piece[6] pent_team = []
+    piece[] pent_team = []
     boolean[6] pent_team_played = [ false, false, false, false, false, false ]
     
 
@@ -93,7 +93,16 @@ site pent [=
         keep: pent_phase phase(pent_phase pp) = pp
         keep: int turn(int t) = t
 
-        /---- the game API ----/ 
+        /---- the game API ----/
+        
+        dynamic start [=
+            if (phase == BEFORE_GAME) [=
+                set_phase(CHOOSE_PLAYERS);
+            
+            =] else [=
+                redirect illegal_action_for_phase("start", here);
+            =]
+        =] 
     
         dynamic add_piece_by_id(id, boolean to_team_A) [=
             add_piece(pieces[piece.index_for_id(id)], to_team_A);
@@ -134,12 +143,19 @@ site pent [=
                  if (player_A && player_B) [=
                      set_phase(CHOOSE_ORDER);
                  =]
+            =] else [=
+                redirect illegal_action_for_phase("set_player", here);
              =]
         =]
 
         dynamic set_a_picks_first(boolean flag) [=
-            eval(a_picks_first(: flag :));
-            set_phase(CHOOSE_TEAM);
+            if (phase == CHOOSE_ORDER) [=
+                eval(a_picks_first(: flag :));
+                eval(turn(: 1 :));
+                set_phase(CHOOSE_TEAM);
+            =] else [=
+                redirect illegal_action_for_phase("set_a_picks_first", here);
+            =]
         =]
         
         
