@@ -514,10 +514,105 @@ site pent [=
                 "E";
                 test_log("pent_game correctly redirects on call to add_piece_by_id");
             =]
+        =]
+
+    
+        test_base test_pent_game_choose_players [=
+            expected = "ABCDEFGHI"
+            
+            this pent_game [/]
+            
+            eval(pent_game);
+            pent_game.start;
+            
+            // when first started, a pent_game enters the CHOOSE_PLAYERS phase
+            if (pent_game.phase == CHOOSE_PLAYERS) [=
+                "A";
+                test_log("pent_game correctly in CHOOSE_PLAYERS phase upon starting");
+            =] else [=
+                test_log("pent_game not in CHOOSE_PLAYERS state after call to start");
+            =]
+            
+            
+            // functions that are meaningful only in other phases should redirect
+            // to an illegal_action_for_phase error
+            [=
+                pent_game.start;
+                test_log("pent_game incorrectly allows call to start after already started");
+
+            =] catch illegal_action_for_phase [=
+                "B";
+                test_log("pent_game correctly redirects on call to start");
+            =]
+            
+            [=
+                pent_game.set_a_picks_first(true);
+                test_log("pent_game incorrectly allows call to set_a_picks_first");
+
+            =] catch illegal_action_for_phase [=
+                "C";
+                test_log("pent_game correctly redirects on call to set_a_picks_first");
+            =]
+
+            [=
+                pent_game.add_piece_by_id(1, true);
+                test_log("pent_game incorrectly allows call to add_piece_by_id");
+
+            =] catch illegal_action_for_phase [=
+                "D";
+                test_log("pent_game correctly redirects on call to add_piece_by_id");
+            =]
+
+            // now choose players.  To start with, neither player should have a value.
+            if (!pent_game.player_A && !pent_game.player_B) [=
+                "E";
+                test_log("CHOOSE_PLAYERS phase correctly begins with neither player set");
+            =] else [=
+                test_log("CHOOSE_PLAYERS phase incorrectly begins with one or both players set");
+            =]
+            
+            // After choosing one player, the game should still be in the CHOOSE_PLAYERS
+            // phase.  After choosing two players, the game should advance to the CHOOSE_ORDER phase. 
+            [=
+                pent_game.set_player("Al Pha", "a", true);
+                if (pent_game.player_A) [=
+                    "F";
+                    test_log("Player A chosen successfully");
+                =] else [=
+                    test_log("Player A has no value after being chosen");
+                =]
+
+                if (!pent_game.player_B) [=
+                    "G";
+                    test_log("Player B correctly has no value after only Player A has been chosen");
+                =] else [=
+                    test_log("Player B incorrectly has a value after Player A is chosen");
+                =]
+            
+                pent_game.set_player("B Eta", "b", false);
+                if (pent_game.player_A && pent_game.player_B) [=
+                    "H";
+                    test_log("Both players chosen successfully");
+                =] else if (!pent_game.player_B) [=
+                    test_log("Unable to choose player B");
+                =] else [=
+                    test_log("Player A is null after Player B is chosen");
+                =]
+                
+            =] catch illegal_action_for_phase [=
+                test_log("unable to choose player, got an illegal_action_for_phase redirection");
+            =]
+                    
+            if (pent_game.phase == CHOOSE_ORDER) [=
+                "I";
+                test_log("pent_game phase correctly advanced to CHOOSE_ORDER after both players were chosen");
+            =] else [=
+                test_log("pent_game in wrong phase after choosing both players: " + pent_game.phase);
+            =]
        =]
 
     =]
-    
+
     /------ informal tests ------/
     
     show_all_positions(params{}) [=

@@ -371,8 +371,12 @@ site pent [=
 
     /-------- error handling --------------------------/
     
-    page error_page(msg, ctx) [=
-        error_panel(msg, ctx);
+    page error_page(request r),(msg, ctx) [=
+        with (r) [=
+            error_panel(r.params{"message"});
+        =] else [=
+            error_panel(msg, ctx);
+        =]
     =]
     
     
