@@ -562,7 +562,7 @@ site pent [=
                 "D";
                 test_log("pent_game correctly redirects on call to add_piece_by_id");
             =]
-
+           
             // now choose players.  To start with, neither player should have a value.
             if (!pent_game.player_A && !pent_game.player_B) [=
                 "E";
@@ -570,7 +570,7 @@ site pent [=
             =] else [=
                 test_log("CHOOSE_PLAYERS phase incorrectly begins with one or both players set");
             =]
-            
+
             // After choosing one player, the game should still be in the CHOOSE_PLAYERS
             // phase.  After choosing two players, the game should advance to the CHOOSE_ORDER phase. 
             [=
@@ -611,10 +611,35 @@ site pent [=
             =]
        =]
 
+        test_base test_pent_game_choose_orderer [=
+            expected = "AB"
+            
+            this pent_game [/]
+
+            eval(pent_game);
+            [=
+                pent_game.start;
+                pent_game.set_player("Al Pha", "a", true);
+                pent_game.set_player("B Eta", "b", false);
+                "A";
+                test_log("successfully started game and set players");
+
+            =] catch illegal_action_for_phase [=
+                test_log("failed to start game and set players");
+            =]
+            
+            if (pent_game.phase == CHOOSE_ORDER) [=
+                "B";
+                test_log("pent_game successfully reaches CHOOSE_ORDER phase");
+            =] else [=
+                test_log("pent_game fails to reach CHOOSE_PLAYERS phase");
+            =]
+
+       =]
     =]
 
     /------ informal tests ------/
-    
+
     show_all_positions(params{}) [=
     
         int ix = params{"piece"} ? (int) params{"piece"} : 0
@@ -680,4 +705,28 @@ site pent [=
              cells_to_m;
     =]
 
+    _p_g [=
+        keep: player_A(a, b) = a + b
+        dynamic set_player [=
+            eval(player_A(: "A", "B" :));
+        =]
+    =]
+        
+
+    test_cached_child [=
+    
+        _p_g _pent_game [/]
+
+        if (_pent_game.player_A) [=
+            "first access true (wrong)<br>";
+        =] else [=
+            "first access false (right)<br>";
+        =]
+        _pent_game.set_player;
+        if (_pent_game.player_A) [=
+            "second access true (right)<br>";
+        =] else [=
+            "second access false (wrong)<br>";
+        =]
+    =]
 =]
