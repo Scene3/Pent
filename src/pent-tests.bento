@@ -611,8 +611,95 @@ site pent [=
             =]
        =]
 
-        test_base test_pent_game_choose_orderer [=
-            expected = "AB"
+        test_base test_pent_game_choose_order [=
+            expected = "ABCDEFG"
+            
+            pent_game pent_game_1 [/]
+
+            eval(pent_game_1);
+            [=
+                pent_game_1.start;
+                pent_game_1.set_player("Al Pha", "a", true);
+                pent_game_1.set_player("B Eta", "b", false);
+                "A";
+                test_log("successfully started game and set players");
+
+            =] catch illegal_action_for_phase [=
+                test_log("failed to start game and set players");
+            =]
+            
+            if (pent_game_1.phase == CHOOSE_ORDER) [=
+                "B";
+                test_log("pent_game successfully reaches CHOOSE_ORDER phase");
+            =] else [=
+                test_log("pent_game fails to reach CHOOSE_ORDER phase");
+            =]
+
+            // functions that are meaningful only in other phases should redirect
+            // to an illegal_action_for_phase error
+            [=
+                pent_game_1.start;
+                test_log("pent_game incorrectly allows call to start after already started");
+
+            =] catch illegal_action_for_phase [=
+                "C";
+                test_log("pent_game correctly redirects on call to start");
+            =]
+
+            [=
+                pent_game_1.add_piece_by_id(1, true);
+                test_log("pent_game incorrectly allows call to add_piece_by_id");
+
+            =] catch illegal_action_for_phase [=
+                "D";
+                test_log("pent_game correctly redirects on call to add_piece_by_id");
+            =]
+
+            
+            [=
+                pent_game_1.set_a_picks_first(true);
+                if (pent_game_1.a_picks_first) [=
+                    "E";
+                    test_log("Correctly chose player A to pick first");
+                =] else [=
+                    test_log("Failed to choose player A to pick first");
+                =]
+            =] catch illegal_action_for_phase [=
+                test_log("pent_game incorrectly redirects on call to set_a_picks_first");
+            =]
+
+            // to test choosing the other way, start another game.
+            pent_game pent_game_2 [/]
+
+            eval(pent_game_2);                    
+            pent_game_2.start;
+            pent_game_2.set_player("Abe", "a", true);
+            pent_game_2.set_player("Babe", "b", false);
+
+            [=                
+
+                pent_game_2.set_a_picks_first(false);
+                if (!pent_game_2.a_picks_first) [=
+                    "F";
+                    test_log("In second pent_game, correctly chose player B to pick first");
+                =] else [=
+                    test_log("In second pent_game, failed to choose player B to pick first");
+                =]
+
+            =] catch illegal_action_for_phase [=
+                test_log("pent_game incorrectly redirects on second call to set_a_picks_first");
+            =]
+
+            if (pent_game.phase == CHOOSE_TEAM) [=
+                "G";
+                test_log("pent_game phase correctly advanced to CHOOSE_TEAM after player order was chosen");
+            =] else [=
+                test_log("pent_game in wrong phase after choosing player order: " + pent_game.phase);
+            =]
+        =]
+
+        test_base test_pent_game_choose_team [=
+            expected = "ABCDE"
             
             this pent_game [/]
 
@@ -621,21 +708,53 @@ site pent [=
                 pent_game.start;
                 pent_game.set_player("Al Pha", "a", true);
                 pent_game.set_player("B Eta", "b", false);
+                pent_game.set_a_picks_first(true);
                 "A";
-                test_log("successfully started game and set players");
+                test_log("successfully started game, set players and chose order");
 
             =] catch illegal_action_for_phase [=
-                test_log("failed to start game and set players");
+                test_log("failed to start game, set players and choose order");
             =]
             
-            if (pent_game.phase == CHOOSE_ORDER) [=
+            if (pent_game.phase == CHOOSE_TEAM) [=
                 "B";
-                test_log("pent_game successfully reaches CHOOSE_ORDER phase");
+                test_log("pent_game successfully reaches CHOOSE_TEAM phase");
             =] else [=
-                test_log("pent_game fails to reach CHOOSE_PLAYERS phase");
+                test_log("pent_game fails to reach CHOOSE_TEAM phase");
             =]
 
-       =]
+            // functions that are meaningful only in other phases should redirect
+            // to an illegal_action_for_phase error
+            [=
+                pent_game.start;
+                test_log("pent_game incorrectly allows call to start after already started");
+
+            =] catch illegal_action_for_phase [=
+                "C";
+                test_log("pent_game correctly redirects on call to start");
+            =]
+
+            [=
+                pent_game.set_a_picks_first(true);
+                test_log("pent_game incorrectly allows call to set_a_picks_first");
+
+            =] catch illegal_action_for_phase [=
+                "D";
+                test_log("pent_game correctly redirects on call to set_a_picks_first");
+            =]
+
+            [=
+                pent_game.add_piece_by_id(1, true);
+                "E";
+                test_log("pent_game correctly allows adding first piece");
+
+            =] catch illegal_action_for_phase [=
+                test_log("pent_game incorrectly redirects on call to add_piece_by_id");
+            =]
+
+        =]            
+
+
     =]
 
     /------ informal tests ------/
