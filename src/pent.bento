@@ -393,5 +393,5 @@ site pent [=
     /-------- defined errors --------------------------/
     
     error_panel("Illegal action for phase: " + msg, ctx) illegal_action_for_phase_error(msg, ctx) [/]
-
+    error_panel("Unable to add piece: " + msg, ctx) unable_to_add_piece(ctx) [/]
 =]

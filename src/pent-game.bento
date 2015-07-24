@@ -110,11 +110,14 @@ site pent [=
         
         dynamic add_piece(piece p, boolean to_team_A) [=
             if (phase == CHOOSE_TEAM) [=
-                if (to_team_A) [=
+                if (to_team_A && team_A.count < 6) [=
                     eval(team_A(: team_A + p :));
-                =] else [=
+                =] else if (!to_team_A && team_B.count < 6) [=
                     eval(team_B(: team_B + p :));
+                =] else [=
+                    redirect unable_to_add_piece("team full", here);
                 =]
+                
                 eval(turn(: team_A.count + team_B.count + 1 :));
                 if (turn == 13) [=
                     eval(turn(: 1 :));
