@@ -110,6 +110,10 @@ site pent [=
         
         dynamic add_piece(piece p, boolean to_team_A) [=
             if (phase == CHOOSE_TEAM) [=
+                if (array.contains(team_A, p) || array.contains(team_B, p)) [=
+                    redirect unable_to_add_piece("piece already chosen");
+                =]
+            
                 if (to_team_A && team_A.count < 6) [=
                     eval(team_A(: team_A + p :));
                 =] else if (!to_team_A && team_B.count < 6) [=
@@ -128,9 +132,22 @@ site pent [=
             =]
         =]
 
+        /** Returns true if piece is unused and is on the right team **/
+        dynamic boolean is_available(piece p) [=
+        
+        =]
         
         dynamic add_play(play p) [=
-            eval(plays(: plays + p :));
+            if (phase == PLAY_GAME) [=
+                if (!is_available(p.piece)) [=
+                    redirect unable_to_add_play("piece not available", here);
+                =]
+                
+                eval(plays(: plays + p :));
+                eval(turn(: turn + 1 :));
+            =] else [=
+                redirect illegal_action_for_phase("add_play", here);
+            =]
         =]
     
         dynamic set_player(name, id, boolean is_player_a) [=

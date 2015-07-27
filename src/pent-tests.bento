@@ -577,26 +577,26 @@ site pent [=
                 pent_game.set_player("Al Pha", "a", true);
                 if (pent_game.player_A) [=
                     "F";
-                    test_log("Player A chosen successfully");
+                    test_log("player A chosen successfully");
                 =] else [=
-                    test_log("Player A has no value after being chosen");
+                    test_log("player A has no value after being chosen");
                 =]
 
                 if (!pent_game.player_B) [=
                     "G";
-                    test_log("Player B correctly has no value after only Player A has been chosen");
+                    test_log("player B correctly has no value after only Player A has been chosen");
                 =] else [=
-                    test_log("Player B incorrectly has a value after Player A is chosen");
+                    test_log("player B incorrectly has a value after Player A is chosen");
                 =]
             
                 pent_game.set_player("B Eta", "b", false);
                 if (pent_game.player_A && pent_game.player_B) [=
                     "H";
-                    test_log("Both players chosen successfully");
+                    test_log("both players chosen successfully");
                 =] else if (!pent_game.player_B) [=
-                    test_log("Unable to choose player B");
+                    test_log("unable to choose player B");
                 =] else [=
-                    test_log("Player A is null after Player B is chosen");
+                    test_log("player A is null after Player B is chosen");
                 =]
                 
             =] catch illegal_action_for_phase [=
@@ -660,9 +660,9 @@ site pent [=
                 pent_game_1.set_a_picks_first(true);
                 if (pent_game_1.a_picks_first) [=
                     "E";
-                    test_log("Correctly chose player A to pick first");
+                    test_log("correctly chose player A to pick first");
                 =] else [=
-                    test_log("Failed to choose player A to pick first");
+                    test_log("failed to choose player A to pick first");
                 =]
             =] catch illegal_action_for_phase [=
                 test_log("pent_game incorrectly redirects on call to set_a_picks_first");
@@ -681,16 +681,16 @@ site pent [=
                 pent_game_2.set_a_picks_first(false);
                 if (!pent_game_2.a_picks_first) [=
                     "F";
-                    test_log("In second pent_game, correctly chose player B to pick first");
+                    test_log("in second pent_game, correctly chose player B to pick first");
                 =] else [=
-                    test_log("In second pent_game, failed to choose player B to pick first");
+                    test_log("in second pent_game, failed to choose player B to pick first");
                 =]
 
             =] catch illegal_action_for_phase [=
                 test_log("pent_game incorrectly redirects on second call to set_a_picks_first");
             =]
 
-            if (pent_game.phase == CHOOSE_TEAM) [=
+            if (pent_game_1.phase == CHOOSE_TEAM && pent_game_2.phase == CHOOSE_TEAM) [=
                 "G";
                 test_log("pent_game phase correctly advanced to CHOOSE_TEAM after player order was chosen");
             =] else [=
@@ -699,7 +699,7 @@ site pent [=
         =]
 
         test_base test_pent_game_choose_team [=
-            expected = "ABCDE"
+            expected = "ABCDEFGHIJ"
             
             this pent_game [/]
 
@@ -752,9 +752,98 @@ site pent [=
                 test_log("pent_game incorrectly redirects on call to add_piece_by_id");
             =]
 
+            [=
+                pent_game.add_piece_by_id(1, false);
+                test_log("pent_game incorrectly allows adding the same piece twice");
+
+            =] catch unable_to_add_piece [=
+                "F";
+                test_log("pent_game correctly redirects when adding the same piece twice");
+            =]
+
+            [=
+                pent_game.add_piece_by_id(2, false);
+                pent_game.add_piece_by_id(3, true);
+                pent_game.add_piece_by_id(4, false);
+                pent_game.add_piece_by_id(5, true);
+                pent_game.add_piece_by_id(6, false);
+                pent_game.add_piece_by_id(7, true);
+                pent_game.add_piece_by_id(8, false);
+                pent_game.add_piece_by_id(9, true);
+                pent_game.add_piece_by_id(10, false);
+                pent_game.add_piece_by_id(11, true);
+                if (pent_game.team_A.count == 6) [=
+                    "G";
+                    test_log("team A chosen correctly");
+                =] else [=
+                    test_log("incorrect number of pieces on team A: " + pent_game.team_A.count);
+                =]
+                
+            =] catch [=
+                test_log("pent_game incorrectly redirects when adding a valid piece");
+            =]
+
+            [=
+                pent_game.add_piece_by_id(12, true);
+                test_log("pent_game incorrectly allows adding a seventh piece to team A");
+
+            =] catch unable_to_add_piece [=
+                "H";
+                test_log("pent_game correctly redirects when attempting to add a seventh piece");
+            =]
+
+            [=
+                pent_game.add_piece_by_id(12, false);
+                if (pent_game.team_B.count == 6) [=
+                    "I";
+                    test_log("team B chosen correctly");
+                =] else [=
+                    test_log("incorrect number of pieces on team B: " + pent_game.team_B.count);
+                =]
+
+            =] catch [=
+                test_log("pent_game incorrectly redirects when adding a valid piece");
+            =]
+            
+            if (pent_game.phase == PLAY_GAME) [=
+                "J";
+                test_log("pent_game phase correctly advances to PLAY_GAME after both teams are chosen");
+            =] else [=
+                test_log("pent_game in wrong phase after choosing both teams: " + pent_game.phase);
+            =]
         =]            
 
+        test_base test_pent_game_play_game [=
+            expected = "AB"
+            
+            this pent_game [/]
 
+            eval(pent_game);
+            [=
+                pent_game.start;
+                pent_game.set_player("Al Pha", "a", true);
+                pent_game.set_player("B Eta", "b", false);
+                pent_game.set_a_picks_first(true);
+
+                for int id from 1 to 12 by 2 [=
+                    pent_game.add_piece_by_id(id, true);
+                    pent_game.add_piece_by_id(id + 1, false);
+                =]
+
+                "A";
+                test_log("successfully started game, set players, chose order and chose teams");
+
+            =] catch illegal_action_for_phase [=
+                test_log("failed to start game, set players, choose order and choose teams");
+            =]
+
+            if (pent_game.phase == PLAY_GAME) [=
+                "B";
+                test_log("pent_game successfully reaches PLAY_GAME phase");
+            =] else [=
+                test_log("pent_game fails to reach PLAY_GAME phase");
+            =]
+        =]
     =]
 
     /------ informal tests ------/
