@@ -54,6 +54,7 @@ site pent [=
     /-------- session initialization --------------/
 
     session_init [=
+        view_mode(TEXT_MODE);
     =]
 
     

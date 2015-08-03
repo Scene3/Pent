@@ -14,6 +14,33 @@ site pent [=
 
     int view_mode(int mode) = mode 
 
+    /---- session state ----/
+
+    piece last_viewed_piece(piece p) = p
+    
+    
+
+    /---- the view of views ----/
+    
+    response view [=
+
+        response piece(params{}) [=
+            pent.piece param_piece = piece_for_id(params{"piece"}) 
+            if (param_piece) [=
+                piece_view(param_piece);
+                eval(last_viewed_piece(: param_piece :));
+            =] else if (last_viewed_piece) [=
+                piece_view(last_viewed_piece);
+            =] else [=
+                piece_view(utah);
+                eval(last_viewed_piece(: param_piece :));
+            =]
+        =]
+
+    
+    
+    =]
+
 
     /---- piece attributes ----/
 
@@ -36,9 +63,7 @@ site pent [=
         
         
         =]    
-    
-    
-    =]
+     =]
     
     pent_view set_view(piece[] removed) [=
     
@@ -50,6 +75,32 @@ site pent [=
     
     =]
 
+    pent_view piece_view(piece p) [=
+        if (TEXT_MODE) [=
+           piece_serializer(p).serialize;
+        
+        =] else [=
+        
+        
+        =]
+        
+    
+    =]
 
-
+    /---- serializers ----/
+    serializable(*) piece_serializer(str), (piece p) [=
+        keep: int id        = p.id
+        keep: name          = p.name
+        keep: classic_name  = p.classic_name
+        keep: int value     = p.value
+        keep: int rotations = p.rotations
+        keep: int chirality = p.chirality
+        keep: int width     = p.width
+        keep: int height    = p.height
+    =]
+    
+pser [=
+    piece_serializer(utah).serialize;
+=]    
+    
 =]

@@ -175,6 +175,12 @@ site pent [=
 
         this;                                      
     =]
+    
+    dynamic piece piece_for_id(int id) [=
+        if (id >= 1 && id <= 12) [=
+            pieces[id - 1];
+        =]
+    =]
 
     piece[12] pieces = [
         utah,
