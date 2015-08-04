@@ -22,10 +22,14 @@ site pent [=
 
     /---- the view of views ----/
     
-    response view [=
+    dynamic response view [=
 
-        response piece(params{}) [=
-            pent.piece param_piece = piece_for_id(params{"piece"}) 
+        dynamic response piece(params{}) [=
+            log("view piece params: " + params);
+            log("   ...id: " + piece_id); 
+
+            int piece_id = (int) params{"id"}
+            pent.piece param_piece = (params{"name"} ? piece_table{params{"name"}} : piece_for_id(piece_id)) 
             if (param_piece) [=
                 piece_view(param_piece);
                 eval(last_viewed_piece(: param_piece :));
@@ -54,7 +58,7 @@ site pent [=
         int y [?]
     =]
 
-    pent_view team_view(team_name, pent_team team, pent_team_played played) [=
+    dynamic pent_view team_view(team_name, pent_team team, pent_team_played played) [=
 
         if (view_mode == TEXT_MODE) [=
             
@@ -65,17 +69,17 @@ site pent [=
         =]    
      =]
     
-    pent_view set_view(piece[] removed) [=
+    dynamic pent_view set_view(piece[] removed) [=
     
     =]
     
     
-    pent_view board_view(pent_game game) [=
+    dynamic pent_view board_view(pent_game game) [=
     
     
     =]
 
-    pent_view piece_view(piece p) [=
+    dynamic pent_view piece_view(piece p) [=
         if (TEXT_MODE) [=
            piece_serializer(p).serialize;
         
@@ -88,7 +92,7 @@ site pent [=
     =]
 
     /---- serializers ----/
-    serializable(*) piece_serializer(str), (piece p) [=
+    dynamic serializable(*) piece_serializer(str), (piece p) [=
         keep: int id        = p.id
         keep: name          = p.name
         keep: classic_name  = p.classic_name

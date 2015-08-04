@@ -211,7 +211,7 @@ site pent [=
     static int PLUS_ID = 12
     
     
-    piece{} piece_table = { for piece p in pieces [= p.id: p =] }
+    piece{} piece_table = { for piece p in pieces [= p.id: p, p.name: p =] }
     
     global piece utah [=
         int id = 1
