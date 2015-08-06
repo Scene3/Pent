@@ -25,8 +25,8 @@ site pent [=
     dynamic response view [=
 
         dynamic response piece(params{}) [=
-            log("view piece params: " + params);
-            log("   ...id: " + piece_id); 
+            //log("view piece params: " + params);
+            //log("   ...id: " + piece_id); 
 
             int piece_id = (int) params{"id"}
             pent.piece param_piece = (params{"name"} ? piece_table{params{"name"}} : piece_for_id(piece_id)) 
@@ -40,11 +40,13 @@ site pent [=
                 eval(last_viewed_piece(: param_piece :));
             =]
         =]
-
-    
-    
     =]
 
+
+show_piece [=
+    piece param_piece = piece_for_id(2);
+    piece_view(param_piece);
+=]
 
     /---- piece attributes ----/
 
