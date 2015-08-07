@@ -45,6 +45,7 @@ site pent [=
 
 show_piece [=
     piece param_piece = piece_for_id(2);
+    log("showing " + param_piece.name);
     piece_view(param_piece);
 =]
 
