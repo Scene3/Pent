@@ -397,6 +397,15 @@ site pent [=
 
     =]
 
+emptyclass [/]
+
+emptyclass, pent_board p2c [=
+  play p1 = play(utah, 0)
+  play[] p1_array = [ p1 ]
+  plays_to_cell(p1_array, 0);
+=]
+
+
     test_runner pent_game_tests [=
 
         test_base test_pent_game_initial_state [=
