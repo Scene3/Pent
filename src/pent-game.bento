@@ -93,8 +93,18 @@ site pent [=
         keep: pent_phase phase(pent_phase pp) = pp
         keep: int turn(int t) = t
 
-        /---- the game API ----/
+        /--------------------------------------/
+        /--------     the game API     --------/
+        /--------------------------------------/
         
+        /---- set the phase ----/    
+
+        dynamic set_phase(pent_phase pp) [= 
+            eval(phase(: pp :));
+        =]
+ 
+        /---- start the game ----/
+
         dynamic start [=
             if (phase == BEFORE_GAME) [=
                 set_phase(CHOOSE_PLAYERS);
@@ -103,6 +113,40 @@ site pent [=
                 redirect illegal_action_for_phase("start", here);
             =]
         =] 
+
+        /---- CHOOSE_PLAYERS phase ----/
+    
+        dynamic set_player(name, id, boolean is_player_a) [=
+        
+            if (phase == CHOOSE_PLAYERS) [=
+                if (is_player_a) [=
+                    eval(player_A(: pent_player(name, id) :));
+                =] else [=
+                    eval(player_B(: pent_player(name, id) :));
+                =] 
+                 
+                 /-- if both players are set, advance to the next phase --/
+                 if (player_A && player_B) [=
+                     set_phase(CHOOSE_ORDER);
+                 =]
+            =] else [=
+                redirect illegal_action_for_phase("set_player", here);
+             =]
+        =]
+
+        /---- CHOOSE_ORDER phase ----/
+
+        dynamic set_a_picks_first(boolean flag) [=
+            if (phase == CHOOSE_ORDER) [=
+                eval(a_picks_first(: flag :));
+                eval(turn(: 1 :));
+                set_phase(CHOOSE_TEAM);
+            =] else [=
+                redirect illegal_action_for_phase("set_a_picks_first", here);
+            =]
+        =]
+        
+        /---- CHOOSE_TEAM phase ----/
     
         dynamic add_piece_by_id(id, boolean to_team_A) [=
             add_piece(pieces[piece.index_for_id(id)], to_team_A);
@@ -132,9 +176,38 @@ site pent [=
             =]
         =]
 
+        /---- PLAY_GAME phase ----/
+        
+        /** Returns true if it is currently player A's turn **/
+        dynamic boolean a_goes_next [=
+        
+            /-- it's A's turn if the turn is odd and A did not pick first, or
+             -- the turn is even and A did pick first.
+             --/
+            (((turn & 1) && !a_picks_first) || (!(turn & 1) && a_picks_first));
+        =]
+
+
         /** Returns true if piece is unused and is on the right team **/
         dynamic boolean is_available(piece p) [=
+            if (was_played(p)) [=
+                false;
+            =] else if (array.contains(team_A, p)) [=
+                a_goes_next;
+            =] else [=
+                (!a_goes_next);
+            =]
+        =]
         
+        /** Returns true if piece has been played **/
+        dynamic boolean was_played(piece p) [=
+            boolean played(boolean b) = b
+            for play ply in plays until played [=
+                if (ply.piece == p) [=
+                    eval(played(true));
+                =]
+            =]
+            played;
         =]
         
         dynamic add_play(play p) [=
@@ -149,39 +222,7 @@ site pent [=
                 redirect illegal_action_for_phase("add_play", here);
             =]
         =]
-    
-        dynamic set_player(name, id, boolean is_player_a) [=
-        
-            if (phase == CHOOSE_PLAYERS) [=
-                if (is_player_a) [=
-                    eval(player_A(: pent_player(name, id) :));
-                =] else [=
-                    eval(player_B(: pent_player(name, id) :));
-                =] 
-                 
-                 /-- if both players are set, advance to the next phase --/
-                 if (player_A && player_B) [=
-                     set_phase(CHOOSE_ORDER);
-                 =]
-            =] else [=
-                redirect illegal_action_for_phase("set_player", here);
-             =]
-        =]
 
-        dynamic set_a_picks_first(boolean flag) [=
-            if (phase == CHOOSE_ORDER) [=
-                eval(a_picks_first(: flag :));
-                eval(turn(: 1 :));
-                set_phase(CHOOSE_TEAM);
-            =] else [=
-                redirect illegal_action_for_phase("set_a_picks_first", here);
-            =]
-        =]
-        
-        
-        dynamic set_phase(pent_phase pp) [= 
-            eval(phase(: pp :));
-        =]
         
         set_phase(BEFORE_GAME);
         this;    

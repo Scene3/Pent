@@ -823,7 +823,7 @@ emptyclass, pent_board p2c [=
         =]            
 
         test_base test_pent_game_play_game [=
-            expected = "AB"
+            expected = "ABCDEF"
             
             this pent_game [/]
 
@@ -851,6 +851,48 @@ emptyclass, pent_board p2c [=
                 test_log("pent_game successfully reaches PLAY_GAME phase");
             =] else [=
                 test_log("pent_game fails to reach PLAY_GAME phase");
+            =]
+
+            // it should be the first turn
+            if (pent_game.turn == 1) [=
+                "C";
+                test_log("game starts at turn 1");
+            =] else [=
+                test_log("game should start at turn 1 but instead starts at turn " + turn);
+            =]
+            
+            // player A picked first, so player B should go first
+            if (!pent_game.a_goes_next) [=
+                "D";
+                test_log("it is correctly player B's turn");
+            =] else [=
+                test_log("it should be player B's turn but it's player A's turn");
+            =]
+            
+            // player B goes first, so all pieces on team_B should be available
+            if (pent_game.is_available(pent_game.team_B[0]) &&
+                pent_game.is_available(pent_game.team_B[1]) &&
+                pent_game.is_available(pent_game.team_B[2]) &&
+                pent_game.is_available(pent_game.team_B[3]) &&
+                pent_game.is_available(pent_game.team_B[4]) &&
+                pent_game.is_available(pent_game.team_B[5])) [=
+                "E";
+                test_log("all of player B's pieces are correctly available to play");
+            =] else [=
+                test_log("not all of player B's pieces are available");
+            =]
+            
+            // player B goes first, so none of the pieces on team_A should be available
+            if (!pent_game.is_available(pent_game.team_A[0]) &&
+                !pent_game.is_available(pent_game.team_A[1]) &&
+                !pent_game.is_available(pent_game.team_A[2]) &&
+                !pent_game.is_available(pent_game.team_A[3]) &&
+                !pent_game.is_available(pent_game.team_A[4]) &&
+                !pent_game.is_available(pent_game.team_A[5])) [=
+                "F";
+                test_log("all of player A's pieces are correctly unavailable to play");
+            =] else [=
+                test_log("some of player A's pieces are incorrectly available");
             =]
         =]
     =]
