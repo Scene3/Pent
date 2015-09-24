@@ -22,34 +22,68 @@ site pent [=
 
     /---- the view of views ----/
     
-    dynamic response view [=
+    view [=
 
         dynamic response piece(params{}) [=
             //log("view piece params: " + params);
             //log("   ...id: " + piece_id); 
 
             int piece_id = (int) params{"id"}
-            pent.piece param_piece = (params{"name"} ? piece_table{params{"name"}} : piece_for_id(piece_id)) 
+            pent.piece param_piece = (piece_id ? piece_for_id(piece_id) : piece_table{params{"name"}}) 
+
             if (param_piece) [=
-                piece_view(param_piece);
+                log("   ...found piece " + param_piece.name);
+                piece_serializer(param_piece);
                 eval(last_viewed_piece(: param_piece :));
-            =] else if (last_viewed_piece) [=
-                piece_view(last_viewed_piece);
-            =] else [=
-                piece_view(utah);
-                eval(last_viewed_piece(: param_piece :));
+            =] else if (!last_viewed_piece) [=
+                eval(last_viewed_piece(: utah :));
             =]
+             piece_serializer(last_viewed_piece);
+        =]
+        
+        dynamic response game(params{}) [=
+            board_view;
         =]
     =]
 
 
-show_piece [=
-    piece param_piece = piece_for_id(2);
-    log("showing " + param_piece.name);
-    piece_view(param_piece);
-=]
+    base_page(*) show_page(params{}) [=
+        boolean needs_login = false
+        
+        sub;
+    =]
+
+
+    show_page(*) show(params{}) [=
+    
+        show_page(*) piece(params{}) [=
+            pent.piece param_piece = piece_for_id(2);
+            log("showing " + param_piece.name);
+            piece_view(param_piece);
+        =]
+    =]
 
     /---- piece attributes ----/
+    
+    
+    /---- view css ----/
+    
+    pent_view_style [|
+    
+        .pent_table td {
+            width: 4em;
+            height: 4em;
+            border-style: outset;
+            border-width: 4px;
+        }
+    
+        .pent_table {
+            table-layout: fixed;
+            color: #FFFFFF;
+            background-color: #000000;
+        }    
+    
+    |]
 
 
     /---- view components ----/
@@ -62,7 +96,6 @@ show_piece [=
     =]
 
     dynamic pent_view team_view(team_name, pent_team team, pent_team_played played) [=
-
         if (view_mode == TEXT_MODE) [=
             
         
@@ -78,20 +111,24 @@ show_piece [=
     
     
     dynamic pent_view board_view(pent_game game) [=
-    
-    
+
+        [| <table class="pent_table"> |]
+        for int i = 0 to 8 [=
+            [| <tr> |]
+            for int j = 0 to 8 [=
+                [| <td></td> |]
+            =]
+            [| </tr> |]
+        =]
+        [| </table> |]
     =]
 
     dynamic pent_view piece_view(piece p) [=
         if (TEXT_MODE) [=
-           piece_serializer(p).serialize;
-        
+            view.piece(p);
         =] else [=
         
-        
         =]
-        
-    
     =]
 
     /---- serializers ----/
@@ -104,10 +141,16 @@ show_piece [=
         keep: int chirality = p.chirality
         keep: int width     = p.width
         keep: int height    = p.height
+        
+        with (p) [=
+            serialize;
+        =] else [=
+            this;
+        =]
     =]
     
 pser [=
-    piece_serializer(utah).serialize;
+    piece_serializer(utah);
 =]    
     
 =]

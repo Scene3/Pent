@@ -126,7 +126,12 @@ site pent [=
         boolean needs_login [?]    
         boolean needs_admin = false
  
-        style [| 
+        style [=
+            base_style;
+            pent_view_style;
+        =]
+        
+        base_style [| 
             html, body { 
                 width: 100%;
                 height: 100%;
