@@ -132,7 +132,7 @@ site pent [=
     =]
 
     /---- serializers ----/
-    dynamic serializable(*) piece_serializer(str), (piece p) [=
+    dynamic serializable(*), piece piece_serializer(str), (piece p) [=
         keep: int id        = p.id
         keep: name          = p.name
         keep: classic_name  = p.classic_name
@@ -143,7 +143,7 @@ site pent [=
         keep: int height    = p.height
         
         with (p) [=
-            serialize;
+            this.serialize;
         =] else [=
             this;
         =]
