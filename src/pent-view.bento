@@ -24,14 +24,22 @@ site pent [=
     
     view [=
 
-        dynamic response piece(params{}) [=
-            //log("view piece params: " + params);
-            //log("   ...id: " + piece_id); 
+        dynamic response piece(params{}),(pent.piece pp) [=
+            log("view piece params: " + params);
+            with (pp) [=
+                log("   ...pp.id: " + pp.id);
+            =] else [= 
+                log("   ...id: " + piece_id);
+            =] 
 
             int piece_id = (int) params{"id"}
             pent.piece param_piece = (piece_id ? piece_for_id(piece_id) : piece_table{params{"name"}}) 
 
-            if (param_piece) [=
+            with (pp) [=
+                log("   ...passed piece " + pp.name);
+                piece_serializer(pp);
+                eval(last_viewed_piece(: pp :));
+            =] else if (param_piece) [=
                 log("   ...found piece " + param_piece.name);
                 piece_serializer(param_piece);
                 eval(last_viewed_piece(: param_piece :));
@@ -57,7 +65,8 @@ site pent [=
     show_page(*) show(params{}) [=
     
         show_page(*) piece(params{}) [=
-            pent.piece param_piece = piece_for_id(2);
+            int piece_id = (int) params{"id"}
+            pent.piece param_piece = (piece_id ? piece_for_id(piece_id) : piece_table{params{"name"}}) 
             log("showing " + param_piece.name);
             piece_view(param_piece);
         =]
@@ -124,15 +133,11 @@ site pent [=
     =]
 
     dynamic pent_view piece_view(piece p) [=
-        if (TEXT_MODE) [=
-            view.piece(p);
-        =] else [=
-        
-        =]
+        view.piece(p);
     =]
 
     /---- serializers ----/
-    dynamic serializable(*), piece piece_serializer(str), (piece p) [=
+    dynamic serializable(str), piece piece_serializer(str), (piece p) [=
         keep: int id        = p.id
         keep: name          = p.name
         keep: classic_name  = p.classic_name
@@ -143,7 +148,7 @@ site pent [=
         keep: int height    = p.height
         
         with (p) [=
-            this.serialize;
+            serialize;
         =] else [=
             this;
         =]
