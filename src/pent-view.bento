@@ -37,11 +37,9 @@ site pent [=
 
             with (pp) [=
                 log("   ...passed piece " + pp.name);
-                piece_serializer(pp);
                 eval(last_viewed_piece(: pp :));
             =] else if (param_piece) [=
                 log("   ...found piece " + param_piece.name);
-                piece_serializer(param_piece);
                 eval(last_viewed_piece(: param_piece :));
             =] else if (!last_viewed_piece) [=
                 eval(last_viewed_piece(: utah :));
@@ -97,7 +95,7 @@ site pent [=
 
     /---- view components ----/
 
-    component pent_view [=
+    dynamic component pent_view [=
         component_class = "view " + owner.type
         
         int x [?]
@@ -146,7 +144,9 @@ site pent [=
         keep: int chirality = p.chirality
         keep: int width     = p.width
         keep: int height    = p.height
-        
+        keep: pent_position[] all_positions = p.all_positions
+        keep: pent_position[] protos = p.protos        
+
         with (p) [=
             serialize;
         =] else [=
