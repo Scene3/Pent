@@ -154,8 +154,9 @@ site pent [=
         =]
     =]
     
-pser [=
-    piece_serializer(utah);
+pser(params{}) [=
+    piece param_piece = piece_for_id((int) params{"id"}); 
+    piece_serializer(param_piece);
 =]    
     
 =]
