@@ -137,6 +137,7 @@ site pent [=
     /---- serializers ----/
     dynamic serializable(str), piece piece_serializer(str), (piece p) [=
         keep: int id        = p.id
+        keep: pent_position[] all_positions = p.all_positions
         keep: name          = p.name
         keep: classic_name  = p.classic_name
         keep: int value     = p.value
@@ -144,8 +145,7 @@ site pent [=
         keep: int chirality = p.chirality
         keep: int width     = p.width
         keep: int height    = p.height
-        keep: pent_position[] all_positions = p.all_positions
-        keep: pent_position[] protos = p.protos        
+        keep: pent_position[] protos = p.protos
 
         with (p) [=
             serialize;

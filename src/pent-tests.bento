@@ -28,10 +28,13 @@ site pent [=
             tr.run;
         
             for test_result rslt in tr.results [=
-                [| <li>Name: [= rslt.name; =]<br>
-                      Passed: [= rslt.result; =]<br>
-                      log:<ul>
+                [| <li>[= rslt.name; =]<br> |]
+                if (rslt.result) [|
+                    Passed
+                |] else [|
+                    <span style="color:red">Failed</span>
                 |]
+                [| <br><ul> |]
                 for msg in rslt.messages [|
                     <li>[= msg; =]</li>
                 |]
