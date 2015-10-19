@@ -18,8 +18,6 @@ site pent [=
 
     piece last_viewed_piece(piece p) = p
     
-    
-
     /---- the view of views ----/
     
     view [=
@@ -76,24 +74,87 @@ site pent [=
     /---- view css ----/
     
     pent_view_style [|
-    
-        .pent_table td {
-            width: 4em;
-            height: 4em;
-            border-style: outset;
-            border-width: 4px;
+
+        .view {
+            padding: 1rem;
+            border: 0.125em solid #EEEEDD;
         }
     
-        .pent_table {
+        .pent_board td {
+            border-width: 0;
+            padding: 0;
+            text-align: center;
+        }
+    
+        .pent_board {
+            margin: 4rem;
             table-layout: fixed;
-            color: #FFFFFF;
-            background-color: #000000;
+            border-style: outset;
+            border-width: 0.5rem;
+            border-spacing: 0;
+            border-collapse: false;
+            color: #EEEE00;
+            background-color: #111122;
         }    
+
+        .pent_tile {
+            border-style: inset;
+            border-width: 0.125rem;
+            width: 1.25rem;
+            height: 1.25rem;
+            padding: 0.5rem;
+            color: #777777;
+            background-color: #000000;
+        }
+        
+        title_bar {
+            width: 100%;
+            background-color: #339999;
+            color: #EFEF0F;
+            text-align: center;
+            font-weight: bold;
+        }
     
     |]
 
 
     /---- view components ----/
+
+    dynamic pent_tile(int value) [=  
+        [| <div class="pent_tile" /]
+
+        if (view_mode == STANDARD_MODE) [=
+            if (value) [| 
+                style="background: [= color_for_piece(value); =]"
+            |]
+        =]
+
+        [| > |]        
+        
+        if (view_mode == TEXT_MODE) [= 
+            value;
+        =]
+
+        [| </div> |]
+    =]
+        
+    dynamic color_for_piece(int id) [=
+        piece_color[id - 1];
+    =]    
+
+    piece_color[12] = [ "#773333",
+                        "#337733",
+                        "#333377",
+                        "#444422",
+                        "#442244",
+                        "#224444",
+                        "#883333",
+                        "#338833",
+                        "#333388",
+                        "#555522",
+                        "#552255",
+                        "#225555" ]
+
 
     dynamic component pent_view [=
         component_class = "view " + owner.type
@@ -116,13 +177,20 @@ site pent [=
     
     =]
     
+    dynamic pent_view title_view(pent_game game) [=
+        component_class = "title_bar"
+
+        game.player_A.name;
+        " vs. ";
+        game.player_B.name;    
+    =]
     
     dynamic pent_view board_view(pent_game game) [=
     
         pent_board board = pent_board(game.plays)
         int[] cells = board.cells
 
-        [| <table class="pent_table"> |]
+        [| <table class="pent_board"> |]
         for int row = 0 to 8 [=
             [| <tr> |]
             for int col = 0 to 8 [=
@@ -158,10 +226,5 @@ site pent [=
             this;
         =]
     =]
-    
-pser(params{}) [=
-    piece param_piece = piece_for_id((int) params{"id"}); 
-    piece_serializer(param_piece);
-=]    
     
 =]

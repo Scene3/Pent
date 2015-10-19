@@ -587,12 +587,17 @@ emptyclass, pent_board p2c [=
             // phase.  After choosing two players, the game should advance to the CHOOSE_ORDER phase. 
             [=
                 pent_game.set_player("Al Pha", "a", true);
-                if (pent_game.player_A) [=
+                if (pent_game.player_A && pent_game.player_A.name == "Al Pha" && pent_game.player_A.id == "a") [=
                     "F";
                     test_log("player A chosen successfully");
-                =] else [=
+                =] else if (!pent_game.player_A) [=
                     test_log("player A has no value after being chosen");
-                =]
+                =] else if (pent_game.player_A.name != "Al Pha") [=
+                    test_log("player A has wrong name after being chosen");
+                =] else [=                    
+                    test_log("player A has wrong id after being chosen");
+                =]                    
+                
 
                 if (!pent_game.player_B) [=
                     "G";
@@ -602,11 +607,15 @@ emptyclass, pent_board p2c [=
                 =]
             
                 pent_game.set_player("B Eta", "b", false);
-                if (pent_game.player_A && pent_game.player_B) [=
+                if (pent_game.player_A && pent_game.player_B && pent_game.player_B.name == "B Eta" && pent_game.player_B.id == "b") [=
                     "H";
                     test_log("both players chosen successfully");
                 =] else if (!pent_game.player_B) [=
                     test_log("unable to choose player B");
+                =] else if (pent_game.player_B.name != "B Eta") [=
+                    test_log("player B has wrong name after being chosen");
+                =] else if (pent_game.player_B.id != "b") [=                    
+                    test_log("player B has wrong id after being chosen");
                 =] else [=
                     test_log("player A is null after Player B is chosen");
                 =]
@@ -991,4 +1000,21 @@ emptyclass, pent_board p2c [=
             "second access false (wrong)<br>";
         =]
     =]
+    
+    pser(params{}) [=
+        piece param_piece = piece_for_id((int) params{"id"}); 
+        piece_serializer(param_piece);
+    =]
+    
+    gpn [=
+        pent_player cgp = current_game.player_A
+    
+        current_game.player_A.name;
+        "/";
+        cgp.id;
+        "/";
+        current_game.phase;
+    =]    
+    
+    
 =]

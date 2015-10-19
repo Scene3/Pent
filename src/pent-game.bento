@@ -96,6 +96,19 @@ site pent [=
         /--------------------------------------/
         /--------     the game API     --------/
         /--------------------------------------/
+
+        /---- set all state values to their initial values ----/
+
+        dynamic init [=
+            eval(player_A);
+            eval(player_B);
+            eval(a_picks_first);
+            eval(team_A);
+            eval(team_B);
+            eval(turn);        
+            set_phase(BEFORE_GAME);
+        =]      
+
         
         /---- set the phase ----/    
 
@@ -223,8 +236,7 @@ site pent [=
             =]
         =]
 
-        
-        set_phase(BEFORE_GAME);
+        init;
         this;    
     =]
 

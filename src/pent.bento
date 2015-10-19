@@ -16,9 +16,7 @@ site pent [=
 
     init [=
         load_users("users", "admins");
-        
-        /---- until we implement the fancy stuff ----/
-        view_mode(TEXT_MODE);
+        view_mode(STANDARD_MODE);
     =]
     
     load_users(ufilename, afilename) [=
@@ -54,19 +52,22 @@ site pent [=
     /-------- session initialization --------------/
 
     session_init [=
+        current_game(pent_game);
+        current_game.start;
+        current_game.set_player("Player A", "a", true);
+        current_game.set_player("Player B", "b", false);
+        current_game.set_a_picks_first(true);
+
         view_mode(TEXT_MODE);
     =]
 
     
-    /-------- error handling ----------------------/
+    /-------- session status ---------------------/
 
-    component error(msg) [=
-        component_class = "error_msg"
-        message = msg
-        
-        "Error: ";
-        msg;
-    =]
+    pent_game current_game(pent_game gm) = gm
+    
+    /** if work_mode is true, we are managing the game site rather than playing the game **/
+    boolean work_mode(boolean do_work) = do_work
 
 
     /-------- login status and information --------/
@@ -93,12 +94,15 @@ site pent [=
     =]
 
 
-    /-------- session status ---------------------/
+    /-------- error handling ----------------------/
 
-    current_game(game_id) = game_id
-    
-    /** if work_mode is true, we are managing the game site rather than playing the game **/
-    boolean work_mode(boolean do_work) = do_work
+    component error(msg) [=
+        component_class = "error_msg"
+        message = msg
+        
+        "Error: ";
+        msg;
+    =]
 
 
     /-------- log file ---------------------------/
@@ -260,6 +264,8 @@ site pent [=
             
         =]
         
+        pent_game this_game = current_game
+        
         base_page this_page = owner
         page_name = owner.type
         boolean is_admin = authenticate_admin(this_username)
@@ -284,7 +290,7 @@ site pent [=
         boolean needs_login = false
         boolean needs_admin = false
     
-        pent_console(current_game);    
+        pent_console(this_game, params);    
     =]
 
     base_page(*) work_page(params{}) [=
@@ -298,7 +304,14 @@ site pent [=
         sub;
         [| </div></div> |]
     =]
+
     
+    
+
+    play_page(*) sample(params{}) [=
+        this_game = sample_game
+    =]
+
 
     /-------- basic tools -------------------------/
 

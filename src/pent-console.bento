@@ -123,7 +123,7 @@ site pent [=
 
 
     /** pent-specific console **/
-    console pent_console(params{}),(pent_game gm) [=
+    dynamic console pent_console(pent_game gm, params{}) [=
         /** the current game **/
         keep: pent_game game = gm
      
@@ -146,13 +146,6 @@ site pent [=
         dynamic boolean a_picks_next = (is_odd(turn) == game.a_picks_first)
         dynamic boolean a_plays_next = (is_odd(turn) != game.a_picks_first)
         
-        dynamic pent_view[] views = [
-            if (game.phase == BEFORE_GAME) [=
-             
-             
-            =]  
-        ]
-
 
         /---- implementation ----/
         
@@ -231,6 +224,9 @@ site pent [=
                  =]
              =]
          =]
+         
+         title_view(game);
+         board_view(game);
   
     =]
 
