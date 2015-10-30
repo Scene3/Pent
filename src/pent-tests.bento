@@ -977,9 +977,9 @@ emptyclass, pent_board p2c [=
     =]
 
     _p_g [=
-        keep: player_A(a, b) = a + b
+        keep: pent_player player_A(pent_player plyr) = plyr
         dynamic set_player [=
-            eval(player_A(: "A", "B" :));
+            eval(player_A(: pent_player("Abe", "a") :));
         =]
     =]
         
@@ -988,17 +988,19 @@ emptyclass, pent_board p2c [=
     
         _p_g _pent_game [/]
 
-        if (_pent_game.player_A) [=
+     /--   if (_pent_game.player_A) [=
             "first access true (wrong)<br>";
         =] else [=
             "first access false (right)<br>";
-        =]
+        =] --/
         _pent_game.set_player;
-        if (_pent_game.player_A) [=
+    /---    if (_pent_game.player_A) [=
             "second access true (right)<br>";
         =] else [=
             "second access false (wrong)<br>";
-        =]
+        =] ---/
+        
+        _pent_game.player_A.name;
     =]
     
     pser(params{}) [=
