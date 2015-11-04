@@ -1011,9 +1011,9 @@ emptyclass, pent_board p2c [=
     gpn [=
         pent_player cgp = current_game.player_A
     
-        current_game.player_A.name;
+        cgp.name;
         "/";
-        cgp.id;
+        current_game.player_A.id;
         "/";
         current_game.phase;
     =]    

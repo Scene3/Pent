@@ -65,7 +65,7 @@ site pent [=
 
     /---- a player ----/
     
-    game_player(*) pent_player(name, id) [/]
+    game_player(*) pent_player(player_name, player_id) [/]
     
 
     /---- a team ----/
