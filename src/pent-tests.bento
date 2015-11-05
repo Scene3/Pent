@@ -1009,13 +1009,18 @@ emptyclass, pent_board p2c [=
     =]
     
     gpn [=
-        pent_player cgp = current_game.player_A
+        pent_game pg [/]
+        pent_player cgp = pg.player_A
+            
+        eval(pg);
+        pg.start;
+        pg.set_player("Al Pha", "a", true);
     
         cgp.name;
         "/";
-        current_game.player_A.id;
+        pg.player_A.id;
         "/";
-        current_game.phase;
+        pg.phase;
     =]    
     
     
