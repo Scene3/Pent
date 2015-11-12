@@ -133,9 +133,9 @@ site pent [=
         
             if (phase == CHOOSE_PLAYERS) [=
                 if (is_player_a) [=
-                    eval(player_A(: pent_player(name, id) :));
+                    eval(player_A(: pent_player(: name, id :) :));
                 =] else [=
-                    eval(player_B(: pent_player(name, id) :));
+                    eval(player_B(: pent_player(: name, id :) :));
                 =] 
                  
                  /-- if both players are set, advance to the next phase --/
