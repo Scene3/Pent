@@ -1,0 +1,46 @@
+/**  pent-api.bento
+ *
+ *   Endpoints for Pent API.
+ *
+ *
+ **/
+
+site pent [=
+
+    
+    /---- the api ----/
+    
+    api [=
+
+        /** Endpoints:
+         *
+         *    -- view
+         *        -- piece = name | id 
+         *        -- piece = name | id & position = n
+         *          
+         *            
+         *    -- play  
+         *
+         **/
+
+        dynamic response view(params{}) [=
+            int piece_id = (int) params{"id"}
+            pent.piece param_piece = (piece_id ? piece_for_id(piece_id) : piece_table{params{"name"}}) 
+
+            with (pp) [=
+                log("   ...passed piece " + pp.name);
+                eval(last_viewed_piece(: pp :));
+            =] else if (param_piece) [=
+                log("   ...found piece " + param_piece.name);
+                eval(last_viewed_piece(: param_piece :));
+            =] else if (!last_viewed_piece) [=
+                eval(last_viewed_piece(: utah :));
+            =]
+             piece_serializer(last_viewed_piece);
+        =]
+        
+        dynamic response play(params{}) [=
+            board_view;
+        =]
+    =]
+=]
