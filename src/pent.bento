@@ -53,7 +53,6 @@ site pent [=
 
     session_init [=
         current_game(pent_game);
-        current_game.start;
         current_game.set_player("Player A", "a", true);
         current_game.set_player("Player B", "b", false);
         current_game.set_a_picks_first(true);

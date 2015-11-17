@@ -14,13 +14,25 @@ site pent [=
 
         /** Endpoints:
          *
-         *    -- view
+         *    -- view ?
          *        -- piece = name | id 
+         *          -- returns a representation of the specified piece                
+         *
          *        -- piece = name | id & position = n
-         *          
+         *          -- returns a representation of a pent board with the 
+         *             specified piece at the specified position
+         *             
+         *        -- game = id
+         *          -- returns a representation of the specified game  
+         *           
          *            
          *    -- play  
+         *        -- start
+         *          -- begins a new game, returns the game id
          *
+         *        -- choose ? game = id & a = "player name" &| b = "player name" 
+         *                              &| first = a | b
+         *                
          **/
 
         dynamic response view(params{}) [=

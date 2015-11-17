@@ -411,76 +411,14 @@ emptyclass, pent_board p2c [=
 
     test_runner pent_game_tests [=
 
-        test_base test_pent_game_initial_state [=
-            expected = "ABCDEF"
-            
-            this pent_game [/]
-            
-            eval(pent_game);
-            
-            // when first created, a pent_game is in the BEFORE_GAME phase and
-            // has no players or team members
-            if (pent_game.phase == BEFORE_GAME) [=
-                "A";
-                test_log("pent_game starts in correct phase");
-            =] else [=
-                test_log("pent_game starts in wrong phase: " + pent_game.phase);
-            =]
-            
-            if (!pent_game.player_A && !pent_game.player_B) [=
-                "B";
-                test_log("pent_game correctly starts with no players");
-            =] else [=
-                test_log("pent_game incorrectly starts with one or more players");
-            =]
-            
-            if (pent_game.team_A.count == 0 && pent_game.team_B.count == 0) [=
-                "C";
-                test_log("pent_game correctly starts with empty teams");
-            =] else [=
-                test_log("pent_game incorrectly starts with nonempty teams; Team A count: " + pent_game.team_A.count + "  Team B count: " + pent_game.team_B.count);
-            =]
-            
-            // functions that are meaningful only in other phases should redirect
-            // to an illegal_action_for_phase error
-            [=
-                pent_game.set_player("A Player", "A", true);
-                test_log("pent_game incorrectly allows call to set_player in initial state");
-
-            =] catch illegal_action_for_phase [=
-                "D";
-                test_log("pent_game correctly redirects on call to set_player in initial state");
-            =]
-            
-            [=
-                pent_game.set_a_picks_first(true);
-                test_log("pent_game incorrectly allows call to set_a_picks_first in initial state");
-
-            =] catch illegal_action_for_phase [=
-                "E";
-                test_log("pent_game correctly redirects on call to set_a_picks_first in initial state");
-            =]
-
-            [=
-                pent_game.add_piece_by_id(1, true);
-                test_log("pent_game incorrectly allows call to add_piece_by_id in initial state");
-
-            =] catch illegal_action_for_phase [=
-                "F";
-                test_log("pent_game correctly redirects on call to add_piece_by_id in initial state");
-            =]
-       =]
-
         test_base test_pent_game_start [=
-            expected = "ABCDE"
+            expected = "ABCD"
             
             this pent_game [/]
             
             eval(pent_game);
             
             [=
-                pent_game.start;
-                
                 "A";
                 test_log("pent_game correctly starts without redirection");
 
@@ -501,20 +439,11 @@ emptyclass, pent_board p2c [=
             // functions that are meaningful only in other phases should redirect
             // to an illegal_action_for_phase error
             [=
-                pent_game.start;
-                test_log("pent_game incorrectly allows call to start after already started");
-
-            =] catch illegal_action_for_phase [=
-                "C";
-                test_log("pent_game correctly redirects on call to start");
-            =]
-            
-            [=
                 pent_game.set_a_picks_first(true);
                 test_log("pent_game incorrectly allows call to set_a_picks_first");
 
             =] catch illegal_action_for_phase [=
-                "D";
+                "C";
                 test_log("pent_game correctly redirects on call to set_a_picks_first");
             =]
 
@@ -523,19 +452,18 @@ emptyclass, pent_board p2c [=
                 test_log("pent_game incorrectly allows call to add_piece_by_id");
 
             =] catch illegal_action_for_phase [=
-                "E";
+                "D";
                 test_log("pent_game correctly redirects on call to add_piece_by_id");
             =]
         =]
 
     
         test_base test_pent_game_choose_players [=
-            expected = "ABCDEFGHI"
+            expected = "ABCDEFGH"
             
             this pent_game [/]
             
             eval(pent_game);
-            pent_game.start;
             
             // when first started, a pent_game enters the CHOOSE_PLAYERS phase
             if (pent_game.phase == CHOOSE_PLAYERS) [=
@@ -547,22 +475,12 @@ emptyclass, pent_board p2c [=
             
             
             // functions that are meaningful only in other phases should redirect
-            // to an illegal_action_for_phase error
-            [=
-                pent_game.start;
-                test_log("pent_game incorrectly allows call to start after already started");
-
-            =] catch illegal_action_for_phase [=
-                "B";
-                test_log("pent_game correctly redirects on call to start");
-            =]
-            
             [=
                 pent_game.set_a_picks_first(true);
                 test_log("pent_game incorrectly allows call to set_a_picks_first");
 
             =] catch illegal_action_for_phase [=
-                "C";
+                "B";
                 test_log("pent_game correctly redirects on call to set_a_picks_first");
             =]
 
@@ -571,13 +489,13 @@ emptyclass, pent_board p2c [=
                 test_log("pent_game incorrectly allows call to add_piece_by_id");
 
             =] catch illegal_action_for_phase [=
-                "D";
+                "C";
                 test_log("pent_game correctly redirects on call to add_piece_by_id");
             =]
            
             // now choose players.  To start with, neither player should have a value.
             if (!pent_game.player_A && !pent_game.player_B) [=
-                "E";
+                "D";
                 test_log("CHOOSE_PLAYERS phase correctly begins with neither player set");
             =] else [=
                 test_log("CHOOSE_PLAYERS phase incorrectly begins with one or both players set");
@@ -588,7 +506,7 @@ emptyclass, pent_board p2c [=
             [=
                 pent_game.set_player("Al Pha", "a", true);
                 if (pent_game.player_A && pent_game.player_A.name == "Al Pha" && pent_game.player_A.id == "a") [=
-                    "F";
+                    "E";
                     test_log("player A chosen successfully");
                 =] else if (!pent_game.player_A) [=
                     test_log("player A has no value after being chosen");
@@ -600,7 +518,7 @@ emptyclass, pent_board p2c [=
                 
 
                 if (!pent_game.player_B) [=
-                    "G";
+                    "F";
                     test_log("player B correctly has no value after only Player A has been chosen");
                 =] else [=
                     test_log("player B incorrectly has a value after Player A is chosen");
@@ -608,7 +526,7 @@ emptyclass, pent_board p2c [=
             
                 pent_game.set_player("B Eta", "b", false);
                 if (pent_game.player_A && pent_game.player_B && pent_game.player_B.name == "B Eta" && pent_game.player_B.id == "b") [=
-                    "H";
+                    "G";
                     test_log("both players chosen successfully");
                 =] else if (!pent_game.player_B) [=
                     test_log("unable to choose player B");
@@ -625,7 +543,7 @@ emptyclass, pent_board p2c [=
             =]
                     
             if (pent_game.phase == CHOOSE_ORDER) [=
-                "I";
+                "H";
                 test_log("pent_game phase correctly advanced to CHOOSE_ORDER after both players were chosen");
             =] else [=
                 test_log("pent_game in wrong phase after choosing both players: " + pent_game.phase);
@@ -633,13 +551,12 @@ emptyclass, pent_board p2c [=
        =]
 
         test_base test_pent_game_choose_order [=
-            expected = "ABCDEFG"
+            expected = "ABCDEF"
             
             pent_game pent_game_1 [/]
 
             eval(pent_game_1);
             [=
-                pent_game_1.start;
                 pent_game_1.set_player("Al Pha", "a", true);
                 pent_game_1.set_player("B Eta", "b", false);
                 "A";
@@ -659,20 +576,11 @@ emptyclass, pent_board p2c [=
             // functions that are meaningful only in other phases should redirect
             // to an illegal_action_for_phase error
             [=
-                pent_game_1.start;
-                test_log("pent_game incorrectly allows call to start after already started");
-
-            =] catch illegal_action_for_phase [=
-                "C";
-                test_log("pent_game correctly redirects on call to start");
-            =]
-
-            [=
                 pent_game_1.add_piece_by_id(1, true);
                 test_log("pent_game incorrectly allows call to add_piece_by_id");
 
             =] catch illegal_action_for_phase [=
-                "D";
+                "C";
                 test_log("pent_game correctly redirects on call to add_piece_by_id");
             =]
 
@@ -680,7 +588,7 @@ emptyclass, pent_board p2c [=
             [=
                 pent_game_1.set_a_picks_first(true);
                 if (pent_game_1.a_picks_first) [=
-                    "E";
+                    "D";
                     test_log("correctly chose player A to pick first");
                 =] else [=
                     test_log("failed to choose player A to pick first");
@@ -693,7 +601,6 @@ emptyclass, pent_board p2c [=
             pent_game pent_game_2 [/]
 
             eval(pent_game_2);                    
-            pent_game_2.start;
             pent_game_2.set_player("Abe", "a", true);
             pent_game_2.set_player("Babe", "b", false);
 
@@ -701,7 +608,7 @@ emptyclass, pent_board p2c [=
 
                 pent_game_2.set_a_picks_first(false);
                 if (!pent_game_2.a_picks_first) [=
-                    "F";
+                    "E";
                     test_log("in second pent_game, correctly chose player B to pick first");
                 =] else [=
                     test_log("in second pent_game, failed to choose player B to pick first");
@@ -712,7 +619,7 @@ emptyclass, pent_board p2c [=
             =]
 
             if (pent_game_1.phase == CHOOSE_TEAM && pent_game_2.phase == CHOOSE_TEAM) [=
-                "G";
+                "F";
                 test_log("pent_game phase correctly advanced to CHOOSE_TEAM after player order was chosen");
             =] else [=
                 test_log("pent_game in wrong phase after choosing player order: " + pent_game.phase);
@@ -726,7 +633,6 @@ emptyclass, pent_board p2c [=
 
             eval(pent_game);
             [=
-                pent_game.start;
                 pent_game.set_player("Al Pha", "a", true);
                 pent_game.set_player("B Eta", "b", false);
                 pent_game.set_a_picks_first(true);
@@ -747,12 +653,12 @@ emptyclass, pent_board p2c [=
             // functions that are meaningful only in other phases should redirect
             // to an illegal_action_for_phase error
             [=
-                pent_game.start;
-                test_log("pent_game incorrectly allows call to start after already started");
+                pent_game.set_player("Horton", "hoo", true);
+                test_log("pent_game incorrectly allows call to set_player after players already chosen");
 
             =] catch illegal_action_for_phase [=
                 "C";
-                test_log("pent_game correctly redirects on call to start");
+                test_log("pent_game correctly redirects on call to set_player");
             =]
 
             [=
@@ -841,7 +747,6 @@ emptyclass, pent_board p2c [=
 
             eval(pent_game);
             [=
-                pent_game.start;
                 pent_game.set_player("Al Pha", "a", true);
                 pent_game.set_player("B Eta", "b", false);
                 pent_game.set_a_picks_first(true);
@@ -1013,7 +918,6 @@ emptyclass, pent_board p2c [=
         pent_player cgp = pg.player_A
             
         eval(pg);
-        pg.start;
         pg.set_player("Al Pha", "a", true);
     
         cgp.name;

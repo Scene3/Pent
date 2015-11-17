@@ -11,14 +11,11 @@ site pent [=
     
     pent_phase [?]
     
-    /** When the player first arrives at the site, until the player clicks on the
-     *  start button, the application is in the Before Game phase.
-     **/
-    pent_phase BEFORE_GAME = "Before Game"
-
-    /** In the Choose Players phase, Player A and Player B are chosen.  By default,
-     *  the user plays as Player A, and chooses Player B, either by selecting one 
-     *  of the available computer opponents or inviting another person to play.
+    /** When a new game is created, it starts in the Choose Players phase. In the 
+     *  Choose Players phase, the user chooses who plays each player, Player A and 
+     *  Player B.  By default, the user plays as Player A, and chooses either one 
+     *  of the available computer opponents or a person playing remotely to play
+     *  Player B.
      **/ 
     pent_phase CHOOSE_PLAYERS = "Choose Players"
 
@@ -106,7 +103,7 @@ site pent [=
             eval(team_A);
             eval(team_B);
             eval(turn);        
-            set_phase(BEFORE_GAME);
+            set_phase(CHOOSE_PLAYERS);
         =]      
 
         
@@ -116,16 +113,6 @@ site pent [=
             eval(phase(: pp :));
         =]
  
-        /---- start the game ----/
-
-        dynamic start [=
-            if (phase == BEFORE_GAME) [=
-                set_phase(CHOOSE_PLAYERS);
-            
-            =] else [=
-                redirect illegal_action_for_phase("start", here);
-            =]
-        =] 
 
         /---- CHOOSE_PLAYERS phase ----/
     
