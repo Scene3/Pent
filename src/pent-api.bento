@@ -36,23 +36,40 @@ site pent [=
          **/
 
         dynamic response view(params{}) [=
-            int piece_id = (int) params{"id"}
-            pent.piece param_piece = (piece_id ? piece_for_id(piece_id) : piece_table{params{"name"}}) 
-
-            with (pp) [=
-                log("   ...passed piece " + pp.name);
-                eval(last_viewed_piece(: pp :));
-            =] else if (param_piece) [=
-                log("   ...found piece " + param_piece.name);
-                eval(last_viewed_piece(: param_piece :));
-            =] else if (!last_viewed_piece) [=
-                eval(last_viewed_piece(: utah :));
+            if (params{"position"}) [=
+                view_position(params);
+            =] else if (params{"piece"}) [=
+                view_piece(params);
             =]
-             piece_serializer(last_viewed_piece);
         =]
+        
+        dynamic response view_piece(params{}) [=
+            piece_param = params{"piece"}
+            piece requested_piece = piece_table{piece_param}) 
+           
+            piece_serializer(requested_piece);
+        =]
+        
+        dynamic response view_position(params{}) [=
+        
+        =]
+        
+        
         
         dynamic response play(params{}) [=
             board_view;
         =]
     =]
+
+    dynamic piece piece_from_params(params{}) [=
+        piece_val = params{"piece"}
+        int piece_id = (int) piece_val
+        if (piece_id > 0) [=
+            piece_for_id(piece_id);
+        =] else [=
+            piece_table{piece_val};
+        =]
+    =]
+
+
 =]
