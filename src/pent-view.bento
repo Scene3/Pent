@@ -14,59 +14,6 @@ site pent [=
 
     int view_mode(int mode) = mode 
 
-    /---- session state ----/
-
-    piece last_viewed_piece(piece p) = p
-    
-    /---- the view of views ----/
-    
-    view [=
-
-        dynamic response piece(params{}),(pent.piece pp) [=
-            log("view piece params: " + params);
-            with (pp) [=
-                log("   ...pp.id: " + pp.id);
-            =] else [= 
-                log("   ...id: " + piece_id);
-            =] 
-
-            int piece_id = (int) params{"id"}
-            pent.piece param_piece = (piece_id ? piece_for_id(piece_id) : piece_table{params{"name"}}) 
-
-            with (pp) [=
-                log("   ...passed piece " + pp.name);
-                eval(last_viewed_piece(: pp :));
-            =] else if (param_piece) [=
-                log("   ...found piece " + param_piece.name);
-                eval(last_viewed_piece(: param_piece :));
-            =] else if (!last_viewed_piece) [=
-                eval(last_viewed_piece(: utah :));
-            =]
-             piece_serializer(last_viewed_piece);
-        =]
-        
-        dynamic response game(params{}) [=
-            board_view;
-        =]
-    =]
-
-
-    base_page(*) show_page(params{}) [=
-        boolean needs_login = false
-        
-        sub;
-    =]
-
-
-    show_page(*) show(params{}) [=
-    
-        show_page(*) piece(params{}) [=
-            int piece_id = (int) params{"id"}
-            pent.piece param_piece = (piece_id ? piece_for_id(piece_id) : piece_table{params{"name"}}) 
-            log("showing " + param_piece.name);
-            piece_view(param_piece);
-        =]
-    =]
 
     /---- piece attributes ----/
     
@@ -204,7 +151,6 @@ site pent [=
     =]
 
     dynamic pent_view piece_view(piece p) [=
-        view.piece(p);
     =]
 
     /---- serializers ----/

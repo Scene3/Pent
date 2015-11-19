@@ -45,13 +45,19 @@ site pent [=
         
         dynamic response view_piece(params{}) [=
             piece_param = params{"piece"}
-            piece requested_piece = piece_table{piece_param}) 
+            piece requested_piece = piece_table{piece_param}
            
+            log("  ...requested_piece: " + requested_piece.name);
             piece_serializer(requested_piece);
         =]
         
         dynamic response view_position(params{}) [=
-        
+            piece_param = params{"piece"}
+            piece requested_piece = piece_table{piece_param}
+            int n = (int) params{"position"}
+            pent_position pos = requested_piece.all_positions[n]
+            
+            pos;
         =]
         
         
