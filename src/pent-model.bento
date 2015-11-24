@@ -182,7 +182,31 @@ site pent [=
         =]
     =]
 
-    piece[12] pieces = [
+    /---- serializer ----/
+    
+    dynamic serializable(str), piece piece_serializer(str), (piece p) [=
+        keep: int id        = p.id
+        keep: pent_position[] all_positions = p.all_positions
+        keep: name          = p.name
+        keep: classic_name  = p.classic_name
+        keep: int value     = p.value
+        keep: int rotations = p.rotations
+        keep: int chirality = p.chirality
+        keep: int width     = p.width
+        keep: int height    = p.height
+        keep: pent_position[] protos = p.protos
+
+        with (p) [=
+            serialize;
+        =] else [=
+            this;
+        =]
+    =]
+    
+
+    /** the twelve pentomino pieces **/
+
+    global piece[12] pieces = [
         utah,
         faucet,
         long_L,
@@ -197,6 +221,8 @@ site pent [=
         plus
     ]
     
+    piece{} piece_table = { for piece p in pieces [= p.id: p, p.name: p =] }
+
     static int UTAH_ID = 1
     static int FAUCET_ID = 2
     static int LONG_L_ID = 3
@@ -209,12 +235,10 @@ site pent [=
     static int ZIGZAG_ID = 10
     static int BAR_ID = 11
     static int PLUS_ID = 12
-    
-    
-    piece{} piece_table = { for piece p in pieces [= p.id: p, p.name: p =] }
+
     
     global piece utah [=
-        int id = 1
+        int id = UTAH_ID
         name = "Utah"
         classic_name = "P"
         int value = 10
@@ -236,7 +260,7 @@ site pent [=
     =]
     
     global piece faucet [=
-        int id = 2
+        int id = FAUCET_ID
         name = "Faucet"
         classic_name = "F"
         int value = 9
@@ -258,7 +282,7 @@ site pent [=
     =]
         
     global piece long_L [=
-        int id = 3
+        int id = LONG_L_ID
         name = "Long L"
         classic_name = "L"
         int value = 8
@@ -280,7 +304,7 @@ site pent [=
     =]
         
     global piece snake [=
-        int id = 4
+        int id = SNAKE_ID
         name = "Snake"
         classic_name = "N"
         int value = 8
@@ -302,7 +326,7 @@ site pent [=
     =]
        
     global piece pipe [=
-        int id = 5
+        int id = PIPE_ID
         name = "Pipe"
         classic_name = "Y"
         int value = 8
@@ -325,7 +349,7 @@ site pent [=
        
     
     global piece C_piece [=
-        int id = 6
+        int id = C_PIECE_ID
         name = "C"
         classic_name = "U"
         int value = 5
@@ -343,7 +367,7 @@ site pent [=
         
 
     global piece square_L [=
-        int id = 7
+        int id = SQUARE_L_ID
         name = "Square L"
         classic_name = "V"
         int value = 4
@@ -360,7 +384,7 @@ site pent [=
     =]        
 
     global piece T_piece [=
-        int id = 8
+        int id = T_PIECE_ID
         name = "T"
         classic_name = "T"
         int value = 4
@@ -377,7 +401,7 @@ site pent [=
     =]
         
     global piece stairs [=
-        int id = 9
+        int id = STAIRS_ID
         name = "Stairs"
         classic_name = "W"
         int value = 4
@@ -394,7 +418,7 @@ site pent [=
     =]
         
     global piece zigzag [=
-        int id = 10
+        int id = ZIGZAG_ID
         name = "Zigzag"
         classic_name = "Z"
         int value = 4
@@ -412,7 +436,7 @@ site pent [=
     =]
       
     global piece bar [=
-        int id = 11
+        int id = BAR_ID
         name = "Bar"
         classic_name = "I"
         int value = 2
@@ -427,7 +451,7 @@ site pent [=
     =]
         
     global piece plus [=
-        int id = 12
+        int id = PLUS_ID
         name = "Plus"
         classic_name = "X"
         int value = 1
