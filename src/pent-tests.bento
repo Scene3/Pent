@@ -926,6 +926,19 @@ emptyclass, pent_board p2c [=
         "/";
         pg.phase;
     =]    
+
+    cmc [=
+        pent_position horizontal_half_mask = [ #FF, #FF, #FF, #FF, 0, 0, 0, 0 ]
+        // partial cells to mask
+        pent_board horizontal_half_cells_board [=
+            keep: int[] cells = [ for int i from 0 to 32 [= (12 - (i % 12)) =],
+                                  for int i from 0 to 32 [= 0 =] ]
+        =]
+
+        horizontal_half_mask;
+        br;
+        horizontal_half_cells_board.mask;
+    =]
     
     
 =]
