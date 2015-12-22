@@ -47,7 +47,7 @@ site pent [=
             piece_param = params{"piece"}
             piece requested_piece = piece_table{piece_param}
            
-            log("  ...requested_piece: " + requested_piece.name);
+            log("  ...requested piece: " + requested_piece.name);
             piece_serializer(requested_piece);
         =]
         
@@ -57,6 +57,7 @@ site pent [=
             int n = (int) params{"position"}
             pent_position pos = requested_piece.all_positions[n]
             
+            log("  ...requested position: " + n + " for piece: " + requested_piece.name);
             pos;
         =]
         
