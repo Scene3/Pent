@@ -940,5 +940,18 @@ emptyclass, pent_board p2c [=
         horizontal_half_cells_board.mask;
     =]
     
-    
+    pgpg [=
+        this pent_game [/]
+        eval(pent_game);
+        pent_game.set_player("Al Pha", "a", true);
+        pent_game.set_player("B Eta", "b", false);
+        pent_game.set_a_picks_first(true);
+
+        for int id from 1 to 12 by 2 [=
+            pent_game.add_piece_by_id(id, true);
+            pent_game.add_piece_by_id(id + 1, false);
+        =]
+           
+        pent_game.is_available(pent_game.team_B[0]);
+    =]
 =]
