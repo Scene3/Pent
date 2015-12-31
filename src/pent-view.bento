@@ -150,7 +150,11 @@ site pent [=
         [| </table> |]
     =]
 
-    dynamic pent_view piece_view(piece p) [=
+    dynamic pent_view piece_view(piece p), (piece p, int pos_index) [=
+        pent_position pos = p.all_positions[pos_index]
+        
+        
+        
     =]
 
 =]
