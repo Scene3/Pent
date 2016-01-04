@@ -57,7 +57,7 @@ site pent [=
         current_game.set_player("Player B", "b", false);
         current_game.set_a_picks_first(true);
 
-        view_mode(TEXT_MODE);
+        view_mode(STANDARD_MODE);
     =]
 
     
@@ -376,6 +376,19 @@ site pent [=
         [| <h3>log</h3><pre> |]
         include_file(LOG_FILE);
         [| </pre> |]
+    =]
+    
+    base_page show_piece(params{}) [=
+        boolean needs_login = false
+        boolean needs_admin = false
+    
+        piece_param = params{"piece"}
+        piece requested_piece = piece_table{piece_param}
+        int pos = (int) params{"position"}
+            
+        log("  ...showing position: " + pos + " for piece: " + requested_piece.name);
+    
+        piece_view(requested_piece, pos);
     =]
 
 

@@ -45,13 +45,21 @@ site pent [=
         }    
 
         .pent_tile {
-            border-style: inset;
             border-width: 0.125rem;
             width: 1.25rem;
             height: 1.25rem;
             padding: 0.5rem;
             color: #777777;
-            background-color: #000000;
+            background-color: #070707;
+        }
+ 
+        .empty_cell {
+            border-style: inset;
+            border-color: #444444;
+        }
+
+        .filled_cell {
+            border-style: outset;
         }
         
         title_bar {
@@ -67,12 +75,12 @@ site pent [=
 
     /---- view components ----/
 
-    dynamic pent_tile(int value) [=  
-        [| <div class="pent_tile" /]
+    dynamic pent_tile(int value), (int value, boolean top, boolean right, boolean bottom, boolean left) [=  
+        [| <div class="pent_tile [= (value ? "filled_cell" : "empty_cell"); =]" /]
 
         if (view_mode == STANDARD_MODE) [=
             if (value) [| 
-                style="background: [= color_for_piece(value); =]"
+                style="background-color: [= color_for_piece(value); =]; border-color: [= border_color_for_piece(value); =]"
             |]
         =]
 
@@ -89,18 +97,35 @@ site pent [=
         piece_color[id - 1];
     =]    
 
-    piece_color[12] = [ "#773333",
-                        "#337733",
-                        "#333377",
-                        "#444422",
-                        "#442244",
-                        "#224444",
-                        "#883333",
-                        "#338833",
-                        "#333388",
-                        "#555522",
-                        "#552255",
-                        "#225555" ]
+    dynamic border_color_for_piece(int id) [=
+        piece_border_color[id - 1];
+    =]    
+
+    piece_color[12] = [ "#DD4444",
+                        "#44DD44",
+                        "#4444DD",
+                        "#AAAA22",
+                        "#AA22AA",
+                        "#22AAAA",
+                        "#CC6611",
+                        "#11CC66",
+                        "#6611CC",
+                        "#66CC11",
+                        "#1166CC",
+                        "#CC1166" ]
+
+    piece_border_color[12] = [ "#FF6666",
+                               "#66FF66",
+                               "#6666FF",
+                               "#CCCC44",
+                               "#CC44CC",
+                               "#44CCCC",
+                               "#EE8833",
+                               "#33EE88",
+                               "#8833EE",
+                               "#88EE33",
+                               "#3388EE",
+                               "#EE3388" ]
 
 
     dynamic component pent_view [=
@@ -152,9 +177,36 @@ site pent [=
 
     dynamic pent_view piece_view(piece p), (piece p, int pos_index) [=
         pent_position pos = p.all_positions[pos_index]
+
+        pent_position top_border = p.all_top_borders[pos_index]
+        pent_position right_border = p.all_right_borders[pos_index]
+        pent_position bottom_border = p.all_bottom_borders[pos_index]
+        pent_position left_border = p.all_left_borders[pos_index]
+
+        int piece_id = p.id
+
+        dynamic handle_cell(int cell_index) [=
+            pent_position mask = cell_mask[cell_index]
+            dynamic boolean is_hit(pent_position p) = pent_board.is_hit(p, mask)
         
+            if (is_hit(pos)) [=
+                pent_tile(piece_id, is_hit(top_border), is_hit(right_border), is_hit(bottom_border), is_hit(left_border));
+            =] else [=
+                pent_tile(0);
+            =]
+        =]        
         
-        
+        [| <table class="pent_board"> |]
+        for int row = 0 to 8 [=
+            [| <tr> |]
+            for int col = 0 to 8 [=
+                [| <td> |]
+                handle_cell(row * 8 + col);
+                [| </td> |]
+            =]
+            [| </tr> |]
+        =]
+        [| </table> |]
     =]
 
 =]

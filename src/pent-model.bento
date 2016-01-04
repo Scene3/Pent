@@ -94,6 +94,13 @@ site pent [=
                                                (mask & #02 ? 1 : 0), (mask & #01 ? 1 : 0) ]
     
     
+    dynamic pent_position shift_down_one(pent_position pp) =  [ 0, pp[0], pp[1], pp[2], pp[3], pp[4], pp[5], pp[6] ]
+    dynamic pent_position shift_right_one(pent_position pp) = [ (pp[0] >> 1), (pp[1] >> 1), (pp[2] >> 1), (pp[3] >> 1),
+                                                                (pp[4] >> 1), (pp[5] >> 1), (pp[6] >> 1), (pp[7] >> 1) ]
+    dynamic pent_position shift_up_one(pent_position pp) =    [ pp[1], pp[2], pp[3], pp[4], pp[5], pp[6], pp[7], 0 ]
+    dynamic pent_position shift_left_one(pent_position pp) =  [ (pp[0] << 1), (pp[1] << 1), (pp[2] << 1), (pp[3] << 1),
+                                                                (pp[4] << 1), (pp[5] << 1), (pp[6] << 1), (pp[7] << 1) ]
+
     dynamic pent_position shift_down(pent_position pp, int num_rows) = [ 
                                 pp[ (8 - num_rows)  & 7 ], pp[ (9 - num_rows)  & 7 ],
                                 pp[ (10 - num_rows) & 7 ], pp[ (11 - num_rows) & 7 ],
@@ -139,42 +146,103 @@ site pent [=
         dynamic int width_for_proto(int n) = (n & 1 ? height : width)
         dynamic int height_for_proto(int n) = (n & 1 ? width : height)
          
+        /** the all_positions array includes a mask for every possible 
+         *  placement of a piece, including all rotations and flips.
+         **/
         keep: pent_position[] all_positions [=
             log("computing all positions for " + owner.name + "...");
             compute_all_positions;
         =]
+
+        /** for border styling purposes we have mask arrays for each cell edge
+         *  (top, right, bottom, left) indicating that it is an interior 
+         *  border, i.e., the border is not an outside edge of the piece.
+         **/         
+        pent_position[] all_top_borders [=
+            compute_all_top_borders;
+        =]
+        pent_position[] all_right_borders [=
+            compute_all_right_borders;
+        =]
+        pent_position[] all_bottom_borders [=
+            compute_all_bottom_borders;
+        =]
+        pent_position[] all_left_borders [=
+            compute_all_left_borders;
+        =]
         
+        /** functions to compute the position and border arrays **/
+       
         dynamic pent_position[] compute_all_positions = [
 
-                    for pent_position p in protos and int ix from 0 [=
-                    
-                        // do the first row and the first column in 
-                        // each row separately to avoid a call
+            for pent_position p in protos and int ix from 0 [=
+            
+                // do the first row and the first column in 
+                // each row separately to avoid a call
 
-                        /---- row 0, col 0 ----/
-                        p, 
-                        
-                        /---- row 0, cols 1-7 ----/
-                        for int num_cols from 1 to (9 - width_for_proto(ix)) [=
-                            shift_right(p, num_cols),
-                        =],
+                /---- row 0, col 0 ----/
+                p, 
+                
+                /---- row 0, col 1 ----/
+                shift_right_one(p),
 
-                        /---- rows 1-7 ----/                                  
-                        for int num_rows from 1 to (9 - height_for_proto(ix)) [=
+                /---- row 0, cols 2-7 ----/
+                for int num_cols from 2 to (9 - width_for_proto(ix)) [=
+                    shift_right(p, num_cols),
+                =],
 
-                            /---- col 0 ----/
-                            shift_down(p, num_rows),
-                            
-                            /---- cols 1-7 ----/
-                            for int num_cols from 1 to (9 - width_for_proto(ix)) [=
-                                shift_down_right(p, num_cols, num_rows),
-                            =]
-                        =]
+                /---- rows 1-7 ----/                                  
+                for int num_rows from 1 to (9 - height_for_proto(ix)) [=
+
+                    /---- col 0 ----/
+                    shift_down(p, num_rows),
+                     
+                    /---- cols 1-7 ----/
+                    for int num_cols from 1 to (9 - width_for_proto(ix)) [=
+                        shift_down_right(p, num_cols, num_rows),
                     =]
-                ]
+                =]
+            =]
+        ]
 
+        dynamic pent_position[] compute_all_top_borders = [
+            // a cell has a top border if its mask bit is true and the
+            // corresponding mask bit in the row above is true
+            for pent_position p in all_positions [=
+                (p & shift_down_one(p)),
+            =]
+        ]
+
+        dynamic pent_position[] compute_all_right_borders = [
+            // a cell has a right border if its mask bit is true and the
+            // corresponding mask bit in the column to the right is true
+            for pent_position p in all_positions [=
+                (p & shift_left_one(p)),
+            =]
+        ]
+
+        dynamic pent_position[] compute_all_bottom_borders = [
+            // a cell has a bottom border if its mask bit is true and the
+            // corresponding mask bit in the row below is true
+            for pent_position p in all_positions [=
+                (p & shift_up_one(p)),
+            =]
+        ]
+
+        dynamic pent_position[] compute_all_left_borders = [
+            // a cell has a left border if its mask bit is true and the
+            // corresponding mask bit in the column to the left is true
+            for pent_position p in all_positions [=
+                (p & shift_right_one(p)),
+            =]
+        ]
+
+        /-- instantiate as object --/
         this;                                      
     =]
+
+
+
     
     dynamic piece piece_for_id(int id) [=
         if (id >= 1 && id <= 12) [=
@@ -221,7 +289,7 @@ site pent [=
         plus
     ]
     
-    piece{} piece_table = { for piece p in pieces [= p.id: p, p.name: p =] }
+    global piece{} piece_table = { for piece p in pieces [= p.id: p, p.name: p =] }
 
     static int UTAH_ID = 1
     static int FAUCET_ID = 2
@@ -257,6 +325,19 @@ site pent [=
                                    [ #C0, #E0,   0, 0, 0, 0, 0, 0 ],
                                    [ #C0, #C0, #80, 0, 0, 0, 0, 0 ],
                                    [ #E0, #60,   0, 0, 0, 0, 0, 0 ] ]
+
+        pent_position[] protos_top_border = [
+                                   [   0, #80, #C0, 0, 0, 0, 0, 0 ],
+                                   [   0, #C0,   0, 0, 0, 0, 0, 0 ],
+                                   [   0, #C0, #40, 0, 0, 0, 0, 0 ],
+                                   [   0, #60,   0, 0, 0, 0, 0, 0 ],
+
+                                   [   0, #40, #C0, 0, 0, 0, 0, 0 ],
+                                   [   0, #C0,   0, 0, 0, 0, 0, 0 ],
+                                   [   0, #C0, #80, 0, 0, 0, 0, 0 ],
+                                   [   0, #60,   0, 0, 0, 0, 0, 0 ] ]
+
+
     =]
     
     global piece faucet [=
@@ -411,10 +492,10 @@ site pent [=
         int width = 3
         int height = 3
         
-        pent_position[] protos = [ [ #80, #C0, #30, 0, 0, 0, 0, 0 ],
-                                   [ #30, #C0, #80, 0, 0, 0, 0, 0 ],
-                                   [ #C0, #30, #20, 0, 0, 0, 0, 0 ],
-                                   [ #20, #30, #C0, 0, 0, 0, 0, 0 ] ]
+        pent_position[] protos = [ [ #80, #C0, #60, 0, 0, 0, 0, 0 ],
+                                   [ #60, #C0, #80, 0, 0, 0, 0, 0 ],
+                                   [ #C0, #60, #20, 0, 0, 0, 0, 0 ],
+                                   [ #20, #60, #C0, 0, 0, 0, 0, 0 ] ]
     =]
         
     global piece zigzag [=
