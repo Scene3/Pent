@@ -70,10 +70,20 @@ site pent [=
     piece[] pent_team = []
     boolean[6] pent_team_played = [ false, false, false, false, false, false ]
     
+    
 
     /---- a game ----/
 
-    pent_game [=
+    pent_game(game_id) [=
+    
+        global int global_id_sequence(int n) = n
+        dynamic int next_id_sequence = global_id_sequence(: global_id_sequence + 1 :)
+        
+        dynamic generate_new_game_id = next_id_sequence
+
+        /** id for use in service requests **/
+        keep: id = (game_id ? game_id : generate_new_game_id)
+    
         /** the players **/
         keep: pent_player player_A(pent_player plyr) = plyr
         keep: pent_player player_B(pent_player plyr) = plyr
