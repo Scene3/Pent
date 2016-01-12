@@ -76,13 +76,11 @@ site pent [=
 
     pent_game(game_id) [=
     
-        global int global_id_sequence(int n) = n
-        dynamic int next_id_sequence = global_id_sequence(: global_id_sequence + 1 :)
+        global long global_id_sequence(int n) = n
+        dynamic long next_id_sequence = global_id_sequence(: global_id_sequence + 1 :)
         
-        dynamic generate_new_game_id = next_id_sequence
-
         /** id for use in service requests **/
-        keep: id = (game_id ? game_id : generate_new_game_id)
+        keep: id = (game_id ? game_id : generate_game_id(next_id_sequence))
     
         /** the players **/
         keep: pent_player player_A(pent_player plyr) = plyr
