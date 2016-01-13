@@ -10,12 +10,12 @@ site pent [=
     /--------- id generation ---------/
 
     dynamic generate_game_id(long seq) [=
-        rsec67(seq);    
+        rsec67(seq % 300763);   // 67 * 67 * 67    
     =]
     
     dynamic rsec67(long n) [=
 
-        long next_id = n
+        long id_val = n
         
         dynamic to67(long val) [=
             int val_mod = val % 67
@@ -46,8 +46,9 @@ site pent [=
         =]
 
         rev67(current_seconds);
-        if (next_id < 67) [= "*"; =]
-        forward67(next_id);
+        if (id_val < 67)        [= "**"; =]
+        else if (id_val < 4489) [= "*"; =]
+        forward67(id_val);
     =]
 
 
