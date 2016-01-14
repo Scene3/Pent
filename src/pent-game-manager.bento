@@ -7,6 +7,37 @@
 
 site pent [=
 
+    /--------- game persistence ---------/
+    
+    global pent_game{} game_repository = {}
+    
+    dynamic save_game(pent_game pg) [=
+        pg_id = pg.id
+        keep by pg_id in game_repository: pent_game persisted_game = pg
+        
+        eval(persisted_game);
+    =]
+
+    dynamic pent_game get_game(id) [=
+        game_repository{id};
+    =]
+
+
+    /--------- new game creation ---------/
+    
+    global long global_id_sequence(int n) = n
+    dynamic long next_id_sequence = global_id_sequence(: global_id_sequence + 1 :)
+
+    dynamic pent_game new_pent_game [=
+        new_game_id = generate_game_id(next_id_sequence)
+        pent_game new_game = pent_game(new_game_id);
+        
+        log("Creating new game, id = " + new_game_id);
+        save_game(new_game);
+        new_game;
+    =]
+
+
     /--------- id generation ---------/
 
     dynamic generate_game_id(long seq) [=
