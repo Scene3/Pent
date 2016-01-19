@@ -30,7 +30,7 @@ site pent [=
 
     dynamic pent_game new_pent_game [=
         new_game_id = generate_game_id(next_id_sequence)
-        pent_game new_game = pent_game(new_game_id);
+        pent_game(new_game_id) new_game [/]
         
         log("Creating new game, id = " + new_game_id);
         save_game(new_game);

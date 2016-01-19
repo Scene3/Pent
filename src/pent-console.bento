@@ -225,6 +225,10 @@ site pent [=
              =]
          =]
          
+         pent_player plyr_A = game.player_A
+         pent_player plyr_B = game.player_B
+         
+         log("console showing game " + game.id + " between " + plyr_A.name + " and " + plyr_B.name); 
          title_view(game);
          board_view(game);
   

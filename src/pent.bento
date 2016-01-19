@@ -52,11 +52,12 @@ site pent [=
     /-------- session initialization --------------/
 
     session_init [=
-        current_game(pent_game);
+        current_game(new_pent_game);
         current_game.set_player("Player A", "a", true);
         current_game.set_player("Player B", "b", false);
         current_game.set_a_picks_first(true);
 
+        log("init player A: " + current_game.player_A.name);
         view_mode(STANDARD_MODE);
     =]
 
@@ -305,9 +306,6 @@ site pent [=
         [| </div></div> |]
     =]
 
-    
-    
-
     play_page(*) sample(params{}) [=
         this_game = sample_game
     =]
@@ -427,4 +425,19 @@ site pent [=
     error_panel("Illegal action for phase: " + msg, ctx) illegal_action_for_phase_error(msg, ctx) [/]
     error_panel("Unable to add piece: " + msg, ctx) unable_to_add_piece(ctx) [/]
     error_panel("Unable to make move: " + msg, ctx) unable_to_add_play(ctx) [/]
+
+
+    /------- for troubleshooting ------/
+    
+    dynamic current_player_A [=
+        current_game.player_A.name;
+    =]
+
+    dynamic current_info [=
+        [| <table><tr><td>Game id:</td><td> |]
+        current_game.id;
+        [| </td></tr><tr><td>Phase:</td><td> |]
+        current_game.phase;
+        [| </td></tr></table> |]
+    =]
 =]
