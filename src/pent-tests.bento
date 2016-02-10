@@ -531,7 +531,7 @@ emptyclass, pent_board p2c [=
                 =] else if (!pent_game.player_B) [=
                     test_log("unable to choose player B");
                 =] else if (pent_game.player_B.name != "B Eta") [=
-                    test_log("player B has wrong name after being chosen");
+                    test_log("player B has wrong name after being chosen (" + pent_game.player_B.name + " instead of B Eta)");
                 =] else if (pent_game.player_B.id != "b") [=                    
                     test_log("player B has wrong id after being chosen");
                 =] else [=
@@ -963,5 +963,17 @@ emptyclass, pent_board p2c [=
             =]
             br;
         =]
+    =]
+    
+    plyrs [=
+        pent_game pg [/]
+            
+        eval(pg);
+        pg.set_player("Al Pha", "a", true);
+        pg.set_player("B Eta", "b", false);
+        "A: ";
+        pg.player_A.name;
+        "<br>B: ";
+        pg.player_B.name;
     =]
 =]

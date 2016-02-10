@@ -57,7 +57,7 @@ site pent [=
         current_game.set_player("Player B", "b", false);
         current_game.set_a_picks_first(true);
 
-        log("init player A: " + current_game.player_A.name);
+        log("session init player A: " + current_game.player_A.name);
         view_mode(STANDARD_MODE);
     =]
 
