@@ -168,7 +168,7 @@ site pent [=
         dynamic add_piece(piece p, boolean to_team_A) [=
             if (phase == CHOOSE_TEAM) [=
                 if (array.contains(team_A, p) || array.contains(team_B, p)) [=
-                    redirect unable_to_add_piece("piece already chosen");
+                    redirect unable_to_add_piece("piece already chosen", here);
                 =]
             
                 if (to_team_A && team_A.count < 6) [=

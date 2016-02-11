@@ -976,4 +976,31 @@ emptyclass, pent_board p2c [=
         "<br>B: ";
         pg.player_B.name;
     =]
+    
+    ct [=
+        this pent_game [/]
+
+        eval(pent_game);
+        pent_game.set_player("Al Pha", "a", true);
+        pent_game.set_player("B Eta", "b", false);
+        pent_game.set_a_picks_first(true);
+        pent_game.add_piece_by_id(1, true);
+        pent_game.add_piece_by_id(2, false);
+        pent_game.add_piece_by_id(3, true);
+        pent_game.add_piece_by_id(4, false);
+        pent_game.add_piece_by_id(5, true);
+        pent_game.add_piece_by_id(6, false);
+        pent_game.add_piece_by_id(7, true);
+        pent_game.add_piece_by_id(8, false);
+        pent_game.add_piece_by_id(9, true);
+        pent_game.add_piece_by_id(10, false);
+        pent_game.add_piece_by_id(11, true);
+        pent_game.add_piece_by_id(12, false);
+        "A: ";
+        pent_game.team_A.count;
+        "<br>B: ";
+        pent_game.team_B.count;
+    =]
+
+    
 =]

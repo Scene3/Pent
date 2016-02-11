@@ -423,8 +423,8 @@ site pent [=
     /-------- defined errors --------------------------/
     
     error_panel("Illegal action for phase: " + msg, ctx) illegal_action_for_phase_error(msg, ctx) [/]
-    error_panel("Unable to add piece: " + msg, ctx) unable_to_add_piece(ctx) [/]
-    error_panel("Unable to make move: " + msg, ctx) unable_to_add_play(ctx) [/]
+    error_panel("Unable to add piece: " + msg, ctx) unable_to_add_piece(msg, ctx) [/]
+    error_panel("Unable to make move: " + msg, ctx) unable_to_add_play(msg, ctx) [/]
 
 
     /------- for troubleshooting ------/
