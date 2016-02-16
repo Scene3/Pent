@@ -980,7 +980,7 @@ emptyclass, pent_board p2c [=
     ct [=
         this pent_game [/]
 
-        eval(pent_game);
+        eval(pent_game(generate_game_id(0)));
         pent_game.set_player("Al Pha", "a", true);
         pent_game.set_player("B Eta", "b", false);
         pent_game.set_a_picks_first(true);

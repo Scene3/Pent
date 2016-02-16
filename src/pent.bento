@@ -264,8 +264,6 @@ site pent [=
             
         =]
         
-        pent_game this_game = current_game
-        
         base_page this_page = owner
         page_name = owner.type
         boolean is_admin = authenticate_admin(this_username)
@@ -289,8 +287,10 @@ site pent [=
     base_page(*) play_page(params{}) [=
         boolean needs_login = false
         boolean needs_admin = false
-    
-        log("playing game " + this_game.id);
+
+        pent_game this_game = current_game
+        
+        log("playing game " + this_game.id + " with players " + this_game.player_A.name + " and " + this_game.player_B.name);
         pent_console(this_game, params);    
     =]
 
@@ -429,8 +429,13 @@ site pent [=
 
     /------- for troubleshooting ------/
     
-    dynamic current_player_A [=
+    dynamic current_players [=
+        pent_game this_game = current_game
+        
         current_game.player_A.name;
+        this_game.player_A.name;
+        ",";
+        this_game.player_B.name;
     =]
 
     dynamic current_info [=
@@ -438,6 +443,12 @@ site pent [=
         current_game.id;
         [| </td></tr><tr><td>Phase:</td><td> |]
         current_game.phase;
+        [| </td></tr><tr><td>Player A:</td><td> |]
+        current_game.player_A.name;
+        [| </td></tr><tr><td>Player B:</td><td> |]
+        current_game.player_B.name;
+        [| </td></tr><tr><td>Turn:</td><td> |]
+        current_game.turn;
         [| </td></tr></table> |]
     =]
 =]

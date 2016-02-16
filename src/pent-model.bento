@@ -289,7 +289,7 @@ site pent [=
         plus
     ]
     
-    global piece{} piece_table = { for piece p in pieces [= p.id: p, p.name: p =] }
+    global piece{} piece_table = { for piece p in pieces [= p.id: p, p.name: p, to_lower(p.name): p, to_upper(p.name): p =] }
 
     static int UTAH_ID = 1
     static int FAUCET_ID = 2
