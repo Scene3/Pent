@@ -118,7 +118,7 @@ site pent [=
 
     /** console base class **/
     component console [=
-
+        style [| width: 100%; |]
     =]
 
 
