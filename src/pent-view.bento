@@ -23,8 +23,7 @@ site pent [=
     pent_view_style [|
 
         .view {
-            padding: 1rem;
-            border: 0.125em solid #EEEEDD;
+            width: 100%;
         }
     
         .pent_board td {
@@ -53,6 +52,12 @@ site pent [=
             background-color: #070707;
         }
  
+        .console_view {
+            width: 100%;
+            background-color: #66CCCC;
+            box-sizing: border-box;
+        }
+
         .empty_cell {
             border-style: inset;
             border-color: #444444;
@@ -64,15 +69,29 @@ site pent [=
         
         .title_bar {
             width: 100%;
+            padding: 0.5rem;
             background-color: #339999;
-            color: #EFEF0F;
+            color: #110C0F;
             text-align: center;
             font-weight: bold;
-            font-size: 1.5rem;
-            font-family: Helvetica, Arial, Geneva, sans-serif;
+            font-size: .95rem;
+            font-family: "Arial Black","Arial Bold",sans-serif;
+            box-sizing: border-box;
         }
-    
+        
+        .pent_letter {
+            display: inline;
+            padding: 0 2em;
+        }
     |]
+
+
+    /---- the main component ----/
+
+    dynamic pent_view console_view(pent_game gm, params{}) [=
+        title_view(gm);
+        pent_console(gm, params);
+    =]
 
 
     /---- view components ----/
@@ -153,11 +172,22 @@ site pent [=
     
     dynamic pent_view title_view(pent_game game) [=
         component_class = "title_bar"
-
-        game.player_A.name;
-        " vs. ";
-        game.player_B.name;    
+        
+        component pent_letter [=
+            component_class = "pent_letter"
+        =]
+        
+        pent_letter pent_p [| P |]
+        pent_letter pent_e [| E |]
+        pent_letter pent_n [| N |]
+        pent_letter pent_t [| T |]
+        
+        pent_p;
+        pent_e;
+        pent_n;
+        pent_t;
     =]
+    
     
     dynamic pent_view board_view(pent_game game) [=
     
