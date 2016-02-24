@@ -283,7 +283,6 @@ site pent [=
             font-family: Helvetica, Arial, Geneva, sans-serif;
         }
         
-        
         .console {
             padding: 0.5rem 2rem;
             background-color: #66CCCC;
@@ -304,8 +303,6 @@ site pent [=
         .choose_players_panel radiobutton {
             width: 100%;
         }
-        
-    
     |]
 
 
