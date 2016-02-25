@@ -17,6 +17,8 @@ site pent [=
     init [=
         load_users("users", "admins");
         view_mode(STANDARD_MODE);
+        
+        three_init;
     =]
     
     load_users(ufilename, afilename) [=
@@ -59,6 +61,8 @@ site pent [=
 
         log("session init player A: " + current_game.player_A.name);
         view_mode(STANDARD_MODE);
+        
+        three_session_init;
     =]
 
     
@@ -292,6 +296,13 @@ site pent [=
         =]   
     
     =]
+
+    base_page splash_page [=
+        boolean needs_login = false
+        boolean needs_admin = false
+    
+        scene_viewer(splash_scene);
+    =]    
     
     base_page(*) play_page(params{}) [=
         boolean needs_login = false
@@ -398,15 +409,6 @@ site pent [=
     
         piece_view(requested_piece, pos);
     =]
-
-
-    /---- pseudofiles ----/
-
-    js [=
-        lib [=
-        =]
-    =]
-
 
     /-------- error handling --------------------------/
     

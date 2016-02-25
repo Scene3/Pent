@@ -64,7 +64,7 @@
 
     site_config pent_config [=
         name = "pent"
-        bentopath = "src"
+        bentopath = "src:bento-modules/three"
         filepath = "."
     =]    
 

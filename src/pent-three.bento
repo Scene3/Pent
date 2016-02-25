@@ -8,8 +8,139 @@
 site pent [=
 
     adopt three
+
+
+    /--- initialization ---/
     
-     /---- scene viewer ----/ 
+    three_init [=
+        
+    =]
+
+    three_session_init [=
+        current_theme(: default_theme :);
+    =]
+
+    /--- themes ---/
+    
+    pent_theme [=
+        this material [?]
+        int tile_width [?]
+        int tile_depth [?]    
+    =]
+
+    pent_theme default_theme [=
+        this material = blue_material
+        int tile_width = 10
+        int tile_depth = 4    
+    =]
+    
+    pent_theme current_theme(pent_theme theme) = theme
+
+    /--- materials ---/
+
+    phong_material blue_material [=
+        undecorated color = 0x3333CC
+    =]
+    
+    
+    /--- objects ---/
+    
+    composite_object piece_object(pent_theme pt, piece p) [=
+        pent_position proto = p.protos[0]
+        
+        pent_position[] row_masks = [ 
+            [ #FF, 0, 0, 0, 0, 0, 0, 0 ],
+            [ 0, #FF, 0, 0, 0, 0, 0, 0 ],
+            [ 0, 0, #FF, 0, 0, 0, 0, 0 ],
+            [ 0, 0, 0, #FF, 0, 0, 0, 0 ],
+            [ 0, 0, 0, 0, #FF, 0, 0, 0 ],
+            [ 0, 0, 0, 0, 0, #FF, 0, 0 ],
+            [ 0, 0, 0, 0, 0, 0, #FF, 0 ],
+            [ 0, 0, 0, 0, 0, 0, 0, #FF ]
+        ]
+            
+        pent_position[] col_masks = [ 
+            [ #80, #80, #80, #80, #80, #80, #80, #80 ],
+            [ #40, #40, #40, #40, #40, #40, #40, #40 ],
+            [ #20, #20, #20, #20, #20, #20, #20, #20 ],
+            [ #10, #10, #10, #10, #10, #10, #10, #10 ],
+            [ #08, #08, #08, #08, #08, #08, #08, #08 ],
+            [ #04, #04, #04, #04, #04, #04, #04, #04 ],
+            [ #02, #02, #02, #02, #02, #02, #02, #02 ],
+            [ #01, #01, #01, #01, #01, #01, #01, #01 ]
+        ]
+            
+
+        three_object[] objs = [ for int row from 0 to p.height [=
+                                    for int col from 0 to p.width [=
+                                        if (proto & row_masks[row] & col_masks[col]) [=
+                                            piece_tile(pt, col, row)
+                                        =]  
+                                    =]
+                                =]
+                              ]  
+    =]
+    
+    
+    mesh piece_tile(pent_theme pt, int col, int row) [=
+        geometry geo = box_geometry(pt.tile_width, pt.tile_width, pt.tile_depth)
+        material mat = pt.material
+        position pos = position((col - 1) * pt.tile_width, 2, (row - 1) * pt.tile_width)
+    =]
+    
+    mesh blue_cube [=
+        geometry geo = box_geometry(10, 10, 10)
+        material mat = blue_material
+        position pos = position(0, 2, 0)
+    =]
+
+    
+    /--- lights ---/
+
+    object_group light_group [=
+    
+        point_light(0xFF0000) bright_red_light [=
+            position pos = position(30, 13, 20)
+        =]
+    
+        point_light(0x00FF00) bright_green_light [=
+            position pos = position(-30, 13, 20)
+        =]
+    
+        point_light(0x5555FF) bright_blue_light [=
+            position pos = position(0, 50, 0)
+        =]
+    
+        point_light(0xAAAAAA) soft_white_light [=
+            position pos = position(0, 2, 40)
+        =]
+    =]
+
+    object_group set_of_pieces [=
+        piece_object(current_theme, utah) utah_piece [/]
+    
+        next_frame [|
+            utah_piece.rotation.x -= 0.005;
+            utah_piece.rotation.y += 0.005;
+            utah_piece.rotation.z -= 0.005;
+        |]
+    =]
+
+
+    scene splash_scene [=
+        three_object[] objs = [
+            set_of_pieces,
+            light_group
+        ]
+            
+        next_frame [=
+            set_of_pieces.next_frame;
+        =]
+    =]
+
+
+
+    /---- scene viewer ----/ 
 
     dynamic component scene_viewer(scene s) [=
         width = "100%"
@@ -49,10 +180,24 @@ site pent [=
         
         log("  >> instantiating scene_component with scene " + s.name);
         scene_component;
-    =]        
+    =]
 
-=]
+    /---- pseudofiles ----/
+
+    js [=
+        lib [=
+            three [=
+                js [=
+                    include_file("../../3p/lib/three.js");
+                =]
+            =]
+            stats [=
+                js [=
+                    include_file("../../3p/lib/stats.min.js");
+                =]
+            =]
+        =]
+    =]
     
-
 
 =]
