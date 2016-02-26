@@ -36,6 +36,21 @@ site pent [=
     
     pent_theme current_theme(pent_theme theme) = theme
 
+
+    /--- camera ---/
+    
+    dynamic perspective_camera pent_cam [=
+        position pos = position(0, 2, 50)
+        name = "pent_camera"
+
+        far(2000);    /--- 1.5 * backdrop.horizon); ---/
+        [|
+            [= name; =].target = new THREE.Vector3( 0, 2, 0 );
+        |]
+        sub;
+    =]
+
+
     /--- materials ---/
 
     phong_material blue_material [=
@@ -82,8 +97,9 @@ site pent [=
     =]
     
     
-    mesh piece_tile(pent_theme pt, int col, int row) [=
-        geometry geo = box_geometry(pt.tile_width, pt.tile_width, pt.tile_depth)
+    dynamic mesh piece_tile(pent_theme pt, int col, int row) [=
+        dynamic name = "tile_" + row + "_" + col         
+        geometry geo = box_geometry(pt.tile_width, pt.tile_depth, pt.tile_width)
         material mat = pt.material
         position pos = position((col - 1) * pt.tile_width, 2, (row - 1) * pt.tile_width)
     =]
@@ -132,7 +148,9 @@ site pent [=
             set_of_pieces,
             light_group
         ]
-            
+
+        camera cam = pent_cam
+                    
         next_frame [=
             set_of_pieces.next_frame;
         =]
