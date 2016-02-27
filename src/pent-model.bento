@@ -16,6 +16,14 @@ site pent [=
 
     byte[8] pent_position = []
     
+    /---- basic position tests ----/
+        
+    dynamic boolean is_empty(pent_position pos) = !(pos[0] | pos[1] | pos[2] | pos[3] | pos[4] | pos[5] | pos[6] | pos[7]) 
+    dynamic boolean is_hit(pent_position pos1, pent_position pos2) = ((pos1[0] & pos2[0]) || (pos1[1] & pos2[1]) || (pos1[2] & pos2[2]) || (pos1[3] & pos2[3])
+                                                                   || (pos1[4] & pos2[4]) || (pos1[5] & pos2[5]) || (pos1[6] & pos2[6]) || (pos1[7] & pos2[7]))
+
+    /---- basic position masks ----/
+
     pent_position empty_board_mask = [ 0, 0, 0, 0, 0, 0, 0, 0 ]
     pent_position full_board_mask = [ #FF, #FF, #FF, #FF, #FF, #FF, #FF, #FF ] 
 
@@ -28,7 +36,10 @@ site pent [=
         [ 0,0,0,0,0,#80,0,0 ], [ 0,0,0,0,0,#40,0,0 ], [ 0,0,0,0,0,#20,0,0 ], [ 0,0,0,0,0,#10,0,0 ], [ 0,0,0,0,0,#08,0,0 ], [ 0,0,0,0,0,#04,0,0 ], [ 0,0,0,0,0,#02,0,0 ], [ 0,0,0,0,0,#01,0,0 ],
         [ 0,0,0,0,0,0,#80,0 ], [ 0,0,0,0,0,0,#40,0 ], [ 0,0,0,0,0,0,#20,0 ], [ 0,0,0,0,0,0,#10,0 ], [ 0,0,0,0,0,0,#08,0 ], [ 0,0,0,0,0,0,#04,0 ], [ 0,0,0,0,0,0,#02,0 ], [ 0,0,0,0,0,0,#01,0 ], 
         [ 0,0,0,0,0,0,0,#80 ], [ 0,0,0,0,0,0,0,#40 ], [ 0,0,0,0,0,0,0,#20 ], [ 0,0,0,0,0,0,0,#10 ], [ 0,0,0,0,0,0,0,#08 ], [ 0,0,0,0,0,0,0,#04 ], [ 0,0,0,0,0,0,0,#02 ], [ 0,0,0,0,0,0,0,#01 ]
-    ]         
+    ]
+         
+    
+    /---- the game board ----/    
 
     pent_board(play[] play_list) [=
 
@@ -43,10 +54,6 @@ site pent [=
 
 
         /---- testers -----/
-        
-        dynamic boolean is_empty(pent_position pos) = !(pos[0] | pos[1] | pos[2] | pos[3] | pos[4] | pos[5] | pos[6] | pos[7]) 
-        dynamic boolean is_hit(pent_position pos1, pent_position pos2) = ((pos1[0] & pos2[0]) || (pos1[1] & pos2[1]) || (pos1[2] & pos2[2]) || (pos1[3] & pos2[3])
-                                                                       || (pos1[4] & pos2[4]) || (pos1[5] & pos2[5]) || (pos1[6] & pos2[6]) || (pos1[7] & pos2[7]))
         
         dynamic boolean is_open(pent_position pos) = is_empty(pos & mask)
 

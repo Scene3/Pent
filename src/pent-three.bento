@@ -37,15 +37,21 @@ site pent [=
     pent_theme current_theme(pent_theme theme) = theme
 
 
+    /--- positions ---/
+    
+
+
+
     /--- camera ---/
     
     dynamic perspective_camera pent_cam [=
         position pos = position(0, 2, 50)
         name = "pent_camera"
+        position target = position(0, 2, 0)
 
         far(2000);    /--- 1.5 * backdrop.horizon); ---/
         [|
-            [= name; =].target = new THREE.Vector3( 0, 2, 0 );
+            [= name; =].target = [= target; =]
         |]
         sub;
     =]
@@ -85,11 +91,12 @@ site pent [=
             [ #01, #01, #01, #01, #01, #01, #01, #01 ]
         ]
             
+        dynamic boolean has_tile(pent_position piece_proto, int col, int row) = !is_empty(piece_proto & row_masks[row] & col_masks[col]) 
 
-        three_object[] objs = [ for int row from 0 to p.height [=
-                                    for int col from 0 to p.width [=
-                                        if (proto & row_masks[row] & col_masks[col]) [=
-                                            piece_tile(pt, col, row)
+        three_object[] objs = [ for int r from 0 to p.height [=
+                                    for int c from 0 to p.width [=
+                                        if (has_tile(proto, c, r)) [=
+                                            piece_tile(pt, c, r)
                                         =]  
                                     =]
                                 =]
@@ -104,31 +111,29 @@ site pent [=
         position pos = position((col - 1) * pt.tile_width, 2, (row - 1) * pt.tile_width)
     =]
     
-    mesh blue_cube [=
-        geometry geo = box_geometry(10, 10, 10)
-        material mat = blue_material
-        position pos = position(0, 2, 0)
-    =]
-
-    
+     
     /--- lights ---/
 
     object_group light_group [=
     
-        point_light(0xFF0000) bright_red_light [=
-            position pos = position(30, 13, 20)
+        point_light(0xFF5555) bright_red_light [=
+            position pos = position(20, 23, 20)
         =]
     
-        point_light(0x00FF00) bright_green_light [=
-            position pos = position(-30, 13, 20)
+        point_light(0x55FF55) bright_green_light [=
+            position pos = position(-20, 23, 20)
         =]
     
         point_light(0x5555FF) bright_blue_light [=
-            position pos = position(0, 50, 0)
+            position pos = position(0, 33, -10)
         =]
     
-        point_light(0xAAAAAA) soft_white_light [=
-            position pos = position(0, 2, 40)
+        point_light(0xEEEE55) bright_yellow_light [=
+            position pos = position(0, 33, 10)
+        =]
+    
+        ambient_light(0x111111) soft_white_light [=
+            position pos = position(0, 100, 0)
         =]
     =]
 
@@ -215,6 +220,24 @@ site pent [=
                 =]
             =]
         =]
+    =]
+    
+    /---- dev tools ----/
+    
+    position mutable_position(position pos) [=
+        keep: double x(xx) = xx
+        keep: double y(yy) = yy
+        keep: double z(zz) = zz
+    
+        dynamic set_x(xval) = eval(x(: xval :))
+        dynamic set_y(yval) = eval(y(: yval :))
+        dynamic set_z(yval) = eval(z(: zval :))
+        
+        set_x(pos.x);
+        set_y(pos.y);
+        set_z(pos.z);
+        
+        this;
     =]
     
 
