@@ -13,7 +13,7 @@ site pent [=
     /--- initialization ---/
     
     three_init [=
-        
+        three.set_logging_level(three.LOG_INFO);
     =]
 
     three_session_init [=
@@ -24,14 +24,17 @@ site pent [=
     
     pent_theme [=
         this material [?]
-        int tile_width [?]
-        int tile_depth [?]    
+        float tile_width [?]
+        float tile_depth [?]
+        float solid_tile_width = 0.975 * tile_width
+        float solid_tile_height = 0.975 * tile_width   
+        float solid_tile_depth = 0.975 * tile_depth    
     =]
 
     pent_theme default_theme [=
         this material = blue_material
-        int tile_width = 10
-        int tile_depth = 4    
+        float tile_width = 10.0
+        float tile_depth = 4.0    
     =]
     
     pent_theme current_theme(pent_theme theme) = theme
@@ -45,9 +48,9 @@ site pent [=
     /--- camera ---/
     
     dynamic perspective_camera pent_cam [=
-        position pos = position(0, 2, 50)
+        position pos = position(0, 0, 300)
         name = "pent_camera"
-        position target = position(0, 2, 0)
+        position target = position(0, 0, 0)
 
         far(2000);    /--- 1.5 * backdrop.horizon); ---/
         [|
@@ -66,8 +69,10 @@ site pent [=
     
     /--- objects ---/
     
-    composite_object piece_object(pent_theme pt, piece p) [=
+    composite_object piece_3obj(pent_theme pt, piece p) [=
         pent_position proto = p.protos[0]
+        int num_cols = p.width
+        int num_rows = p.height
         
         pent_position[] row_masks = [ 
             [ #FF, 0, 0, 0, 0, 0, 0, 0 ],
@@ -93,22 +98,30 @@ site pent [=
             
         dynamic boolean has_tile(pent_position piece_proto, int col, int row) = !is_empty(piece_proto & row_masks[row] & col_masks[col]) 
 
-        three_object[] objs = [ for int r from 0 to p.height [=
-                                    for int c from 0 to p.width [=
+        three_object[] objs = [ for int r from 0 to num_rows [=
+                                    for int c from 0 to num_cols [=
                                         if (has_tile(proto, c, r)) [=
-                                            piece_tile(pt, c, r)
+                                            piece_tile(pt, c, r, num_cols, num_rows)
                                         =]  
                                     =]
                                 =]
-                              ]  
+                              ]
+         
+        newline;  
     =]
     
     
-    dynamic mesh piece_tile(pent_theme pt, int col, int row) [=
-        dynamic name = "tile_" + row + "_" + col         
-        geometry geo = box_geometry(pt.tile_width, pt.tile_depth, pt.tile_width)
+    dynamic mesh piece_tile(pent_theme pt, int col, int row, int num_cols, int num_rows) [=
+        name = "tile_" + row + "_" + col
+        float x = (col - (float) num_cols / 2) * pt.tile_width
+        float y = (row - (float) num_rows / 2) * pt.tile_width
+        
+        geometry geo = box_geometry(pt.tile_width, pt.tile_width, pt.tile_depth)
         material mat = pt.material
-        position pos = position((col - 1) * pt.tile_width, 2, (row - 1) * pt.tile_width)
+        position pos = position((col - (float) num_cols / 2) * pt.tile_width, (row - (float) num_rows / 2) * pt.tile_width, 0)
+        
+        log(" -- " + name + " x " + x + " y " + y);
+        log("  --- solid_tile_width " + pt.solid_tile_width); 
     =]
     
      
@@ -117,19 +130,19 @@ site pent [=
     object_group light_group [=
     
         point_light(0xFF5555) bright_red_light [=
-            position pos = position(20, 23, 20)
+            position pos = position(120, 123, 120)
         =]
     
         point_light(0x55FF55) bright_green_light [=
-            position pos = position(-20, 23, 20)
+            position pos = position(-120, 123, 120)
         =]
     
         point_light(0x5555FF) bright_blue_light [=
-            position pos = position(0, 33, -10)
+            position pos = position(0, 233, -50)
         =]
     
         point_light(0xEEEE55) bright_yellow_light [=
-            position pos = position(0, 33, 10)
+            position pos = position(0, 233, 200)
         =]
     
         ambient_light(0x111111) soft_white_light [=
@@ -138,13 +151,57 @@ site pent [=
     =]
 
     object_group set_of_pieces [=
-        piece_object(current_theme, utah) utah_piece [/]
     
-        next_frame [|
-            utah_piece.rotation.x -= 0.005;
-            utah_piece.rotation.y += 0.005;
-            utah_piece.rotation.z -= 0.005;
-        |]
+        // The pieces.  These get automatically added to the 
+        // objs array by object_group by dint of being
+        // three_object subclasses.
+          
+        piece_3obj(current_theme, utah) utah_3obj [/]
+        piece_3obj(current_theme, faucet) faucet_3obj [/]
+        piece_3obj(current_theme, long_L) long_L_3obj [/]
+        piece_3obj(current_theme, snake) snake_3obj [/]
+        piece_3obj(current_theme, pipe) pipe_3obj [/]
+        piece_3obj(current_theme, C_piece) C_piece_3obj [/]
+        piece_3obj(current_theme, square_L) square_L_3obj [/]
+        piece_3obj(current_theme, T_piece) T_piece_3obj [/]
+        piece_3obj(current_theme, stairs) stairs_3obj [/]
+        piece_3obj(current_theme, zigzag) zigzag_3obj [/]
+        piece_3obj(current_theme, bar) bar_3obj [/]
+        piece_3obj(current_theme, plus) plus_3obj [/]
+
+        next_frame [=
+            vector3(0, 1, 0) up_vector [/]
+            
+            for three_object obj in objs [=
+                obj.rotate_on_axis(up_vector, 0.02);
+            =]
+        =]
+        
+        int num_cols = 3
+        int num_rows = 4
+        float col_width = current_theme.tile_width * 5
+        float row_height = current_theme.tile_width * 5
+        float total_width = num_cols * col_width
+        float total_height = num_rows * row_height
+
+        dynamic float x_for_col(int col) = (-total_width / 2) + (col * col_width)
+        dynamic float y_for_row(int row) = (total_height / 2) - (row * row_height)
+        
+        dynamic put_in_slot(three_object obj, int col, int row) [=
+            newline;
+            obj.orient(RADIANS_180_DEG, 0, 0);
+            sp;
+            obj.locate(x_for_col(col), y_for_row(row), 0);
+        =]
+
+        /---- construction ----/
+        
+        for int c from 0 to num_cols [=
+            for int r from 0 to num_rows [=
+                put_in_slot(objs[c * num_rows + r], c, r);
+            =]
+        =]
+
     =]
 
 
