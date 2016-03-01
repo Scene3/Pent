@@ -23,12 +23,14 @@ site pent [=
     /--- themes ---/
     
     pent_theme [=
-        this material [?]
-        float tile_width [?]
-        float tile_depth [?]
-        float solid_tile_width = 0.975 * tile_width
-        float solid_tile_height = 0.975 * tile_width   
-        float solid_tile_depth = 0.975 * tile_depth    
+        keep: this material [?]
+        keep: float tile_width [?]
+        keep: float tile_depth [?]
+        keep: float solid_tile_width = 0.975 * tile_width
+        keep: float solid_tile_height = 0.975 * tile_width   
+        keep: float solid_tile_depth = 0.975 * tile_depth
+        
+        this;
     =]
 
     pent_theme default_theme [=
@@ -69,7 +71,7 @@ site pent [=
     
     /--- objects ---/
     
-    composite_object piece_3obj(pent_theme pt, piece p) [=
+    composite_object piece_3obj(piece p) [=
         pent_position proto = p.protos[0]
         int num_cols = p.width
         int num_rows = p.height
@@ -101,7 +103,7 @@ site pent [=
         three_object[] objs = [ for int r from 0 to num_rows [=
                                     for int c from 0 to num_cols [=
                                         if (has_tile(proto, c, r)) [=
-                                            piece_tile(pt, c, r, num_cols, num_rows)
+                                            piece_tile(c, r, num_cols, num_rows)
                                         =]  
                                     =]
                                 =]
@@ -111,12 +113,19 @@ site pent [=
     =]
     
     
-    dynamic mesh piece_tile(pent_theme pt, int col, int row, int num_cols, int num_rows) [=
+    dynamic mesh piece_tile(pent_theme theme, int col, int row, int num_cols, int num_rows),
+                           (int col, int row, int num_cols, int num_rows) [=
+                           
+        pent_theme pt = theme ? theme : current_theme                           
         name = "tile_" + row + "_" + col
         float x = (col - (float) num_cols / 2) * pt.tile_width
         float y = (row - (float) num_rows / 2) * pt.tile_width
+        float width = pt.tile_width
+        float height = pt.tile_width
+        float depth = pt.tile_depth
         
-        geometry geo = box_geometry(pt.tile_width, pt.tile_width, pt.tile_depth)
+        
+        geometry geo = box_geometry(width, height, depth)
         material mat = pt.material
         position pos = position((col - (float) num_cols / 2) * pt.tile_width, (row - (float) num_rows / 2) * pt.tile_width, 0)
         
@@ -156,18 +165,18 @@ site pent [=
         // objs array by object_group by dint of being
         // three_object subclasses.
           
-        piece_3obj(current_theme, utah) utah_3obj [/]
-        piece_3obj(current_theme, faucet) faucet_3obj [/]
-        piece_3obj(current_theme, long_L) long_L_3obj [/]
-        piece_3obj(current_theme, snake) snake_3obj [/]
-        piece_3obj(current_theme, pipe) pipe_3obj [/]
-        piece_3obj(current_theme, C_piece) C_piece_3obj [/]
-        piece_3obj(current_theme, square_L) square_L_3obj [/]
-        piece_3obj(current_theme, T_piece) T_piece_3obj [/]
-        piece_3obj(current_theme, stairs) stairs_3obj [/]
-        piece_3obj(current_theme, zigzag) zigzag_3obj [/]
-        piece_3obj(current_theme, bar) bar_3obj [/]
-        piece_3obj(current_theme, plus) plus_3obj [/]
+        piece_3obj(utah) utah_3obj [/]
+        piece_3obj(faucet) faucet_3obj [/]
+        piece_3obj(long_L) long_L_3obj [/]
+        piece_3obj(snake) snake_3obj [/]
+        piece_3obj(pipe) pipe_3obj [/]
+        piece_3obj(C_piece) C_piece_3obj [/]
+        piece_3obj(square_L) square_L_3obj [/]
+        piece_3obj(T_piece) T_piece_3obj [/]
+        piece_3obj(stairs) stairs_3obj [/]
+        piece_3obj(zigzag) zigzag_3obj [/]
+        piece_3obj(bar) bar_3obj [/]
+        piece_3obj(plus) plus_3obj [/]
 
         next_frame [=
             vector3(0, 1, 0) up_vector [/]
