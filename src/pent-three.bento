@@ -120,12 +120,12 @@ site pent [=
         name = "tile_" + row + "_" + col
         float x = (col - (float) num_cols / 2) * pt.tile_width
         float y = (row - (float) num_rows / 2) * pt.tile_width
-        float width = pt.tile_width
-        float height = pt.tile_width
-        float depth = pt.tile_depth
+        float box_width = pt.solid_tile_width
+        float box_height = pt.solid_tile_height
+        float box_depth = pt.tile_depth
         
         
-        geometry geo = box_geometry(width, height, depth)
+        geometry geo = box_geometry(box_width, box_height, box_depth)
         material mat = pt.material
         position pos = position((col - (float) num_cols / 2) * pt.tile_width, (row - (float) num_rows / 2) * pt.tile_width, 0)
         
