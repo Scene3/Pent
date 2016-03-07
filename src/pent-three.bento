@@ -113,10 +113,9 @@ site pent [=
     =]
     
     
-    dynamic mesh piece_tile(pent_theme theme, int col, int row, int num_cols, int num_rows),
-                           (int col, int row, int num_cols, int num_rows) [=
+    dynamic mesh piece_tile(int col, int row, int num_cols, int num_rows) [=
                            
-        pent_theme pt = theme ? theme : current_theme                           
+        pent_theme pt = current_theme                           
         name = "tile_" + row + "_" + col
         float x = (col - (float) num_cols / 2) * pt.tile_width
         float y = (row - (float) num_rows / 2) * pt.tile_width
