@@ -109,6 +109,7 @@ site pent [=
                                 =]
                               ]
          
+
         newline;  
     =]
     
@@ -122,14 +123,12 @@ site pent [=
         float box_width = pt.solid_tile_width
         float box_height = pt.solid_tile_height
         float box_depth = pt.tile_depth
-        
+       
         
         geometry geo = box_geometry(box_width, box_height, box_depth)
         material mat = pt.material
         position pos = position((col - (float) num_cols / 2) * pt.tile_width, (row - (float) num_rows / 2) * pt.tile_width, 0)
-        
-        log(" -- " + name + " x " + x + " y " + y);
-        log("  --- solid_tile_width " + pt.solid_tile_width); 
+
     =]
     
      
@@ -177,14 +176,7 @@ site pent [=
         piece_3obj(bar) bar_3obj [/]
         piece_3obj(plus) plus_3obj [/]
 
-        next_frame [=
-            vector3(0, 1, 0) up_vector [/]
-            
-            for three_object obj in objs [=
-                obj.rotate_on_axis(up_vector, 0.02);
-            =]
-        =]
-        
+       
         int num_cols = 3
         int num_rows = 4
         float col_width = current_theme.tile_width * 5
@@ -210,6 +202,16 @@ site pent [=
             =]
         =]
 
+        next_frame [=
+            vector3(0, 1, 0) up_vector [/]
+            dynamic int dir(int col, int row) = (((col + row) & 1) * 2) - 1
+                                                  
+            for int c from 0 to num_cols [=
+                for int r from 0 to num_rows [=
+                    objs[c * num_rows + r].rotate_on_axis(up_vector, 0.01 * dir(c, r));
+                =]
+            =]
+        =]
     =]
 
 
