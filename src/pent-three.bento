@@ -18,6 +18,7 @@ site pent [=
 
     three_session_init [=
         current_theme(: default_theme :);
+        show_stats(false);
     =]
 
     /--- themes ---/
@@ -40,6 +41,8 @@ site pent [=
     =]
     
     pent_theme current_theme(pent_theme theme) = theme
+    
+    boolean show_stats(boolean flag) = flag
 
 
     /--- positions ---/
@@ -247,18 +250,22 @@ site pent [=
 
             include_scripts[] = [ "/js/lib/three.js", "/js/lib/stats.js" ]
     
-            sub_script [|
-                stats = new Stats();
-                stats.domElement.style.position = 'absolute';
-                stats.domElement.style.top = '0px';
-                stats.domElement.style.left = (canvasWidth - 80) + 'px';
-                [= canvas_container; =].appendChild(stats.domElement);
-            |]
+            sub_script [=
+                if (show_stats) [|
+                    stats = new Stats();
+                    stats.domElement.style.position = 'absolute';
+                    stats.domElement.style.top = '0px';
+                    stats.domElement.style.left = (canvasWidth - 80) + 'px';
+                    [= canvas_container; =].appendChild(stats.domElement);
+                |]
+            =]
 
             js_function post_render [=
-                body [|
-                    stats.update();
-               |]
+                body [=
+                    if (show_stats) [|
+                        stats.update();
+                    |]
+                =]
             =]
             log("    >>> in scene_component with scene " + s.name);
             
@@ -279,6 +286,7 @@ site pent [=
             three [=
                 js [=
                     include_file("../../3p/lib/three.js");
+                    include_file("../../3p/lib/controls/DragControls.js");
                 =]
             =]
             stats [=
