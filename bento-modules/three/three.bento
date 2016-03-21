@@ -1,4 +1,513 @@
 /---------------------
+ -- three_geometries.bento
+ --
+ -- Geometries for three.bento
+ --
+ -- Copyright (c) 2012 by Michael St. Hippolyte
+ --
+ --/
+ 
+site three [=
+
+
+    /-- camera base class --/
+    
+    three_object camera [=
+        three_class = "Camera"
+        
+        keep: name = owner.type
+        keep: position pos = position(0, 0, 0)
+    =]
+    
+    dynamic camera perspective_camera [=
+        three_class = "PerspectiveCamera"
+
+        field(field_of_view) fov(field_of_view) [/]
+        field(aspect_ratio)  aspect(aspect_ratio) [/]
+        field(near_frame)    near(near_frame) [/]
+        field(far_frame)     far(far_frame) [/]
+
+        method update_projection_matrix [=
+            name = "updateProjectionMatrix"
+        =]
+
+    =]
+    
+    camera orthographic_camera [=
+        three_class = "OrthographicCamera"
+    
+    =]
+=]
+/---------------------
+ -- three.bento
+ --
+ -- Component for rendering three.js content
+ --
+ -- Copyright (c) 2013 by Michael St. Hippolyte
+ --
+ --/
+ 
+site three [=
+
+     
+    /--------- THREE_COMPONENT ----------/
+
+    /** Component to display and control a three.js scene.
+     *
+     *  A three_component is a DOM element that corresponds to a rendering 
+     *  canvas.  
+     *
+     *  There are two scenarios in which this component is called: during
+     *  page construction and via ajax.  These correspond to the two 
+     *  parameter lists.  When passed a scene, the component constructs it
+     *  and keeps it.  When passed a param table, the component processes 
+     *  the params and responds with any changes to the kept scene.  Changes 
+     *  may include modification of objects in the scene, addition or removal 
+     *  of objects, or wholesale replacement of the scene.
+     *
+     **/ 
+   
+    component three_component(scene new_scene),(params{}) [=
+    
+        /--------------------------------/
+        /---- overridable properties ----/
+        
+        /---- required override: subclasses must define this ----/
+        canvas_id [?]
+
+        id = canvas_container
+
+        /---- optional overrides ----/
+  
+        dynamic default_handler_name(event) = canvas_name + "_" + event
+        dynamic handle(event) [=
+            default_handler_name(event);
+            [| (); |]            
+        =] 
+
+        dynamic recalc_canvas_size_logic [=
+            if (size_to_window) [|
+                var x = 0;
+                var y = 0;
+                var width = 0;
+                var height = 0;
+                for (var element = [= canvas_container; =]; element != null; element = element.offsetParent) {
+                   x += element.offsetLeft;
+                   y += element.offsetTop;
+                   if (element.offsetParent == null) {
+                       width = element.offsetWidth;
+                       height = element.offsetHeight;
+                   }
+                }
+                canvasWidth = width - x;
+                canvasHeight = height - y;
+            |] else [|
+                canvasWidth = [= canvas_container; =].clientWidth;
+                canvasHeight = [= canvas_container; =].clientHeight;
+            |]
+        =]
+
+        sub_script [/]
+        sub_funcs [/]
+
+        /---- the three_component is the rendering canvas. ----/
+        canvas_name = canvas_id
+
+        /---- subclasses may override these fields to define a fixed size 
+         ---- canvas; otherwise the canvas is set to the width and height 
+         ---- of the component containing it.
+         ----/
+        canvas_width [| canvasWidth |]
+        canvas_height [| canvasHeight |]
+        boolean size_to_window = true
+
+        /---- names of various canvas-related things ----/
+        canvas_container = canvas_id + "_container"
+        canvas_renderer = canvas_id + "_renderer"
+        canvas_scene = canvas_id + "_scene"
+        canvas_camera = canvas_id + "_camera"
+
+        /---- subclasses may override this to add additional scripts to the list  ----/
+        include_scripts = [ "/js/lib/three.js" ]
+
+        /** if true, an onLoad handler is defined and all the scripts defined by this component
+         *  are embedded in the handler.
+         **/
+        boolean run_scripts_on_load = true
+
+        /-------------------------------/
+        /---- global event handling ----/
+  
+        /** Sets the handler for the event. **/
+        dynamic set_handler(script_object element, event, js_function handler),
+                                                      (event, js_function handler),
+                                                      (event) [=
+            newline;
+            with (element)  [=
+                element.name;
+                [| . |]
+            =] else [=
+                [| window. |]
+            =]
+            event;
+            [| = |]
+            with (handler) [=
+                handler.name;
+            =] else [=
+                default_handler_name(event);
+            =]
+            [| ; |]
+        =] 
+
+        dynamic js_function default_handler(event) [=
+            name = default_handler_name(event)
+            
+            [|            
+                function [= default_handler_name(event); =](event) {
+                    [= body; =]
+                }
+            |]
+        =]            
+
+        /-------------------------------/
+        /---------- the scene ----------/
+
+        keep: scene this_scene = new_scene
+        
+
+        /-------------------------------/
+        /-------- the renderer ---------/
+
+        webgl_renderer(*) this_renderer(cname, width, height) [=
+            canvas_container;
+            [| .appendChild( |]
+            name;
+            [| .domElement); |]
+            sub;
+        =]
+
+
+        /-----------------------/
+        /------ scripting ------/
+        
+        scripts [=
+            info_log("instantiating include_scripts");
+            for s in include_scripts [|
+                <script src="[= s; =]"></script>
+            |]
+            info_log("instantiating main_script");
+            main_script;
+         =]
+
+    
+         main_script [=
+
+            debug_log("main_script called with scene " + this_scene.name + " with " + this_scene.objs.count + " objects");
+            
+            debug_log(" obj[0] " + this_scene.objs[0].type); 
+            
+            for three_object o in this_scene.objs [=
+                debug_log("   ..." + o.type);
+            =]
+                    
+            [| <script> |]
+            
+            /-- create the canvas for rendering, and in the process see 
+             -- if HTML5 and WebGL are supported
+             --/  
+            debug_log("create canvas");
+            create_canvas;
+
+            /-- declare top-level functions and variables --/
+            js_comment_log("declare global variables");
+            declare_global_vars;
+
+            if (run_scripts_on_load) [=
+                [| function [= default_handler_name("onload"); =]() { |]
+            =]
+            
+            /-- proceed, providing there is webgl --/            
+            [| if (webglEnabled) { |]
+
+                [| recalcCanvasSize(); |]
+
+                debug_log("constructing renderer id " + canvas_id + "   width " + canvas_width + "   height " + canvas_height);
+                this_renderer(canvas_id, canvas_width, canvas_height);
+
+                if (size_to_window) [|
+                    window.addEventListener("resize", resizeCanvas, false);
+                |]
+
+                /-- construct the scene --/
+                js_comment_log("construct the scene");
+                this_scene;
+
+                js_comment_log("assign global variables");
+                assign_global_vars;
+                
+
+                /-- let the scene add to the script --/
+                if (this_scene.scripts) [=
+                    js_comment_log("add scene scripts");
+                    this_scene.scripts;
+                =]
+
+                /-- add script defined by subclass, if any --/
+                if (sub_script) [=
+                    js_comment_log("add subclass script");
+                    sub_script;
+                =]
+
+                [| updateCamera(); |]
+
+                /-- drop into the rendering loop, from whence we will not return --/
+                info_log("begin rendering loop");
+                run;
+
+            /-- no webgl --/
+            [| } else { |]
+                /-- notify the user and exit --/
+                canvas_container;
+                [| .innerHTML = "<p><strong>Your hardware or software does not support the graphics capability required by this page.</strong></p>"; |]
+            [| } |]
+
+            if (run_scripts_on_load) [=
+                [| } |]
+                set_handler("onload");
+            =]
+            
+            js_comment_log("declare global functions");
+            declare_funcs;
+
+            [| </script> |]    
+        =]
+
+        /** Declare top level variables, including the  variable corresponding to this 
+         *  component.
+         **/
+        declare_global_vars [|
+            var [= canvas_container; =] = document.getElementById("[= id; =]");
+            var canvasWidth = [= canvas_container; =].clientWidth;
+            var canvasHeight = [= canvas_container; =].clientHeight;
+            var [= canvas_renderer; =];
+            var [= canvas_scene; =];
+            var [= canvas_camera; =];
+        |]  
+        
+        camera this_cam = this_scene.cam
+        assign_global_vars [|
+            [= canvas_renderer; =] = this_renderer;
+            [= canvas_scene; =] = [= this_scene.name; =];
+            [= canvas_camera; =] = [= this_cam.name; =];
+
+        |]
+
+        update_global_vars(params{}) [=
+            cam_pos = canvas_camera + ".position"
+                   
+            if (params{"camera_x"}) [=
+                cam_pos;
+                [| .setX( |]
+                params{"camera_x"};
+                [| ); |]
+            =]
+            if (params{"camera_x"}) [=
+                cam_pos;
+                [| .setX( |]
+                params{"camera_x"};
+                [| ); |]
+            =]
+            if (params{"camera_x"}) [=
+                cam_pos;
+                [| .setX( |]
+                params{"camera_x"};
+                [| ); |]
+            =]
+       =]       
+        
+        
+        /** Create the canvas, depending on what kind of graphics support is available on the client. **/
+        create_canvas [|
+             var [= canvas_name; =] = document.createElement("canvas");
+             [= canvas_name; =].id = "[= canvas_id; =]";
+             var canvasEnabled = [= canvas_name; =] && !!window.CanvasRenderingContext2D;
+             var webglEnabled = [= canvas_name; =] && (
+                 function (canvas) { 
+                     try {
+                         if (!window.WebGLRenderingContext) {
+                             return false;
+                         }
+                         if (canvas.getContext("webgl")) {
+                             return true;
+                         }
+                         if (canvas.getContext("experimental-webgl")) { 
+                             return true;
+                         }
+                     } catch (e) { 
+                         return false;
+                     }
+                 } ([= canvas_name; =]));
+        |]
+        
+                      
+        /** Declare functions. **/
+        declare_funcs [=
+            declare_utils;
+            render.declare;
+            post_render.declare;                
+            animate.declare;
+
+            /-- let the subclass declare functions --/
+            sub_funcs;
+        =]
+        
+        
+        /** Run the animation. **/
+        run [=
+            animate;
+        =]
+
+        /-- top-level javascript functions for this component --/
+
+
+        js_function animate [=
+        
+            args[] = [ "timestamp" ]
+            
+            body [|
+                requestAnimationFrame(animate);
+                [= canvas_scene; =].next_frame();
+                render();
+                post_render();
+            |]
+        =]
+        
+        js_function render [=
+            body [=
+                canvas_renderer; 
+                [| .render( |]
+                canvas_scene;
+                [| , |]
+                canvas_camera;
+                [| ); |]
+            =]
+        =]
+
+        
+        js_function post_render [=
+            body [/]
+        =]
+       
+       
+        declare_utils [|
+
+            function resizeCanvas() {
+                recalcCanvasSize();
+                [= canvas_renderer; =].setSize(canvasWidth, canvasHeight);
+                updateCamera();
+            }
+            
+            function updateCamera() {
+                [= canvas_camera; =].aspect = canvasWidth / canvasHeight;
+                [= canvas_camera; =].updateProjectionMatrix();
+            }
+        
+            function recalcCanvasSize() { 
+                [= recalc_canvas_size_logic; =]
+            }
+
+            var debounceTimeOut = null;
+            function debounce(func) {
+                if (debounceTimeOut != null) {
+                    clearTimeout(debounceTimeOut);
+                    debounceTimeOut = setTimeout(func, 100);
+                }
+            }
+                      
+        |]
+
+        /--------------------------------/
+        /---- component construction ----/
+
+        /---- full instantiation ----/
+        with (new_scene) [=
+            info_log("instantiating three_component");    
+            sub;
+            debug_log("instantiating three_component scripts");
+            scripts;
+            
+        /---- respond to ajax call ----/
+        =] else with (params) [=
+        
+        
+        =]
+    =]
+
+=]
+/---------------------
+ -- three_geometries.bento
+ --
+ -- Geometries for three.bento
+ --
+ -- Copyright (c) 2013 by Michael St. Hippolyte
+ --
+ --/
+ 
+site three [=
+
+
+    /---- geometry base class ----/
+        
+    three_object geometry [=
+        three_class = "Geometry"
+        position pos = position(0, 0, 0)
+        options{} = {}
+    =]
+    
+    /---- geometries ----/
+    
+    geometry cube_geometry(float width, float height, float depth),
+                          (float width, float height, float depth, int seg_width, int seg_height, int seg_depth) [=
+                          
+        three_class = "CubeGeometry"
+
+        args[] = [ width, height, depth,
+                   with (seg_width) [= seg_width, seg_height, seg_depth =]
+                 ]  
+
+    =]                          
+
+    geometry box_geometry(float width, float height, float depth),
+                         (float width, float height, float depth, int seg_width, int seg_height, int seg_depth) [=
+                          
+        three_class = "BoxGeometry"
+
+        args[] = [ width, height, depth,
+                   with (seg_width) [= seg_width, seg_height, seg_depth =]
+                 ]  
+
+    =]                          
+
+    geometry sphere_geometry(float radius),
+                            (float radius, int seg_width, int seg_height),
+                            (float radius, int seg_width, int seg_height, float phi_start, float phi_length, float theta_start, float theta_length) [=
+                            
+        three_class = "SphereGeometry"
+                            
+        args[] = [ radius,
+                   with (seg_width) [= seg_width, seg_height =],
+                   with (phi_start) [= phi_start, phi_length, theta_start, theta_length =]
+                 ]  
+    =]
+    
+    geometry text_geometry(text) [=
+    
+    
+    =]
+    
+        
+=]
+/---------------------
  -- three.bento
  --
  -- Bento support for three.js
@@ -104,6 +613,20 @@ site three [=
             [| ; |]
         =]
 
+        member immutable_field(x),(x, y),(x, y, z) [=
+            [| .set( |]
+            x;
+            with (y) [=
+                [| , |]
+                y;
+            =]
+            with (z) [=
+                [| , |]
+                z;
+            =]
+            [| ); |]
+        =]
+            
         member method(x),(x, y),(x, y, z) [=
             [| ( |]
             x;
@@ -191,6 +714,7 @@ site three [=
         args[] = []
         options{} = {}
         position pos = position(0, 0, 0)
+        rotation rot = rotation(0, 0, 0)
 
         three_object objs[] = []
         boolean is_composite = (objs.count > 1)
@@ -240,10 +764,13 @@ site three [=
             name; [| .position.z = [= z; =]; |]
         =]
 
-        dynamic field(pos) set_position [=
+        dynamic immutable_field(pos.x, pos.y, pos.z) set_position [=
             name = "position"
         =]
 
+        dynamic immutable_field(rot.x, rot.y, rot.z) set_rotation [=
+            name = "rotation"
+        =]
 
         dynamic construct [=
             debug_log("...constructing " + three_class + "...");
@@ -268,7 +795,7 @@ site three [=
         dynamic set_attributes [=
             debug_log("setting position of " + owner.type + " to " + pos);
             with (pos) [|
-                [= name; =].position = [= pos; =];
+                [= name; =].position.set([= pos.x; =], [= pos.y; =], [= pos.z; =]);
             |]            
         =]         
 
@@ -352,6 +879,8 @@ site three [=
             [| .setSize([= width; =], [= height; =]); |]
         =]
 
+        set_attributes [/]
+                
         set_size(width, height);
         sub;
     =]
@@ -636,4 +1165,146 @@ site three [=
         =]
     =]
    
+=]
+/---------------------
+ -- three_materials.bento
+ --
+ -- Materials for three.bento
+ --
+ -- Copyright (c) 2013-2014 by Michael St. Hippolyte
+ --
+ --/
+ 
+site three [=
+
+
+    /---- material base class ----/
+        
+    three_object material [=
+        three_class = "Material"
+        
+        float opacity [?]
+        boolean transparent [?]
+        blending [?]
+        boolean depth_test [?]
+        boolean depth_write [?]
+        boolean polygon_offset [?]
+        polygon_offset_factor [?]        
+        polygon_offset_units [?]        
+        alpha_test [?]
+        boolean overdraw [?]
+           
+        options{} = { with (opacity)        [= "opacity": opacity =],
+                      with (transparent)    [= "transparent": transparent =],
+                      with (blending)       [= "blending": blending =],
+                      with (depth_test)     [= "depthTest": depth_test =],
+                      with (depth_write)    [= "depthWrite": depth_write =],
+                      with (polygon_offset) [= "polygonOffset": polygon_offset =],
+                      with (offset_factor)  [= "offsetFactor": offset_factor =],
+                      with (offset_units)   [= "offsetUnits": offset_units =],
+                      with (alpha_test)     [= "alphaTest": alpha_test =],
+                      with (overdraw)       [= "overdraw": overdraw =]
+                    }
+    =]
+    
+    /---- materials ----/
+    
+    material basic_material [=
+        three_class = "MeshBasicMaterial"
+        
+        undecorated color [?]
+        undecorated map [?]
+        light_map [?]
+        env_map [?]
+        combine [?]
+        reflectivity [?]
+        refraction_ratio [?]
+        boolean fog [?]
+        shading [?]
+        boolean wireframe [?]
+        line_width [?]
+        line_cap [?]
+        line_join [?]
+        boolean vertex_colors [?]
+        boolean skinning [?]
+        boolean morph_targets [?]
+    
+        options{} = { with (color)            [= "color": color =],
+                      if   (map)              [= "map": map =],
+                      if   (light_map)        [= "lightMap": light_map =],
+                      if   (env_map)          [= "envMap": env_map =],
+                      with (combine)          [= "combine": combine =],
+                      with (reflectivity)     [= "reflectivity": reflectivity =],
+                      with (refraction_ratio) [= "refractionRatio": refraction_ratio =],
+                      with (fog)              [= "fog": fog =],
+                      with (shading)          [= "shading": shading =],
+                      with (wireframe)        [= "wireframe": wireframe =],
+                      with (line_width)       [= "wireframeLinewidth": line_width =],
+                      with (line_cap)         [= "wireframeLinecap": line_cap =],
+                      with (line_join)        [= "wireframeLinejoin": line_join =],
+                      with (vertex_colors)    [= "vertexColors": vertex_colors =],
+                      with (skinning)         [= "skinning": skinning =],
+                      with (morph_targets)    [= "morphTargets": morph_targets =] 
+                    }                     
+    =]
+
+    basic_material lambert_material [=
+        three_class = "MeshLambertMaterial"
+    =]
+
+    basic_material phong_material [=
+        three_class = "MeshPhongMaterial"
+    =]
+    
+    /---- textures ----/
+
+    undecorated load_texture(image_path) [=
+        [| THREE.ImageUtils.loadTexture("[= image_path; =]") |]
+    =]
+
+    
+=]
+/---------------------
+ -- three_objects.bento
+ --
+ -- Full-fledged general objects for three.bento
+ --
+ -- Copyright (c) 2013 by Michael St. Hippolyte
+ --
+ --/
+ 
+site three [=
+
+    /---- background objects ----/
+
+    dynamic synthetic_object backdrop [=
+        geometry geo = sphere_geometry(horizon, seg_width, seg_height)
+        material mat = basic_material
+        name = owner.type
+        
+        /-- default distance to horizon -- one kilometer  --/
+        int horizon = 1000
+        int seg_width = 100
+        int seg_height = 100
+        
+        decl [|
+            var [= name; =] = new THREE.Mesh( [= geo.construct; =], [= mat.construct; =] ); 
+            [= name; =].scale.x = -1;
+        |]
+    =]
+
+        
+    three_object ambience [=
+        light lt [?]
+        backdrop bd [/]
+        
+        three_object[] objs = [ with (lt) [= lt =], if (bd) [= bd =] ]
+
+        super;
+    =]
+
+
+    /---- very simple objects ----/
+
+ 
 =]
