@@ -401,9 +401,8 @@ emptyclass, pent_board p2c [=
             
             this pent_game [/]
             
-            eval(pent_game);
-            
             [=
+                eval(pent_game);
                 "A";
                 test_log("pent_game correctly starts without redirection");
 
