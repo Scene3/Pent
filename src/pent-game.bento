@@ -127,15 +127,26 @@ site pent [=
 
         /---- CHOOSE_PLAYERS phase ----/
     
-        dynamic set_player(name, id, boolean is_player_a) [=
+        dynamic set_player(pent_player pp, boolean is_player_a),
+                          (name, id, boolean is_player_a) [=
         
             if (phase == CHOOSE_PLAYERS) [=
                 if (is_player_a) [=
-                    log("set player A in game " + owner.id + " to " + name);
-                    eval(player_A(: pent_player(: name, id :) :));
+                    with (pp) [=
+                        log("set player A in game " + owner.id + " to pent_player name = " + pp.name);
+                        eval(player_A(: pp :));
+                    =] else [=
+                        log("set player A in game " + owner.id + " to " + name);
+                        eval(player_A(: pent_player(: name, id :) :));
+                    =]
                 =] else [=
-                    log("set player B in game " + owner.id + " to " + name);
-                    eval(player_B(: pent_player(: name, id :) :));
+                        with (pp) [=
+                        log("set player B in game " + owner.id + " to pent_player name = " + pp.name);
+                        eval(player_B(: pp :));
+                    =] else [=
+                        log("set player B in game " + owner.id + " to " + name);
+                        eval(player_B(: pent_player(: name, id :) :));
+                    =]
                 =] 
                  
                  /-- if both players are set, advance to the next phase --/

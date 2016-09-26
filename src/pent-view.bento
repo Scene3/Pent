@@ -23,7 +23,13 @@ site pent [=
     pent_view_style [|
 
         .view {
-            width: 100%;
+            margin: auto;
+            width: 40rem;
+            box-sizing: border-box;
+        }
+    
+        .view div {
+            width: auto;
         }
     
         .pent_board td {
@@ -52,12 +58,6 @@ site pent [=
             background-color: #070707;
         }
  
-        .console_view {
-            width: 100%;
-            background-color: #66CCCC;
-            box-sizing: border-box;
-        }
-
         .empty_cell {
             border-style: inset;
             border-color: #444444;

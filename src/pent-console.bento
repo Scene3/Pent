@@ -12,7 +12,7 @@ site pent [=
     param_key [?]
     static param_key COMMAND = "do"
     static param_key SET_NAME = "name"
-    static param_key SET_TYPE = "type"
+    static param_key SET_LEVEL = "level"
     static param_key SET_ID = "id"
     static param_key FIRST_PICK = "first"
     static param_key PLAYER = "player"
@@ -33,8 +33,7 @@ site pent [=
     static param_val BACK = "back"
     static param_val CONTINUE = "continue"
     static param_val CHOOSE = "pick"
-    static param_val COMPUTER_PLAYER = "comp"
-    static param_val HUMAN_PLAYER = "human"
+    static param_val PLAYER_LEVEL = "*"
     static param_val ID = "#"
     static param_val PLAYER_A = "A"
     static param_val PLAYER_B = "B"
@@ -74,7 +73,7 @@ site pent [=
             COMMAND:    [ CHOOSE, STOP, BACK ],
             PLAYER:     [ PLAYER_A, PLAYER_B ],
             SET_NAME:   [ NAME ],
-            SET_TYPE:   [ COMPUTER_PLAYER, HUMAN_PLAYER ],
+            SET_LEVEL:  [ PLAYER_LEVEL ],
             SET_ID:     [ ID ]
         },
         
@@ -103,7 +102,23 @@ site pent [=
         }
     }
        
-        
+    
+    /** Computer player options **/
+    
+    VERY_EASY_LEVEL = "very_easy"
+    EASY_LEVEL = "easy"
+    MEDIUM_LEVEL = "medium"
+    HARD_LEVEL = "hard"
+    VERY_HARD_LEVEL = "very_hard"
+    
+    
+    option[] computer_player_options = [ option("Novice", VERY_EASY_LEVEL, true), 
+                                         option("Beginner", EASY_LEVEL, false),
+                                         option("Average", MEDIUM_LEVEL, false),
+                                         option("Above Average", HARD_LEVEL, false),
+                                         option("Pro", VERY_HARD_LEVEL, false) ]
+    
+    
     /**
      *  Pent Console logic
      *
@@ -121,13 +136,16 @@ site pent [=
 
     /** pent-specific console **/
     dynamic console pent_console(pent_game gm, params{}) [=
+    
+        keep: id = "pent_console"
+    
         /** the current game **/
         keep: pent_game game = gm
      
         /** parameter shortcuts **/
         command = params{COMMAND}
         set_name = params{SET_NAME}
-        set_type = params{SET_TYPE}
+        set_level = params{SET_LEVEL}
         set_id = params{SET_ID}
         first_pick = params{FIRST_PICK}
         selected_player = params{PLAYER}
@@ -266,7 +284,7 @@ site pent [=
     pent_console_style [|
 
         .console_title {
-            color: #111155;
+            color: #6666CC;
             padding-top: 0.5rem;
             padding-bottom: 0.5rem;
             text-align: center;
@@ -275,8 +293,23 @@ site pent [=
             font-family: Helvetica, Arial, Geneva, sans-serif;
         }
 
+        .player_title {
+            margin: 0 0 0 -0.825rem;
+            padding: 0 0 0 0.125rem;
+            border-width: 0 0 0.125rem 0;
+            border-color: #2F8F8F;
+            border-style: solid;
+            color: #CCCCCC;
+            text-align: left;
+            font-weight: bold;
+            font-size: 0.5rem;
+            font-family: Helvetica, Arial, Geneva, sans-serif;
+        }
+
         .panel_title {
-            color: #111155;
+            margin: 0 1rem 0 0;
+            padding: 0.5rem 1rem 0.5rem 0;
+            color: #CCCCCC;
             text-align: center;
             font-weight: bold;
             font-size: 1.125rem;
@@ -284,39 +317,51 @@ site pent [=
         }
         
         .console {
-            padding: 0.5rem 2rem;
-            background-color: #66CCCC;
             color: #110C0F;
             font-family: Helvetica, Arial, Geneva, sans-serif;
+            padding: 0.5rem 0; 
         }
         
+        
         .player_panel {
-            border-style: groove;
-            border-width: 0.125rem;
-            padding: 1rem 2rem;
+            background-color: #339999;
+            color: #FFFFFF;
+            padding: 0.125rem 0 0.5rem 1rem;
+            margin: 0.5rem 0;
         }
 
-        .choose_players_panel table {
-            width: 100%;
+        .panel_row {
+            padding: 0.25rem;
         }
-
-        .choose_players_panel radiobutton {
-            width: 100%;
+        
+        .panel_row input {
+            margin-right: 0.25rem;
         }
     |]
 
-
-    dynamic component panel_title(title) [=
-        component_class = owner.type
+            
+    dynamic component player_title(title) [=
+        component_class = "player_title"
         title;
     =]
 
-    dynamic panel_title(*) console_title(title) [/]
+    dynamic panel_title(title) [=
+        [| <div class="panel_title"> |] 
+        title;
+        [| </div> |]
+    =]
+
+    dynamic component console_title(title) [=
+        component_class = "console_title"
+        title;
+    =]
 
     component console_panel [=
         component_class [| 
             console_panel [= owner.type; =]
         |]
+
+        component this_component = owner
     =]
     
 
@@ -336,12 +381,10 @@ site pent [=
         
         sub;
         
-        [| <div class="centered_div"> |]
-        [| <table><tr><td> |]
-        button("back", "Back");
-        [| </td><td> |]
-        submit_button("choose", "Ok", "/" + this_component.id, field_ids, submit_params);
-        [| </td></tr></table></div> |]
+        [| <div class="button_div"> |]
+        button("cancel", "Cancel");
+        submit_button("choose", "Ok", "/pent_console", field_ids, submit_params);
+        [| </div> |]
         
     =]
 
@@ -355,32 +398,21 @@ site pent [=
              title = is_player_A ? "Player A" : "Player B"
              radio_group = is_player_A ? "player_A_type" : "player_B_type"
         
-             [| <table><tr><td colspan="2"> |]
-             
-             panel_title(title);
-
-             [| </td></tr><tr><td><div style="text-align: center"> |]
+             [| <div class="tab"> |]
+             player_title(title);
+             [| </div><div class="panel_row"> |]
              radiobutton(radio_group, "Human", true, "human");
-             [| </div></td><td><div style="text-align: center"> |]
-             radiobutton(radio_group, "Computer", false, "computer");
-
-             [| </div></td></tr><tr><td>Name:</td><td> |]
-             
+             [| Name:&nbsp; |]
+             textedit(SET_NAME, player.name, 20);
              player.name;
-             
-             [| </td></tr></table> |]
-             
+             [| </div><div class="panel_row"> |]
+             radiobutton(radio_group, "Computer", false, "computer");
+             dropdown("Level", computer_player_options);
+             [| </div> |]
         =]
         
-        [| <table><tr><td> |]
-        
         player_panel(true);
-        
-        [| </td><td> |]
-        
         player_panel(false);
-        
-        [| </td></tr></table> |]
     
     =]
 

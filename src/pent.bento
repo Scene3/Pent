@@ -148,6 +148,22 @@ site pent [=
                 background-color: [= main_bgcolor; =];
                 font-family: "Arial", sans-serif;
             }
+        
+            .float_left {
+                float: left;
+            }
+            
+            .float_right {
+                float: right;
+            }
+            
+            .hidden {
+                display: none;
+            }
+            
+            .tab {
+                width: 100%;
+            }
 
             .centered_container {
                 width: 100%;
@@ -162,7 +178,7 @@ site pent [=
                 top: 38%;
                 margin-right: -50%;
                 transform: translate(-50%, -50%);
-                width: 36em;
+                width: 36rem;
             }
             
             .centered_div  {
@@ -176,16 +192,24 @@ site pent [=
             }
 
             .centered_div td {
-                padding: 0.125em 0.5em;
+                padding: 0.125rem 0.5rem;
             }
             
             .centered_div div {
-                padding: 0.75em 4em;
+                padding: 0.75rem 4rem;
             }
             
+            .button_div  {
+                padding: 0.25rem 0 0.25rem 0;
+             }
+
+            .button_div input {
+                margin-right: 5rem;
+             }
+
             .header_bar {
                 width: 100%;
-                padding: 0.75em 0;
+                padding: 0.75rem 0;
             }
 
             .header_bar img {
@@ -197,7 +221,7 @@ site pent [=
            .labeled_edit {
                 text-align: center;
                 font-weight: bold;
-                padding:0.5em;
+                padding:0.5rem;
             }
 
             #splash_image_holder img {
@@ -208,29 +232,33 @@ site pent [=
             
             #login_splash_box {
                 color: purple;
-                font-size: 1em;
+                font-size: 1rem;
                 font-weight: bold;
                 font-family: "Arial", sans-serif;
             }
             
             #login_button {
-                width: 10em;
+                width: 10rem;
             }
             
             #ok_button {
-                width: 10em;
+                width: 10rem;
             }
 
             #cancel_button {
-                width: 10em;
+                width: 10rem;
             }
 
             #back_button {
-                width: 10em;
+                width: 10rem;
             }
 
             #choose_button {
-                width: 10em;
+                width: 10rem;
+            }
+
+            #reset_button {
+                width: 10rem;
             }
 
             #tc_container {
@@ -245,7 +273,7 @@ site pent [=
             
             #input_box input {
                 color: black;
-                font-size: 1.125em;
+                font-size: 1.125rem;
                 background-color: #EEFFFF;
             }
         |]        

@@ -52,6 +52,7 @@ site pent [=
             int num_problems(int n) = n
             
             for piece p in pieces [=
+                log("first piece loop: " + p.name);
                 if (p.protos.count != p.rotations * p.chirality) [=
                     eval(num_problems(: num_problems + 1 :));
                 =]
@@ -70,6 +71,7 @@ site pent [=
             =]
 
             for piece p in pieces [=
+                log("second piece loop: " + p.name);
                 if (p.all_positions.count != p.num_positions) [=
                     test_log("piece " + p.id + " num positions should be " + p.num_positions + " but is " + p.all_positions.count);
                     eval(num_problems(: num_problems + 1 :));
@@ -986,5 +988,13 @@ emptyclass, pent_board p2c [=
         pent_game.team_B.count;
     =]
 
-    
+    pt [=
+        for piece p in pieces and int i from 0 to 1 [=
+            p.all_positions.count;
+                log("there is a count");
+        =]
+        "ok";
+    =]
+            
+            
 =]
