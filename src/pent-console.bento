@@ -294,8 +294,8 @@ site pent [=
         }
 
         .player_title {
-            display: table-cell;
-            margin: 0 0 0 -0.25rem;
+            display: table-caption;
+            width: 100%;
             padding: 0.125rem;
             background-color: #1F7F7F;
             color: #CCCCCC;
@@ -353,9 +353,10 @@ site pent [=
     |]
 
             
-    dynamic component player_title(title) [=
-        component_class = "player_title"
+    dynamic player_title(title) [=
+        [| <div class="player_title" colspan="2"> |]
         title;
+        [| </div> |]
     =]
 
     dynamic panel_title(title) [=
@@ -431,9 +432,9 @@ site pent [=
                  document.getElementById("[= level_cell_id; =]").classList.remove("disabled");
              |] 
 
-             [| <div class="panel_row"> |]
              player_title(title);
-             [| </div><div class="panel_row"><div class="panel_cell"> |]
+
+             [| <div class="panel_row"><div class="panel_cell"> |]
              radiobutton(radio_group, "Human", true, "human", human_radiobutton_script);
              [| </div><div id="[= name_cell_id; =]" class="panel_cell space_on_left"> |]
              [| Name:&nbsp; |]
