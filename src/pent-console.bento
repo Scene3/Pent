@@ -294,15 +294,14 @@ site pent [=
         }
 
         .player_title {
-            margin: 0 0 0 -0.825rem;
-            padding: 0 0 0 0.125rem;
-            border-width: 0 0 0.125rem 0;
-            border-color: #2F8F8F;
-            border-style: solid;
+            display: table-cell;
+            margin: 0 0 0 -0.25rem;
+            padding: 0.125rem;
+            background-color: #1F7F7F;
             color: #CCCCCC;
             text-align: left;
             font-weight: bold;
-            font-size: 0.5rem;
+            font-size: 0.66rem;
             font-family: Helvetica, Arial, Geneva, sans-serif;
         }
 
@@ -326,16 +325,30 @@ site pent [=
         .player_panel {
             background-color: #339999;
             color: #FFFFFF;
-            padding: 0.125rem 0 0.5rem 1rem;
+            padding: 0.2rem;
             margin: 0.5rem 0;
+            display: table;
+        }
+
+        .player_panel tab {
+            display: table-row;
         }
 
         .panel_row {
-            padding: 0.25rem;
+            display: table-row;
         }
         
-        .panel_row input {
-            margin-right: 0.25rem;
+        .panel_cell {
+            display: table-cell;
+            padding: 0.5rem;
+        }
+        
+        .space_on_left * {
+            margin-left: 1rem;
+        }
+        
+        .disabled {
+            color: #CCCCCC;
         }
     |]
 
@@ -397,18 +410,40 @@ site pent [=
              pent_player player = is_player_A ? game.player_A : game.player_B
              title = is_player_A ? "Player A" : "Player B"
              radio_group = is_player_A ? "player_A_type" : "player_B_type"
+             textedit_name = is_player_A ? "player_A_name" : "player_B_name"
+             dropdown_name = is_player_A ? "player_A_level" : "player_B_level"
+             name_cell_id = is_player_A ? "player_A_name_cell" : "player_B_name_cell"
+             level_cell_id = is_player_A ? "player_A_level_cell" : "player_B_level_cell"
+             textedit_id = textedit_name
+             dropdown_id = dropdown_name + "_dropdown"
+
+             human_radiobutton_script [| 
+                 document.getElementById("[= dropdown_id; =]").disabled = true;
+                 document.getElementById("[= level_cell_id; =]").classList.add("disabled");
+                 document.getElementById("[= textedit_id; =]").disabled = false;
+                 document.getElementById("[= name_cell_id; =]").classList.remove("disabled");
+             |] 
         
-             [| <div class="tab"> |]
+             computer_radiobutton_script [| 
+                 document.getElementById("[= textedit_id; =]").disabled = true;
+                 document.getElementById("[= name_cell_id; =]").classList.add("disabled");
+                 document.getElementById("[= dropdown_id; =]").disabled = false;
+                 document.getElementById("[= level_cell_id; =]").classList.remove("disabled");
+             |] 
+
+             [| <div class="panel_row"> |]
              player_title(title);
-             [| </div><div class="panel_row"> |]
-             radiobutton(radio_group, "Human", true, "human");
+             [| </div><div class="panel_row"><div class="panel_cell"> |]
+             radiobutton(radio_group, "Human", true, "human", human_radiobutton_script);
+             [| </div><div id="[= name_cell_id; =]" class="panel_cell space_on_left"> |]
              [| Name:&nbsp; |]
-             textedit(SET_NAME, player.name, 20);
-             player.name;
-             [| </div><div class="panel_row"> |]
-             radiobutton(radio_group, "Computer", false, "computer");
-             dropdown("Level", computer_player_options);
-             [| </div> |]
+             textedit(textedit_name, player.name, 32);
+             [| </div></div><div class="panel_row"><div class="panel_cell"> |]
+             radiobutton(radio_group, "Computer", false, "computer", computer_radiobutton_script);
+             [| </div><div id="[= level_cell_id; =]" class="panel_cell space_on_left disabled"> |]
+             [| Level:&nbsp; |]
+             dropdown(dropdown_name, computer_player_options, true);
+             [| </div></div> |]
         =]
         
         player_panel(true);

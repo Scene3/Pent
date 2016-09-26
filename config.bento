@@ -22,7 +22,7 @@
      *  necessarily responds to every interface.  Individual sites may filter out 
      *  some of them.
      **/
-    listen_to[] = [ "127.0.0.1:5555", "192.168.23.101:8080" ]
+    listen_to[] = [ "127.0.0.1:5555" ]
 
     /** Do not handle requests for files with the following extensions; let the server's
      *  default file handling logic handle them.

@@ -157,6 +157,10 @@ site pent [=
                 float: right;
             }
             
+            .align_right {
+                text-align: right;
+            }
+            
             .hidden {
                 display: none;
             }
@@ -204,7 +208,7 @@ site pent [=
              }
 
             .button_div input {
-                margin-right: 5rem;
+                margin-right: 1rem;
              }
 
             .header_bar {
