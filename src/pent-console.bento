@@ -102,7 +102,6 @@ site pent [=
         }
     }
        
-    
     /** Computer player options **/
     
     VERY_EASY_LEVEL = "very_easy"
@@ -354,7 +353,7 @@ site pent [=
 
             
     dynamic player_title(title) [=
-        [| <div class="player_title" colspan="2"> |]
+        [| <div class="player_title"> |]
         title;
         [| </div> |]
     =]
@@ -387,7 +386,7 @@ site pent [=
         title [/]
 
         field_ids[] = []
-        submit_params{} = {} 
+        submit_params{} = { COMMAND: CHOOSE } 
         
         if (title) [=
             console_title(title);
@@ -404,6 +403,8 @@ site pent [=
 
     chooser_panel choose_players_panel(pent_game game) [=
         title = "Choose Players"
+        
+        field_ids[] = []
         
         dynamic component player_panel(boolean is_player_A) [=
              component_class = owner.type
