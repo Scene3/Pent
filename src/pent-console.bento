@@ -51,12 +51,11 @@ site pent [=
     param_key[] param_keys = []
     
     static param_keys{} allowed_params = {
-        BEFORE_GAME:    [ COMMAND ],
-        CHOOSE_PLAYERS: [ COMMAND, CONFIRM, PLAYER, SET_NAME, SET_TYPE, SET_ID ],
-        CHOOSE_ORDER:   [ COMMAND, CONFIRM, FIRST_PICK ],
-        CHOOSE_TEAM:    [ COMMAND, CONFIRM, TURN, PIECE ],
-        PLAY_GAME:      [ COMMAND, CONFIRM, TURN, PIECE, ROTATE, FLIP, PUT ],
-        BETWEEN_GAMES:  [ COMMAND ]
+        (CHOOSE_PLAYERS): [ COMMAND, CONFIRM, PLAYER, SET_NAME, SET_TYPE, SET_ID ],
+        (CHOOSE_ORDER):   [ COMMAND, CONFIRM, FIRST_PICK ],
+        (CHOOSE_TEAM):    [ COMMAND, CONFIRM, TURN, PIECE ],
+        (PLAY_GAME):      [ COMMAND, CONFIRM, TURN, PIECE, ROTATE, FLIP, PUT ],
+        (BETWEEN_GAMES):  [ COMMAND ]
     }
         
     /** Allowed values for specific parameters in each game state. **/
@@ -65,40 +64,36 @@ site pent [=
     
     static param_vals{}{} allowed_vals = {
     
-        BEFORE_GAME: {
-            COMMAND:    [ START ]
+        (CHOOSE_PLAYERS): { 
+            (COMMAND):    [ CHOOSE, STOP, BACK ],
+            (PLAYER):     [ PLAYER_A, PLAYER_B ],
+            (SET_NAME):   [ NAME ],
+            (SET_LEVEL):  [ PLAYER_LEVEL ],
+            (SET_ID):     [ ID ]
         },
         
-        CHOOSE_PLAYERS: { 
-            COMMAND:    [ CHOOSE, STOP, BACK ],
-            PLAYER:     [ PLAYER_A, PLAYER_B ],
-            SET_NAME:   [ NAME ],
-            SET_LEVEL:  [ PLAYER_LEVEL ],
-            SET_ID:     [ ID ]
+        (CHOOSE_ORDER): { 
+            (COMMAND):    [ STOP, BACK ],
+            (FIRST_PICK): [ PLAYER_A, PLAYER_B ]
         },
         
-        CHOOSE_ORDER: { 
-            COMMAND:    [ STOP, BACK ],
-            FIRST_PICK: [ PLAYER_A, PLAYER_B ]
+        (CHOOSE_TEAM): { 
+            (COMMAND):    [ STOP, BACK ],
+            (TURN):       [ TURN_NUM ],
+            (PIECE):      [ ID ]
         },
         
-        CHOOSE_TEAM: { 
-            COMMAND:    [ STOP, BACK ],
-            TURN:       [ TURN_NUM ],
-            PIECE:      [ ID ]
+        (PLAY_GAME): { 
+            (COMMAND):    [ STOP ],
+            (TURN):       [ TURN_NUM ],
+            (PIECE):      [ ID ],
+            (PUT):        [ CELL ],
+            (ROTATE):     [ QTR_TURNS ],
+            (FLIP):       [ FLIPS ]
         },
         
-        PLAY_GAME: { 
-            COMMAND:    [ STOP ],
-            TURN:       [ TURN_NUM ],
-            PIECE:      [ ID ],
-            PUT:        [ CELL ],
-            ROTATE:     [ QTR_TURNS ],
-            FLIP:       [ FLIPS ]
-        },
-        
-        BETWEEN_GAMES: {
-            COMMAND:    [ CONTINUE, START ]
+        (BETWEEN_GAMES): {
+            (COMMAND):    [ CONTINUE, START ]
         }
     }
        
