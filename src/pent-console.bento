@@ -129,7 +129,7 @@ site pent [=
 
 
     /** pent-specific console **/
-    dynamic console pent_console(pent_game gm, params{}) [=
+    dynamic console pent_console(pent_game gm, params{}),(params{}) [=
     
         keep: id = "pent_console"
     
@@ -413,6 +413,8 @@ site pent [=
              level_cell_id = is_player_A ? "player_A_level_cell" : "player_B_level_cell"
              textedit_id = textedit_name
              dropdown_id = dropdown_name + "_dropdown"
+
+             field_ids[] = [ textedit_id, dropdown_id, radio_group ]
 
              human_radiobutton_script [| 
                  document.getElementById("[= dropdown_id; =]").disabled = true;
