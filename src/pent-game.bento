@@ -140,7 +140,7 @@ site pent [=
                         eval(player_A(: pent_player(: name, id :) :));
                     =]
                 =] else [=
-                        with (pp) [=
+                    with (pp) [=
                         log("set player B in game " + owner.id + " to pent_player name = " + pp.name);
                         eval(player_B(: pp :));
                     =] else [=

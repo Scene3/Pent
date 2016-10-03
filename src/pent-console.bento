@@ -11,9 +11,10 @@ site pent [=
 
     param_key [?]
     static param_key COMMAND = "do"
-    static param_key SET_NAME = "name"
-    static param_key SET_LEVEL = "level"
-    static param_key SET_ID = "id"
+    static param_key PLAYER_A_NAME = "a_name"
+    static param_key PLAYER_B_NAME = "b_name"
+    static param_key PLAYER_A_LEVEL = "a_level"
+    static param_key PLAYER_B_LEVEL = "b_level"
     static param_key FIRST_PICK = "first"
     static param_key PLAYER = "player"
     static param_key PIECE = "piece"
@@ -32,13 +33,12 @@ site pent [=
     static param_val STOP = "stop"
     static param_val BACK = "back"
     static param_val CONTINUE = "continue"
-    static param_val CHOOSE = "pick"
-    static param_val PLAYER_LEVEL = "*"
-    static param_val ID = "#"
+    static param_val CHOOSE = "choose"
+    static param_val LEVEL = "*"
+    static param_val NAME = "*"
     static param_val PLAYER_A = "A"
     static param_val PLAYER_B = "B"
     static param_val CELL = "#"
-    static param_val NAME = "*"
     static param_val QTR_TURNS = "#"
     static param_val FLIPS = "#" 
     static param_val TURN_NUM = "#"
@@ -51,7 +51,7 @@ site pent [=
     param_key[] param_keys = []
     
     static param_keys{} allowed_params = {
-        (CHOOSE_PLAYERS): [ COMMAND, CONFIRM, PLAYER, SET_NAME, SET_TYPE, SET_ID ],
+        (CHOOSE_PLAYERS): [ COMMAND, CONFIRM, PLAYER_A_NAME, PLAYER_A_LEVEL, PLAYER_B_NAME, PLAYER_B_LEVEL ],
         (CHOOSE_ORDER):   [ COMMAND, CONFIRM, FIRST_PICK ],
         (CHOOSE_TEAM):    [ COMMAND, CONFIRM, TURN, PIECE ],
         (PLAY_GAME):      [ COMMAND, CONFIRM, TURN, PIECE, ROTATE, FLIP, PUT ],
@@ -65,11 +65,11 @@ site pent [=
     static param_vals{}{} allowed_vals = {
     
         (CHOOSE_PLAYERS): { 
-            (COMMAND):    [ CHOOSE, STOP, BACK ],
-            (PLAYER):     [ PLAYER_A, PLAYER_B ],
-            (SET_NAME):   [ NAME ],
-            (SET_LEVEL):  [ PLAYER_LEVEL ],
-            (SET_ID):     [ ID ]
+            (COMMAND):        [ CHOOSE, STOP, BACK ],
+            (PLAYER_A_NAME):  [ NAME ],
+            (PLAYER_B_NAME):  [ NAME ],
+            (PLAYER_A_LEVEL): [ LEVEL ],
+            (PLAYER_A_LEVEL): [ LEVEL ]
         },
         
         (CHOOSE_ORDER): { 
@@ -97,14 +97,15 @@ site pent [=
         }
     }
        
+    /** A human player is designated by setting the player level to human **/
+    static HUMAN_LEVEL = "human"
+    
     /** Computer player options **/
-    
-    VERY_EASY_LEVEL = "very_easy"
-    EASY_LEVEL = "easy"
-    MEDIUM_LEVEL = "medium"
-    HARD_LEVEL = "hard"
-    VERY_HARD_LEVEL = "very_hard"
-    
+    static VERY_EASY_LEVEL = "very_easy"
+    static EASY_LEVEL = "easy"
+    static MEDIUM_LEVEL = "medium"
+    static HARD_LEVEL = "hard"
+    static VERY_HARD_LEVEL = "very_hard"
     
     option[] computer_player_options = [ option("Novice", VERY_EASY_LEVEL, true), 
                                          option("Beginner", EASY_LEVEL, false),
@@ -112,6 +113,17 @@ site pent [=
                                          option("Above Average", HARD_LEVEL, false),
                                          option("Pro", VERY_HARD_LEVEL, false) ]
     
+    /** input field ids **/
+    static PLAYER_A_NAME_TEXTEDIT = "player_A_name"
+    static PLAYER_B_NAME_TEXTEDIT = "player_B_name"
+
+    static PLAYER_A_LEVEL_DROPDOWN = "player_A_level_dropdown"
+    static PLAYER_B_LEVEL_DROPDOWN = "player_B_level_dropdown"
+    
+    static PLAYER_A_HUMAN_RADIO = "player_A_human_radiobutton"
+    static PLAYER_A_COMPUTER_RADIO = "player_A_computer_radiobutton"
+    static PLAYER_B_HUMAN_RADIO = "player_B_human_radiobutton"
+    static PLAYER_B_COMPUTER_RADIO = "player_B_computer_radiobutton"
     
     /**
      *  Pent Console logic
@@ -129,7 +141,7 @@ site pent [=
 
 
     /** pent-specific console **/
-    dynamic console pent_console(pent_game gm, params{}),(params{}) [=
+    dynamic console pent_console(pent_game gm, params{}) [=
     
         keep: id = "pent_console"
     
@@ -138,9 +150,10 @@ site pent [=
      
         /** parameter shortcuts **/
         command = params{COMMAND}
-        set_name = params{SET_NAME}
-        set_level = params{SET_LEVEL}
-        set_id = params{SET_ID}
+        player_A_name = params{PLAYER_A_NAME}
+        player_B_name = params{PLAYER_B_NAME}
+        player_A_level = params{PLAYER_A_LEVEL}
+        player_B_level = params{PLAYER_B_LEVEL}
         first_pick = params{FIRST_PICK}
         selected_player = params{PLAYER}
         selected_piece = params{PIECE}
@@ -154,6 +167,19 @@ site pent [=
                 
         dynamic boolean a_picks_next = (is_odd(turn) == game.a_picks_first)
         dynamic boolean a_plays_next = (is_odd(turn) != game.a_picks_first)
+        
+        /---- log calls ----/
+        log("instantiating pent_console for game " + game.id);
+        if (params) [=
+            if (command) [=
+                log("  ...command is " + command);
+            =] else [=
+                log("  ...no command");
+            =]
+            log("    ...params: " + params);
+        =] else [=
+            log("  ...no params");
+        =]
         
 
         /---- implementation ----/
@@ -202,10 +228,19 @@ site pent [=
          
         /-- in the Choose Player phase, we accept name/id choices for either player --/
         =] else if (game.phase == CHOOSE_PLAYERS) [=
-            if (selected_player == PLAYER_A) [=
-                game.set_player(set_name, set_id, true);
-            =] else if (selected_player == PLAYER_B) [=
-                game.set_player(set_name, set_id, false);
+            if (player_A_name) [=
+                log("setting player A to " + player_A_name);
+                game.set_player(player_A_name, "A", true);
+            =] else if (player_A_level) [=
+                log("setting player A to computer, level " + player_A_level);
+                game.set_player("Computer", player_A_level, true);
+            =]
+            if (player_B_name) [=
+                log("setting player B to " + player_B_name);
+                game.set_player(player_B_name, "B", true);
+            =] else if (player_B_level) [=
+                log("setting player B to computer, level " + player_B_level);
+                game.set_player("Computer", player_B_level, true);
             =]
        
         =] else if (game.phase == CHOOSE_ORDER) [=
@@ -380,8 +415,25 @@ site pent [=
         
         title [/]
 
-        field_ids[] = []
-        submit_params{} = { COMMAND: CHOOSE } 
+        submit_params{} = { (COMMAND): CHOOSE }
+        field_params{} = {}
+        
+        submit_script [|
+            function submitScript() {
+                var params = {};
+                [=
+                    for k in submit_params.keys [|
+                        params["[= k; =]"] = "[= submit_params{k}; =]";
+                    |]
+                    for f in field_params.keys [|
+                        params["[= f; =]"] = encodeURIComponent(document.getElementById("[= field_params{f}; =]").value);
+                    |]
+                =]  
+                queryComponent("/do", params);
+                return true;
+            }
+        |]
+            
         
         if (title) [=
             console_title(title);
@@ -391,23 +443,30 @@ site pent [=
         
         [| <div class="button_div"> |]
         button("cancel", "Cancel");
-        submit_button("choose", "Ok", "/pent_console", field_ids, submit_params);
+        request_button("choose", "Ok", "submitScript();");
         [| </div> |]
         
+        // add script
+        [| <script> |]
+        submit_script;
+        [| </script> |]
     =]
 
     chooser_panel choose_players_panel(pent_game game) [=
         title = "Choose Players"
-        
-        field_ids[] = []
+
+        field_params{} = { (PLAYER_A_NAME): PLAYER_A_NAME_TEXTEDIT,
+                           (PLAYER_B_NAME): PLAYER_B_NAME_TEXTEDIT,
+                           (PLAYER_A_LEVEL): PLAYER_A_LEVEL_DROPDOWN,
+                           (PLAYER_B_LEVEL): PLAYER_B_LEVEL_DROPDOWN } 
         
         dynamic component player_panel(boolean is_player_A) [=
              component_class = owner.type
 
              pent_player player = is_player_A ? game.player_A : game.player_B
              title = is_player_A ? "Player A" : "Player B"
-             radio_group = is_player_A ? "player_A_type" : "player_B_type"
-             textedit_name = is_player_A ? "player_A_name" : "player_B_name"
+             radio_group = is_player_A ? "player_A" : "player_B"
+             textedit_name = is_player_A ? PLAYER_A_NAME_TEXTEDIT : PLAYER_B_NAME_TEXTEDIT
              dropdown_name = is_player_A ? "player_A_level" : "player_B_level"
              name_cell_id = is_player_A ? "player_A_name_cell" : "player_B_name_cell"
              level_cell_id = is_player_A ? "player_A_level_cell" : "player_B_level_cell"

@@ -346,6 +346,14 @@ site pent [=
         console_view(this_game, params);    
     =]
 
+    response do(params{}) [=
+        pent_game this_game = current_game
+        
+        log("ajax call for game " + this_game.id + " with players " + this_game.player_A.name + " and " + this_game.player_B.name);
+        pent_console(this_game, params);    
+    =]
+    
+            
     base_page(*) work_page(params{}) [=
         boolean needs_login = true
         boolean needs_admin = true
