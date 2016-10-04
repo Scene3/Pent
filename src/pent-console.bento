@@ -237,10 +237,10 @@ site pent [=
             =]
             if (player_B_name) [=
                 log("setting player B to " + player_B_name);
-                game.set_player(player_B_name, "B", true);
+                game.set_player(player_B_name, "B", false);
             =] else if (player_B_level) [=
                 log("setting player B to computer, level " + player_B_level);
-                game.set_player("Computer", player_B_level, true);
+                game.set_player("Computer", player_B_level, false);
             =]
        
         =] else if (game.phase == CHOOSE_ORDER) [=

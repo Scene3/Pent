@@ -151,6 +151,7 @@ site pent [=
                  
                  /-- if both players are set, advance to the next phase --/
                  if (player_A && player_B) [=
+                     log("both players are set, setting phase to choose order");
                      set_phase(CHOOSE_ORDER);
                  =]
             =] else [=
