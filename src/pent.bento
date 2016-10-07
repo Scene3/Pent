@@ -55,11 +55,6 @@ site pent [=
 
     session_init [=
         current_game(new_pent_game);
-        current_game.set_player("Player A", "a", true);
-        current_game.set_player("Player B", "b", false);
-        current_game.set_a_picks_first(true);
-
-        log("session init player A: " + current_game.player_A.name);
         view_mode(STANDARD_MODE);
         
         three_session_init;
