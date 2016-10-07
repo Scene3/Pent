@@ -337,7 +337,7 @@ site pent [=
 
         pent_game this_game = current_game
         
-        log("playing game " + this_game.id + " with players " + this_game.player_A.name + " and " + this_game.player_B.name);
+        log("playing game " + this_game.id);
         console_view(this_game, params);    
     =]
 

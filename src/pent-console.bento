@@ -143,10 +143,10 @@ site pent [=
     /** pent-specific console **/
     dynamic console pent_console(pent_game gm, params{}) [=
     
-        keep: id = "pent_console"
+        id = "pent_console"
     
         /** the current game **/
-        keep: pent_game game = gm
+        pent_game game = gm
      
         /** parameter shortcuts **/
         command = params{COMMAND}
