@@ -60,6 +60,27 @@ site pent [=
         three_session_init;
     =]
 
+test_gm [=
+    pent_game gm(pent_game g) = g
+    
+    eval(gm(new_pent_game));
+
+    test_cons(gm, true);    
+    test_cons(gm, false);    
+
+=]
+        
+dynamic test_cons(pent_game gm, boolean flag) [=
+    if (flag) [=
+       gm.set_phase(CHOOSE_ORDER);
+    =]
+
+    "<p>Phase: ";
+    gm.phase;
+    "</p>";
+=]
+        
+
     
     /-------- session status ---------------------/
 
