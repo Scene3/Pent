@@ -395,7 +395,15 @@ emptyclass, pent_board p2c [=
   plays_to_cell(p1_array, 0);
 =]
 
+pgt [=
+  this pent_game [/]
+        
+  eval(pent_game);
+  pent_game.set_a_picks_first(true);
+=]
 
+        
+        
     test_runner pent_game_tests [=
 
         test_base test_pent_game_start [=

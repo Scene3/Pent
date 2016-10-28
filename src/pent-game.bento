@@ -121,6 +121,7 @@ site pent [=
         /---- set the phase ----/    
 
         dynamic set_phase(pent_phase pp) [= 
+            log("setting phase to " + pp);
             eval(phase(: pp :));
         =]
  

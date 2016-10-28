@@ -242,12 +242,13 @@ site pent [=
                 log("setting player B to computer, level " + player_B_level);
                 game.set_player("Computer", player_B_level, false);
             =]
-       
+
         =] else if (game.phase == CHOOSE_ORDER) [=
             if (first_pick) [=
+                log("choosing " + first_pick + " to go first");
                 game.set_a_picks_first((first_pick == PLAYER_A));
-            =]           
-        
+            =]
+
         =] else if (game.phase == CHOOSE_TEAM) [=
             if (selected_piece && turn) [=
                 if (turn != game.turn) [=
@@ -285,6 +286,8 @@ site pent [=
          *     -- "game over" splash screen if between games
          *   
          **/
+         
+        log(" ++++<>> game.phase: " + game.phase);
          
         if (game.phase == CHOOSE_PLAYERS) [=
             log("console showing choose players panel"); 
