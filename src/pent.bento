@@ -54,27 +54,22 @@ site pent [=
     /-------- session initialization --------------/
 
     session_init [=
-        current_game(new_pent_game);
+        eval(current_game(new_pent_game));
         view_mode(STANDARD_MODE);
-        
         three_session_init;
     =]
 
+            
 test_gm [=
-    pent_game gm(pent_game g) = g
-    
-    eval(gm(new_pent_game));
-
-    test_cons(gm, true);    
-    test_cons(gm, false);    
-
+    pent_game pg = pent_game("hoo");
+    eval(pg);
+    test_cons(pg);
 =]
+       
         
-dynamic test_cons(pent_game gm, boolean flag) [=
-    if (flag) [=
-       gm.set_phase(CHOOSE_ORDER);
-    =]
-
+dynamic test_cons(pent_game gm) [=
+    gm.phase;
+    gm.set_phase(CHOOSE_ORDER);
     "<p>Phase: ";
     gm.phase;
     "</p>";
