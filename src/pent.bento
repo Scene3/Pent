@@ -358,10 +358,8 @@ dynamic test_cons(pent_game gm) [=
     =]
 
     response do(params{}) [=
-        pent_game this_game = current_game
-        
-        log("ajax call for game " + this_game.id + " with players " + this_game.player_A.name + " and " + this_game.player_B.name);
-        pent_console(this_game, params);    
+        log("ajax call for game " + current_game.id + " with players " + current_game.player_A.name + " and " + current_game.player_B.name);
+        pent_console(current_game, params);    
     =]
     
             

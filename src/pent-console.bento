@@ -287,21 +287,21 @@ site pent [=
          *   
          **/
          
-        log(" ++++<>> game.phase: " + game.phase);
+        log(" ++++<>> game.get_phase: " + game.get_phase);
          
-        if (game.phase == CHOOSE_PLAYERS) [=
+        if (game.get_phase == CHOOSE_PLAYERS) [=
             log("console showing choose players panel"); 
             choose_players_panel(game);
-        =] else if (game.phase == CHOOSE_ORDER) [=
+        =] else if (game.get_phase == CHOOSE_ORDER) [=
             log("console showing choose order panel"); 
             choose_order_panel(game);
-        =] else if (game.phase == CHOOSE_TEAM) [=
+        =] else if (game.get_phase == CHOOSE_TEAM) [=
             log("console showing choose team panel"); 
             choose_team_panel(game);
-        =] else if (game.phase == PLAY_GAME) [=
+        =] else if (game.get_phase == PLAY_GAME) [=
             log("console showing game " + game.id + " between " + plyr_A.name + " and " + plyr_B.name); 
             game_panel(game);
-        =] else if (game.phase == BETWEEN_GAMES) [=
+        =] else if (game.get_phase == BETWEEN_GAMES) [=
             log("console showing game over screen"); 
             game_over_panel;
         =]

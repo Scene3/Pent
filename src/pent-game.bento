@@ -125,7 +125,12 @@ site pent [=
             eval(phase(: pp :));
         =]
  
+        /---- get the phase ----/    
 
+        dynamic pent_phase get_phase = phase
+ 
+                
+                
         /---- CHOOSE_PLAYERS phase ----/
     
         dynamic set_player(pent_player pp, boolean is_player_a),
