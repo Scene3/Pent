@@ -125,6 +125,8 @@ site pent [=
     static PLAYER_B_HUMAN_RADIO = "player_B_human_radiobutton"
     static PLAYER_B_COMPUTER_RADIO = "player_B_computer_radiobutton"
     
+    static FIRST_PICK_RADIO = "first_radiobutton"
+    
     /**
      *  Pent Console logic
      *
@@ -520,6 +522,8 @@ site pent [=
 
     chooser_panel choose_order_panel(pent_game game) [=
         title = "Who Goes First?"
+
+        field_params{} = { (FIRST_PICK): FIRST_PICK_RADIO }
 
         player_A_script [/]
         player_B_script [/]

@@ -347,7 +347,7 @@ dynamic test_cons(pent_game gm) [=
         scene_viewer(splash_scene);
     =]    
     
-    base_page(*) play_page(params{}) [=
+    dynamic base_page(*) play_page(params{}) [=
         boolean needs_login = false
         boolean needs_admin = false
 
@@ -357,13 +357,13 @@ dynamic test_cons(pent_game gm) [=
         console_view(this_game, params);    
     =]
 
-    response do(params{}) [=
+    dynamic response do(params{}) [=
         log("ajax call for game " + current_game.id + " with players " + current_game.player_A.name + " and " + current_game.player_B.name);
         pent_console(current_game, params);    
     =]
     
             
-    base_page(*) work_page(params{}) [=
+    dynamic base_page(*) work_page(params{}) [=
         boolean needs_login = true
         boolean needs_admin = true
     
