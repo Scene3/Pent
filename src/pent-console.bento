@@ -147,6 +147,10 @@ site pent [=
     
         /** the current game **/
         pent_game game = gm
+        
+        /** the current phase **/
+        dynamic pent_phase phase = game.get_phase
+        dynamic set_phase(pent_phase p) = game.set_phase(p)
      
         /** parameter shortcuts **/
         command = params{COMMAND}
@@ -209,25 +213,25 @@ site pent [=
             =]
  
         =] else if (command == BACK) [=
-            if (game.phase == CHOOSE_PLAYERS) [=
-                game.set_phase(BEFORE_GAME);
-            =] else if (game.phase == CHOOSE_ORDER) [=
-                game.set_phase(CHOOSE_PLAYERS);
+            if (phase == CHOOSE_PLAYERS) [=
+                set_phase(BEFORE_GAME);
+            =] else if (phase == CHOOSE_ORDER) [=
+                set_phase(CHOOSE_PLAYERS);
             /-- backing up from Choose Team is only available before the first pick --/
-            =] else if (game.phase == CHOOSE_TEAM && game.turn == 1) [=
-                game.set_phase(CHOOSE_ORDER);
+            =] else if (phase == CHOOSE_TEAM && game.turn == 1) [=
+                set_phase(CHOOSE_ORDER);
             =]
 
         =] else if (command == START) [=
-            game.set_phase(CHOOSE_PLAYERS);
+            set_phase(CHOOSE_PLAYERS);
 
         =] else if (command == CONTINUE) [=   
-            game.set_phase(CHOOSE_TEAM);
+            set_phase(CHOOSE_TEAM);
 
         /---- phase-dependent logic ----/
          
         /-- in the Choose Player phase, we accept name/id choices for either player --/
-        =] else if (game.phase == CHOOSE_PLAYERS) [=
+        =] else if (phase == CHOOSE_PLAYERS) [=
             if (player_A_name) [=
                 log("setting player A to " + player_A_name);
                 game.set_player(player_A_name, "A", true);
@@ -243,13 +247,13 @@ site pent [=
                 game.set_player("Computer", player_B_level, false);
             =]
 
-        =] else if (game.phase == CHOOSE_ORDER) [=
+        =] else if (phase == CHOOSE_ORDER) [=
             if (first_pick) [=
                 log("choosing " + first_pick + " to go first");
                 game.set_a_picks_first((first_pick == PLAYER_A));
             =]
 
-        =] else if (game.phase == CHOOSE_TEAM) [=
+        =] else if (phase == CHOOSE_TEAM) [=
             if (selected_piece && turn) [=
                 if (turn != game.turn) [=
                     redirect error("piece selected out of turn");
@@ -257,14 +261,14 @@ site pent [=
                 game.add_piece_by_id(selected_piece);     
             =]
         
-        =] else if (game.phase == PLAY_GAME) [=
+        =] else if (phase == PLAY_GAME) [=
             if (selected_piece && turn) [=
                 if (turn != game.turn) [=
                     redirect error("piece selected out of turn");
                 =]
                 game.play_piece_by_id(selected_piece, position, a_plays_next);     
                 
-                if (game.phase == BETWEEN_GAMES) [=
+                if (phase == BETWEEN_GAMES) [=
                     // game just ended
                 =]
             =]
@@ -287,21 +291,21 @@ site pent [=
          *   
          **/
          
-        log(" ++++<>> game.get_phase: " + game.get_phase);
+        log(" ++++<>> phase: " + phase);
          
-        if (game.get_phase == CHOOSE_PLAYERS) [=
+        if (phase == CHOOSE_PLAYERS) [=
             log("console showing choose players panel"); 
             choose_players_panel(game);
-        =] else if (game.get_phase == CHOOSE_ORDER) [=
+        =] else if (phase == CHOOSE_ORDER) [=
             log("console showing choose order panel"); 
             choose_order_panel(game);
-        =] else if (game.get_phase == CHOOSE_TEAM) [=
+        =] else if (phase == CHOOSE_TEAM) [=
             log("console showing choose team panel"); 
             choose_team_panel(game);
-        =] else if (game.get_phase == PLAY_GAME) [=
+        =] else if (phase == PLAY_GAME) [=
             log("console showing game " + game.id + " between " + plyr_A.name + " and " + plyr_B.name); 
             game_panel(game);
-        =] else if (game.get_phase == BETWEEN_GAMES) [=
+        =] else if (phase == BETWEEN_GAMES) [=
             log("console showing game over screen"); 
             game_over_panel;
         =]
@@ -411,7 +415,7 @@ site pent [=
     =]
     
 
-    console_panel chooser_panel [=
+    dynamic console_panel chooser_panel [=
         component_class [|
             console_panel chooser_panel [= owner.type; =]
         |]
@@ -421,7 +425,7 @@ site pent [=
         submit_params{} = { (COMMAND): CHOOSE }
         field_params{} = {}
         
-        submit_script [|
+        dynamic submit_script [|
             function submitScript() {
                 var params = {};
                 [=
@@ -432,11 +436,13 @@ site pent [=
                         params["[= f; =]"] = encodeURIComponent(document.getElementById("[= field_params{f}; =]").value);
                     |]
                 =]  
-                queryComponent("/do", params);
+                queryComponentByName("pent_console", "/do", params);
                 return true;
             }
         |]
             
+        
+        log(" chooser panel " + title + " params: " + field_params);
         
         if (title) [=
             console_title(title);
@@ -513,7 +519,19 @@ site pent [=
     =]
 
     chooser_panel choose_order_panel(pent_game game) [=
-       title = "Who Goes First?"
+        title = "Who Goes First?"
+
+        player_A_script [/]
+        player_B_script [/]
+       
+        radio_group = FIRST_PICK
+       
+        [| <div class="panel_row"><div class="panel_cell"> |]
+        radiobutton(radio_group, "Player A", true, "player_A", player_A_script);
+        [| </div><div class="panel_cell"> |]
+        radiobutton(radio_group, "Player B", false, "player_B", player_B_script);
+        [| </div></div> |]
+       
     =]
 
     chooser_panel choose_team_panel(pent_game game) [=
