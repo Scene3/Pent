@@ -125,7 +125,8 @@ site pent [=
     static PLAYER_B_HUMAN_RADIO = "player_B_human_radiobutton"
     static PLAYER_B_COMPUTER_RADIO = "player_B_computer_radiobutton"
     
-    static FIRST_PICK_RADIO = "first_radiobutton"
+    static PLAYER_A_FIRST_RADIO = "first_player_A_radiobutton"
+    static PLAYER_B_FIRST_RADIO = "first_player_B_radiobutton"
     
     /**
      *  Pent Console logic
@@ -426,9 +427,9 @@ site pent [=
 
         submit_params{} = { (COMMAND): CHOOSE }
         field_params{} = {}
+        radio_params{} = {}
         
         dynamic submit_script [|
-            function submitScript() {
                 var params = {};
                 [=
                     for k in submit_params.keys [|
@@ -437,10 +438,17 @@ site pent [=
                     for f in field_params.keys [|
                         params["[= f; =]"] = encodeURIComponent(document.getElementById("[= field_params{f}; =]").value);
                     |]
+                    [| var radioElement; |]
+                    for r in radio_params.keys [=
+                        for e in radio_params{r} [|
+                            radioElement = document.getElementById("[= e; =]");
+                            if (radioElement.checked) {
+                                params["[= r; =]"] = encodeURIComponent(radioElement.value);
+                            }
+                        |]
+                    =]
                 =]  
                 queryComponentByName("pent_console", "/do", params);
-                return true;
-            }
         |]
             
         
@@ -450,17 +458,13 @@ site pent [=
             console_title(title);
         =]
         
-        sub;
+        sub;w
         
         [| <div class="button_div"> |]
         button("cancel", "Cancel");
-        request_button("choose", "Ok", "submitScript();");
+        request_button("choose", "Ok", submit_script);
         [| </div> |]
         
-        // add script
-        [| <script> |]
-        submit_script;
-        [| </script> |]
     =]
 
     chooser_panel choose_players_panel(pent_game game) [=
@@ -523,7 +527,7 @@ site pent [=
     chooser_panel choose_order_panel(pent_game game) [=
         title = "Who Goes First?"
 
-        field_params{} = { (FIRST_PICK): FIRST_PICK_RADIO }
+        radio_params{} = { (FIRST_PICK): [PLAYER_A_FIRST_RADIO, PLAYER_B_FIRST_RADIO] }
 
         player_A_script [/]
         player_B_script [/]
@@ -540,7 +544,8 @@ site pent [=
 
     chooser_panel choose_team_panel(pent_game game) [=
         title = "Choose Teams"
-    
+ 
+        scene_viewer(splash_scene);
     =]
 
     console_panel game_panel(pent_game game) [=

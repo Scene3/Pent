@@ -201,6 +201,7 @@ site pent [=
         
         for int c from 0 to num_cols [=
             for int r from 0 to num_rows [=
+                log("put piece " + objs[c * num_rows + r].type + " in slot " + c + "," + r);
                 put_in_slot(objs[c * num_rows + r], c, r);
             =]
         =]
