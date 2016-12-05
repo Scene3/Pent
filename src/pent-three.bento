@@ -57,11 +57,13 @@ site pent [=
         name = "pent_camera"
         position target = position(0, 0, 0)
 
-        far(2000);    /--- 1.5 * backdrop.horizon); ---/
-        [|
-            [= name; =].target = [= target; =]
-        |]
-        sub;
+        this generate [=
+            far(2000);    /--- 1.5 * backdrop.horizon); ---/
+            [|
+                [= name; =].target = [= target; =]
+            |]
+            sub;
+        =]
     =]
 
 
@@ -113,7 +115,6 @@ site pent [=
                               ]
          
 
-        newline;  
     =]
     
     
@@ -198,11 +199,13 @@ site pent [=
         =]
 
         /---- construction ----/
-        
-        for int c from 0 to num_cols [=
-            for int r from 0 to num_rows [=
-                log("put piece " + objs[c * num_rows + r].type + " in slot " + c + "," + r);
-                put_in_slot(objs[c * num_rows + r], c, r);
+
+        this generate [=        
+            for int c from 0 to num_cols [=
+                for int r from 0 to num_rows [=
+                    log("put piece " + objs[c * num_rows + r].type + " in slot " + c + "," + r);
+                    put_in_slot(objs[c * num_rows + r], c, r);
+                =]
             =]
         =]
 

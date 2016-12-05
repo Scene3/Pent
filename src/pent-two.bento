@@ -33,6 +33,11 @@ site pent [=
     
     /--- objects ---/
     
+    obj2D tile_array [=
+    
+        rect[] tiles = []
+    =]
+    
     rect[] piece_2D(piece p) [=
         pent_position proto = p.protos[0]
         int num_cols = p.width
@@ -139,11 +144,162 @@ site pent [=
 
     /---- 2D graphics objects ----/
     
-    obj_2D [=
-        
+    draw_type [?]
+    static draw_type CLEAR = "clear"
+    static draw_type FILL = "fill"
+    static draw_type STROKE = "stroke"
+    
+    dynamic rect_args(rect r) = r.x1 + "," + r.y1 + "," + r.width + "," + r.height
         
     
+    two_context(context_name) [=
+    
+        keep: name = context_name
+    
+        /-- base rectangle function.  draw_type can be clear, fill or stroke --/
+        dynamic draw_rect(draw_type, rect r) [=
+            context_name;
+            [| . |]
+            draw_type;
+            [| Rect( |]
+            rect_args(r);
+            [| ); |]
+        =]
+    
+    
     =]
+
+    /** Base class of objects used in scene construction.
+      * 
+      **/
+
+    dynamic two_object [=
+        decl [/]
+        args[] = []
+        options{} = {}
+        keep: position pos(position p) = p
+        keep: rotation rot(rotation r) = r
+
+        two_object[] objs = []
+        boolean is_composite = (objs.count > 1)
+        
+        /-- optional event handlers --/
+
+        on_point_to [?]
+        on_hover_over [?]
+        on_drag [?]
+        
+        /-- check for defined handlers --/
+
+        boolean is_pointable [= with (on_point_to) [= true; =] else [= false; =] =]
+        boolean is_hoverable [= with (on_hover_over) [= true; =] else [= false; =] =]
+        boolean is_draggable [= with (on_drag) [= true; =] else [= false; =] =]
+
+        two_object[] pointable_objs = [
+                if (is_pointable) [=
+                    owner.def
+                =] else [=
+                    for two_object o in objs [=
+                        for two_object po in o.pointable_objs [=
+                            po.def
+                        =]
+                    =]
+                =]
+            ]
+
+        
+        /-- animation logic, called for each frame --/
+
+        next_frame [?]
+
+        
+        dynamic rotate(float x, float y) [=
+            newline;
+            name; [| .rotation.x += [= x; =]; |]
+            name; [| .rotation.y += [= y; =]; |]
+        =]
+        
+        dynamic orient(float x, float y) [=
+            newline;
+            name; [| .rotation.x = [= x; =]; |]
+            name; [| .rotation.y = [= y; =]; |]
+        =]
+        
+        dynamic rotate_on_axis(vector3 axis, float angle) [=
+            newline;
+            name; [| .rotateOnAxis([= axis; =],[= angle; =]); |]
+        =]
+
+        dynamic move(float x, float y) [=
+            newline;
+            name; [| .position.x += [= x; =]; |]
+            name; [| .position.y += [= y; =]; |]
+        =]
+
+        dynamic locate(float x, float y) [=
+            newline;
+            name; [| .position.x = [= x; =]; |]
+            name; [| .position.y = [= y; =]; |]
+        =]
+
+        dynamic immutable_field(pos.x, pos.y) set_position [=
+            name = "position"
+        =]
+
+        dynamic immutable_field(rot.x, rot.y) set_rotation [=
+            name = "rotation"
+        =]
+
+        dynamic construct [=
+            debug_log("...constructing " + three_class + "...");
+            debug_log("    ...args: " + (string) args);  
+            debug_log("    ...options: " + (string) options);  
+            debug_log("    ...decorated options: " + decorate(options));  
+
+            [| new THREE. |]
+            three_class;
+            [| ( |]
+
+            if (args) [=
+                arg_list(args);
+
+            =] else if (options) [= 
+                decorate(options);
+            =]
+
+            [| ) |]
+        =]
+
+        dynamic set_attributes [=
+            debug_log("setting position of " + owner.type + " to " + pos);
+            with (pos) [|
+                [= name; =].position.set([= pos.x; =], [= pos.y; =], [= pos.z; =]);
+            |]            
+        =]         
+
+        this generate [=
+            /-- declare the object and call its constructor --/
+            if (decl) [=
+                decl;
+                
+            =] else if (three_class) [| 
+                var [= name; =] = [= construct; =];
+            |]
+            
+            set_attributes;
+            
+            sub;
+    
+            with (next_frame) [|
+                [= name; =].next_frame = function () {
+                    [= next_frame; =]
+                };
+            |]
+        =]
+                
+        this;
+    =]
+
 
     /---- viewer for 2D graphics ----/ 
 

@@ -360,13 +360,17 @@ site pent [=
             padding: 0.5rem 0; 
         }
         
+        .console_row {
+            width: 100%;
+            text-align: center;
+        }
         
         .player_panel {
             background-color: #339999;
             color: #FFFFFF;
             padding: 0.2rem;
-            margin: 0.5rem 0;
-            display: table;
+            margin: 0.5rem;
+            display: inline-table;
         }
 
         .player_panel tab {
@@ -376,10 +380,33 @@ site pent [=
         .panel_row {
             display: table-row;
         }
-        
+
+        .left_cell {
+            text-align: left;
+        }
+
+        .right_cell {
+            text-align: right;
+        }
+
         .panel_cell {
             display: table-cell;
-            padding: 0.5rem;
+            padding: 0.5rem 0.25rem;
+        }
+        
+        .button_panel {
+            display: table;
+            margin: auto;
+            text-align: center;
+        }
+        
+        .button_row {
+            display: table-row;
+        }
+
+        .button_div {
+            display: table-cell;
+            padding: 0.25rem 0.5rem;
         }
         
         .space_on_left * {
@@ -389,6 +416,11 @@ site pent [=
         .disabled {
             color: #CCCCCC;
         }
+        
+        .textedit {
+            width: 9rem;
+        }
+        
     |]
 
             
@@ -458,12 +490,13 @@ site pent [=
             console_title(title);
         =]
         
-        sub;w
+        sub;
         
-        [| <div class="button_div"> |]
+        [| <div class="button_panel"><div class="button_row"><div class="button_div"> |]
         button("cancel", "Cancel");
+        [| </div><div class="button_div"> |]
         request_button("choose", "Ok", submit_script);
-        [| </div> |]
+        [| </div></div></div> |]
         
     =]
 
@@ -506,22 +539,22 @@ site pent [=
 
              player_title(title);
 
-             [| <div class="panel_row"><div class="panel_cell"> |]
+             [| <div class="panel_row"><div class="panel_cell left_cell"> |]
              radiobutton(radio_group, "Human", true, "human", human_radiobutton_script);
-             [| </div><div id="[= name_cell_id; =]" class="panel_cell space_on_left"> |]
+             [| </div><div id="[= name_cell_id; =]" class="panel_cell space_on_left right_cell"> |]
              [| Name:&nbsp; |]
-             textedit(textedit_name, player.name, 32);
-             [| </div></div><div class="panel_row"><div class="panel_cell"> |]
+             textedit(textedit_name, player.name);
+             [| </div></div><div class="panel_row"><div class="panel_cell left_cell"> |]
              radiobutton(radio_group, "Computer", false, "computer", computer_radiobutton_script);
-             [| </div><div id="[= level_cell_id; =]" class="panel_cell space_on_left disabled"> |]
+             [| </div><div id="[= level_cell_id; =]" class="panel_cell space_on_left right_cell disabled"> |]
              [| Level:&nbsp; |]
              dropdown(dropdown_name, computer_player_options, true);
              [| </div></div> |]
         =]
-        
+        [| <div class="console_row"> |]
         player_panel(true);
         player_panel(false);
-    
+        [| </div> |]    
     =]
 
     chooser_panel choose_order_panel(pent_game game) [=

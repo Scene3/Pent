@@ -24,7 +24,7 @@ site pent [=
 
         .view {
             margin: auto;
-            width: 40rem;
+            width: 44rem;
             box-sizing: border-box;
         }
     

@@ -169,6 +169,35 @@ site three [=
             |]
         =]            
 
+
+
+        /------------- controls --------------/
+    
+        dom_event(nm) [=
+           name = nm
+           [| '[= name; =]' |]
+        =]
+        
+        event_handler [=
+            boolean capture = false
+            body [?]
+        =]
+    
+        event_listener(dom_event event, event_handler handler) [=
+            [|
+                document.getElementById([= id; =]).addEventListener([= event; =], function() {[= handler.body; =]}, [= handler.capture; =]);
+            |]            
+        =]
+    
+
+
+        dynamic add_controls [=
+        
+        
+        =]
+
+
+
         /-------------------------------/
         /---------- the scene ----------/
 
@@ -179,11 +208,14 @@ site three [=
         /-------- the renderer ---------/
 
         webgl_renderer(*) this_renderer(cname, width, height) [=
-            canvas_container;
-            [| .appendChild( |]
-            name;
-            [| .domElement); |]
-            sub;
+        
+            this generate [=
+                canvas_container;
+                [| .appendChild( |]
+                name;
+                [| .domElement); |]
+                sub;
+            =]
         =]
 
 
@@ -232,7 +264,7 @@ site three [=
                 [| recalcCanvasSize(); |]
 
                 debug_log("constructing renderer id " + canvas_id + "   width " + canvas_width + "   height " + canvas_height);
-                this_renderer(canvas_id, canvas_width, canvas_height);
+                this_renderer(canvas_id, canvas_width, canvas_height).generate;
 
                 if (size_to_window) [|
                     window.addEventListener("resize", resizeCanvas, false);
@@ -240,7 +272,7 @@ site three [=
 
                 /-- construct the scene --/
                 js_comment_log("construct the scene");
-                this_scene;
+                this_scene.generate;
 
                 js_comment_log("assign global variables");
                 assign_global_vars;
@@ -257,6 +289,9 @@ site three [=
                     js_comment_log("add subclass script");
                     sub_script;
                 =]
+
+                /-- add mouse listeners etc. --/
+                add_controls;
 
                 [| updateCamera(); |]
 
@@ -363,9 +398,9 @@ site three [=
         
         
         /** Run the animation. **/
-        run [=
-            animate;
-        =]
+        run [|
+            animate();
+        |]
 
         /-- top-level javascript functions for this component --/
 
@@ -508,11 +543,12 @@ site three [=
         
 =]
 /---------------------
- -- three.bento
+ -- three_main.bento
  --
+ -- Main module of three.bento
  -- Bento support for three.js
  --
- -- Copyright (c) 2013-2015 by Michael St. Hippolyte
+ -- Copyright (c) 2013-2016 by Michael St. Hippolyte
  --
  --/
  
@@ -641,9 +677,12 @@ site three [=
             [| ); |]
         =]
         
-        debug_log("instantiating object " + name);
+        dynamic generate [= 
+            debug_log("constructing object " + name);
+            sub;
+        =]
         
-        sub;
+        this;
     =]
 
     /** an object representing a javascript function **/
@@ -661,8 +700,9 @@ site three [=
             }
         |]
 
+
         /-- call the function --/
-        [| [= name; =](); |]
+        this generate [| [= name; =](); |]
     =]
 
     dynamic item_list(items[]) [=
@@ -716,9 +756,34 @@ site three [=
         position pos = position(0, 0, 0)
         rotation rot = rotation(0, 0, 0)
 
-        three_object objs[] = []
+        three_object[] objs = []
         boolean is_composite = (objs.count > 1)
+        
+        /-- optional event handlers --/
 
+        on_point_to [?]
+        on_hover_over [?]
+        on_drag [?]
+        
+        /-- check for defined handlers --/
+
+        boolean is_pointable [= with (on_point_to) [= true; =] else [= false; =] =]
+        boolean is_hoverable [= with (on_hover_over) [= true; =] else [= false; =] =]
+        boolean is_draggable [= with (on_drag) [= true; =] else [= false; =] =]
+
+        three_object[] pointable_objs = [
+                if (is_pointable) [=
+                    owner.def
+                =] else [=
+                    for three_object o in objs [=
+                        for three_object po in o.pointable_objs [=
+                            po.def
+                        =]
+                    =]
+                =]
+            ]
+
+        
         /-- animation logic, called for each frame --/
 
         next_frame [?]
@@ -799,24 +864,25 @@ site three [=
             |]            
         =]         
 
-
-        /-- declare the object and call its constructor --/
-        if (decl) [=
-            decl;
+        this generate [=
+            /-- declare the object and call its constructor --/
+            if (decl) [=
+                decl;
+                
+            =] else if (three_class) [| 
+                var [= name; =] = [= construct; =];
+            |]
             
-        =] else if (three_class) [| 
-            var [= name; =] = [= construct; =];
-        |]
-        
-        set_attributes;
-        
-        sub;
-
-        with (next_frame) [|
-            [= name; =].next_frame = function () {
-                [= next_frame; =]
-            };
-        |]
+            set_attributes;
+            
+            sub;
+    
+            with (next_frame) [|
+                [= name; =].next_frame = function () {
+                    [= next_frame; =]
+                };
+            |]
+        =]
     =]
 
 
@@ -827,15 +893,18 @@ site three [=
 
         three_object objs[] = []
         
-        debug_log("composite object " + name + " has " + objs.count + " objs"); 
-        debug_log("  ..objs[0]: " + objs[0].name + "   class: " + objs[0].three_class);
         
-        for three_object o in objs [=
-            o;
-            add(o);
+        this generate [=
+            debug_log("composite object " + name + " has " + objs.count + " objs"); 
+            debug_log("  ..objs[0]: " + objs[0].name + "   class: " + objs[0].three_class);
+            
+            for three_object o in objs [=
+                o.generate;
+                add(o);
+            =]
+    
+            sub;
         =]
-
-        sub;
     =]
 
     /** An object_group is a simple composite object in which all three_object
@@ -847,8 +916,6 @@ site three [=
                 obj
             =]
         ]
-        
-        sub;
     =]
 
 
@@ -880,9 +947,11 @@ site three [=
         =]
 
         set_attributes [/]
-                
-        set_size(width, height);
-        sub;
+        
+        this generate [=                
+            set_size(width, height);
+            sub;
+        =]
     =]
 
 
@@ -924,29 +993,29 @@ site three [=
         
         scripts[] = []
 
-        with (width) [=
-            info_log("constructing scene " + name + ", width " + width + "  height " + height); 
-        =] else [=           
-            info_log("constructing scene " + name); 
-        =]
+        this generate [=
         
-        info_log(objs.count + " scene objects");
-        for three_object o in objs [=
-            debug_log("    ..." + o);
-        =] 
-
-        eval(aspect_ratio);
-
-        /-- instantiate and add camera --/
-        js_comment_log("instantiate camera");
-
-        cam;
-        if (width && height) [=
-            cam.aspect(aspect_ratio);
-            cam.update_projection_matrix;
+            with (width) [=
+                info_log("constructing scene " + name + ", width " + width + "  height " + height); 
+            =] else [=           
+                info_log("constructing scene " + name); 
+            =]
+            
+            info_log(objs.count + " scene objects");
+    
+            eval(aspect_ratio);
+    
+            /-- instantiate and add camera --/
+            js_comment_log("instantiate camera");
+    
+            cam.generate;
+            if (width && height) [=
+                cam.aspect(aspect_ratio);
+                cam.update_projection_matrix;
+            =]
+            js_comment_log("add camera");
+            add(cam);
         =]
-        js_comment_log("add camera");
-        add(cam);
     =]
     
     /---- default scene camera ----/
@@ -955,12 +1024,14 @@ site three [=
         position pos = position(0, 2, 25)
         name = "default_camera"
 
-        far(2000);    /--- 1.5 * backdrop.horizon); ---/
-        debug_log("default_scene_cam name: " + name);
-        [|
-            [= name; =].target = new THREE.Vector3( 0, 2, 0 );
-        |]
-        sub;
+        this generate [=
+            far(2000);    /--- 1.5 * backdrop.horizon); ---/
+            debug_log("default_scene_cam name: " + name);
+            [|
+                [= name; =].target = new THREE.Vector3( 0, 2, 0 );
+            |]
+            sub;
+        =]
     =]
 
 
@@ -1300,7 +1371,6 @@ site three [=
         
         three_object[] objs = [ with (lt) [= lt =], if (bd) [= bd =] ]
 
-        super;
     =]
 
 
