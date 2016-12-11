@@ -70,18 +70,25 @@ site pent [=
         .title_bar {
             width: 100%;
             padding: 0.5rem;
-            background-color: #339999;
             color: #110C0F;
             text-align: center;
             font-weight: bold;
             font-size: .95rem;
             font-family: "Arial Black","Arial Bold",sans-serif;
             box-sizing: border-box;
+            z-index: 200;
         }
         
         .pent_letter {
             display: inline;
             padding: 0 2em;
+        }
+        
+        .canvas_spacer {
+            width: 64rem;
+            height: 20rem;
+            border: 1px solid black;
+            margin: auto;
         }
     |]
 
@@ -90,6 +97,7 @@ site pent [=
 
     dynamic pent_view console_view(pent_game gm, params{}) [=
         title_view;
+        [| <div class="canvas_spacer"></div> |]
         pent_console(gm, params);
     =]
 

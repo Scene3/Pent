@@ -321,6 +321,12 @@ site pent [=
      **/
 
     pent_console_style [|
+    
+        #console_view {
+            width: 100%;
+            height: 100%;
+            z-index: 100;
+        }
 
         .console_title {
             color: #6666CC;
@@ -337,6 +343,7 @@ site pent [=
             width: 100%;
             padding: 0.125rem;
             background-color: #1F7F7F;
+            background: rgba(255, 255, 255, 0.1);
             color: #CCCCCC;
             text-align: left;
             font-weight: bold;
@@ -355,6 +362,7 @@ site pent [=
         }
         
         .console {
+            width: 100%;
             color: #110C0F;
             font-family: Helvetica, Arial, Geneva, sans-serif;
             padding: 0.5rem 0; 
@@ -367,6 +375,7 @@ site pent [=
         
         .player_panel {
             background-color: #339999;
+            background: rgba(127, 127, 127, 0.1);
             color: #FFFFFF;
             padding: 0.2rem;
             margin: 0.5rem;

@@ -272,16 +272,6 @@ dynamic test_cons(pent_game gm) [=
                 width: 10rem;
             }
 
-            #tc_container {
-                width: 100%;
-                height: 100%;
-            }
-            
-            #tc {
-                width: 100%;
-                height: 100%;
-            }
-            
             #input_box input {
                 color: black;
                 font-size: 1.125rem;
@@ -489,7 +479,6 @@ dynamic test_cons(pent_game gm) [=
         pent_game this_game = current_game
         
         current_game.player_A.name;
-        this_game.player_A.name;
         ",";
         this_game.player_B.name;
     =]

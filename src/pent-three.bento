@@ -252,6 +252,8 @@ site pent [=
         
             canvas_id = s.name + "_canvas"
 
+            boolean run_scripts_on_load = false
+
             include_scripts[] = [ "/js/lib/three.js", "/js/lib/stats.js" ]
     
             sub_script [=
