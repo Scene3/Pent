@@ -134,7 +134,7 @@ dynamic test_cons(pent_game gm) [=
     static SPLASH_LOGO = "images/pent-logo-358x78.png"
     static HEADER_LOGO = "images/pent-logo-358x78.png"
 
-    color main_bgcolor = "#AAEEEE"
+    color main_bgcolor = "#112244"
 
 
     /-------- base page ---------------------------/
@@ -340,6 +340,8 @@ dynamic test_cons(pent_game gm) [=
         pent_game this_game = current_game
         
         log("playing game " + this_game.id);
+ 
+        scene_viewer(splash_scene);
         console_view(this_game, params);    
     =]
 

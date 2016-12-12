@@ -24,12 +24,12 @@ site pent [=
 
         .view {
             margin: auto;
-            width: 44rem;
+            width: auto;
             box-sizing: border-box;
         }
     
         .view div {
-            width: auto;
+            box-sizing: border-box;
         }
     
         .pent_board td {
@@ -70,7 +70,7 @@ site pent [=
         .title_bar {
             width: 100%;
             padding: 0.5rem;
-            color: #110C0F;
+            color: #7C7C7C;
             text-align: center;
             font-weight: bold;
             font-size: .95rem;
@@ -87,7 +87,6 @@ site pent [=
         .canvas_spacer {
             width: 64rem;
             height: 20rem;
-            border: 1px solid black;
             margin: auto;
         }
     |]
@@ -97,7 +96,6 @@ site pent [=
 
     dynamic pent_view console_view(pent_game gm, params{}) [=
         title_view;
-        [| <div class="canvas_spacer"></div> |]
         pent_console(gm, params);
     =]
 

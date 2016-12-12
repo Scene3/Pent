@@ -323,19 +323,28 @@ site pent [=
     pent_console_style [|
     
         #console_view {
+            position: absolute;
             width: 100%;
             height: 100%;
+            top: 0;
+            left: 0;
             z-index: 100;
         }
 
+        #console_view div {
+            z-index: 100;
+            position: relative;
+        }        
+
         .console_title {
-            color: #6666CC;
-            padding-top: 0.5rem;
-            padding-bottom: 0.5rem;
+            color: #33BBAA;
+            padding: 0 0 2rem 0;
+            margin: 0;
             text-align: center;
             font-weight: bold;
             font-size: 1.33rem;
             font-family: Helvetica, Arial, Geneva, sans-serif;
+            letter-spacing: 1rem;
         }
 
         .player_title {
@@ -352,8 +361,8 @@ site pent [=
         }
 
         .panel_title {
-            margin: 0 1rem 0 0;
-            padding: 0.5rem 1rem 0.5rem 0;
+            margin: 0;
+            padding: 2rem 1rem;
             color: #CCCCCC;
             text-align: center;
             font-weight: bold;
@@ -365,25 +374,37 @@ site pent [=
             width: 100%;
             color: #110C0F;
             font-family: Helvetica, Arial, Geneva, sans-serif;
-            padding: 0.5rem 0; 
-        }
-        
-        .console_row {
-            width: 100%;
+            padding: 0;
+            margin: 0; 
             text-align: center;
         }
         
-        .player_panel {
-            background-color: #339999;
-            background: rgba(127, 127, 127, 0.1);
+        .console_row {
+            width: 64rem;
+            height: 20rem;
+            text-align: center;
+            margin: auto;
+        }
+        
+        .console_panel {
             color: #FFFFFF;
             padding: 0.2rem;
-            margin: 0.5rem;
-            display: inline-table;
+            margin: 0;
         }
 
-        .player_panel tab {
-            display: table-row;
+        .table_panel {
+            display: inline-table;
+        }        
+
+        
+        .left_panel {
+            margin-left: 0;
+            margin-right: 10rem;
+        }
+
+        .right_panel {
+            margin-left: 10rem;
+            margin-right: 0;
         }
 
         .panel_row {
@@ -402,7 +423,13 @@ site pent [=
             display: table-cell;
             padding: 0.5rem 0.25rem;
         }
-        
+
+        .visible_panel {        
+            background-color: #339999;
+            background: rgba(255, 255, 255, 0.25);
+            padding: 0.5rem;
+        }
+
         .button_panel {
             display: table;
             margin: auto;
@@ -499,9 +526,11 @@ site pent [=
             console_title(title);
         =]
         
+        [| <div class="console_row"> |]
         sub;
+        [| </div> |]
         
-        [| <div class="button_panel"><div class="button_row"><div class="button_div"> |]
+        [| <div class="button_panel visible_panel"><div class="button_row"><div class="button_div"> |]
         button("cancel", "Cancel");
         [| </div><div class="button_div"> |]
         request_button("choose", "Ok", submit_script);
@@ -510,7 +539,7 @@ site pent [=
     =]
 
     chooser_panel choose_players_panel(pent_game game) [=
-        title = "Choose Players"
+        title = "choose players"
 
         field_params{} = { (PLAYER_A_NAME): PLAYER_A_NAME_TEXTEDIT,
                            (PLAYER_B_NAME): PLAYER_B_NAME_TEXTEDIT,
@@ -518,8 +547,8 @@ site pent [=
                            (PLAYER_B_LEVEL): PLAYER_B_LEVEL_DROPDOWN } 
         
         dynamic component player_panel(boolean is_player_A) [=
-             component_class = owner.type
-
+             component_class = "visible_panel table_panel " + (is_player_A ? " left_panel" : " right_panel")
+             id = is_player_A ? "player_A_panel" : "player_B_panel"
              pent_player player = is_player_A ? game.player_A : game.player_B
              title = is_player_A ? "Player A" : "Player B"
              radio_group = is_player_A ? "player_A" : "player_B"
@@ -550,24 +579,20 @@ site pent [=
 
              [| <div class="panel_row"><div class="panel_cell left_cell"> |]
              radiobutton(radio_group, "Human", true, "human", human_radiobutton_script);
-             [| </div><div id="[= name_cell_id; =]" class="panel_cell space_on_left right_cell"> |]
-             [| Name:&nbsp; |]
+             [| </div><div id="[= name_cell_id; =]" class="panel_cell right_cell"> |]
              textedit(textedit_name, player.name);
              [| </div></div><div class="panel_row"><div class="panel_cell left_cell"> |]
              radiobutton(radio_group, "Computer", false, "computer", computer_radiobutton_script);
-             [| </div><div id="[= level_cell_id; =]" class="panel_cell space_on_left right_cell disabled"> |]
-             [| Level:&nbsp; |]
+             [| </div><div id="[= level_cell_id; =]" class="panel_cell right_cell disabled"> |]
              dropdown(dropdown_name, computer_player_options, true);
              [| </div></div> |]
         =]
-        [| <div class="console_row"> |]
         player_panel(true);
         player_panel(false);
-        [| </div> |]    
     =]
 
     chooser_panel choose_order_panel(pent_game game) [=
-        title = "Who Goes First?"
+        title = "who goes first?"
 
         radio_params{} = { (FIRST_PICK): [PLAYER_A_FIRST_RADIO, PLAYER_B_FIRST_RADIO] }
 
@@ -575,19 +600,16 @@ site pent [=
         player_B_script [/]
        
         radio_group = FIRST_PICK
-       
-        [| <div class="panel_row"><div class="panel_cell"> |]
+        [| <div class="visible_panel left_panel"> |]
         radiobutton(radio_group, "Player A", true, "player_A", player_A_script);
-        [| </div><div class="panel_cell"> |]
+        [| </div><div class="visible_panel right_panel"> |]
         radiobutton(radio_group, "Player B", false, "player_B", player_B_script);
-        [| </div></div> |]
+        [| </div> |]
        
     =]
 
     chooser_panel choose_team_panel(pent_game game) [=
-        title = "Choose Teams"
- 
-        scene_viewer(splash_scene);
+        title = "pick teams"
     =]
 
     console_panel game_panel(pent_game game) [=

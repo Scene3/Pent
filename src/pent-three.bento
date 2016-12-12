@@ -35,7 +35,7 @@ site pent [=
     =]
 
     pent_theme default_theme [=
-        this material = blue_material
+        this material = jade_material
         float tile_width = 10.0
         float tile_depth = 4.0    
     =]
@@ -71,6 +71,10 @@ site pent [=
 
     phong_material blue_material [=
         undecorated color = 0x3333CC
+    =]
+    
+    phong_material jade_material [=
+        undecorated color = 0x448855
     =]
     
     
@@ -140,24 +144,24 @@ site pent [=
 
     object_group light_group [=
     
-        point_light(0xFF5555) bright_red_light [=
+        point_light(0xDD6666) bright_red_light [=
             position pos = position(120, 123, 120)
         =]
     
-        point_light(0x55FF55) bright_green_light [=
+        point_light(0x66DD66) bright_green_light [=
             position pos = position(-120, 123, 120)
         =]
     
-        point_light(0x5555FF) bright_blue_light [=
+        point_light(0x6666DD) bright_blue_light [=
             position pos = position(0, 233, -50)
         =]
     
-        point_light(0xEEEE55) bright_yellow_light [=
+        point_light(0xCCCC77) bright_yellow_light [=
             position pos = position(0, 233, 200)
         =]
     
         ambient_light(0x111111) soft_white_light [=
-            position pos = position(0, 100, 0)
+            position pos = position(0, 0, 100)
         =]
     =]
 
@@ -187,9 +191,11 @@ site pent [=
         float row_height = current_theme.tile_width * 5
         float total_width = num_cols * col_width
         float total_height = num_rows * row_height
+        float col_padding = col_width / 2
+        float row_padding = row_height / 2
 
-        dynamic float x_for_col(int col) = (-total_width / 2) + (col * col_width)
-        dynamic float y_for_row(int row) = (total_height / 2) - (row * row_height)
+        dynamic float x_for_col(int col) = (-total_width / 2) + (col * col_width) + col_padding
+        dynamic float y_for_row(int row) = (total_height / 2) - (row * row_height) - row_padding 
         
         dynamic put_in_slot(three_object obj, int col, int row) [=
             newline;
@@ -244,10 +250,13 @@ site pent [=
         height = "100%" 
         
         three_component(s) scene_component [=
-            style  [| position: absolute; top: 0; left: 0;
-                      width: 100%; height: 100%; 
+            style  [| position: fixed;
+                      top: 2.5rem;
+                      left: 0;
+                      width: 100%;
+                      height: 28rem; 
                       margin: 0; padding: 0;
-                      z-index: 0;
+                      z-index: 1;
                    |]
         
             canvas_id = s.name + "_canvas"
