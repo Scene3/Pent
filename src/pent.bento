@@ -134,7 +134,7 @@ dynamic test_cons(pent_game gm) [=
     static SPLASH_LOGO = "images/pent-logo-358x78.png"
     static HEADER_LOGO = "images/pent-logo-358x78.png"
 
-    color main_bgcolor = "#112244"
+    static color main_bgcolor = "#112244"
 
 
     /-------- base page ---------------------------/
@@ -269,6 +269,10 @@ dynamic test_cons(pent_game gm) [=
             }
 
             #reset_button {
+                width: 10rem;
+            }
+
+            #restart_button {
                 width: 10rem;
             }
 

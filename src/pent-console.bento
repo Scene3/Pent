@@ -319,6 +319,10 @@ site pent [=
      *  Pent Console UI
      *
      **/
+     
+    static color left_border_color = "#5599FF"
+    static color right_border_color = "#FF5555"
+    static color neutral_border_color = "#DDDDDD"
 
     pent_console_style [|
     
@@ -338,7 +342,7 @@ site pent [=
 
         .console_title {
             color: #33BBAA;
-            padding: 0 0 2rem 0;
+            padding: 0.5rem 0 1.5rem 0;
             margin: 0;
             text-align: center;
             font-weight: bold;
@@ -347,17 +351,25 @@ site pent [=
             letter-spacing: 1rem;
         }
 
-        .player_title {
+        .panel_title_bar {
             display: table-caption;
             width: 100%;
             padding: 0.125rem;
             background-color: #1F7F7F;
             background: rgba(255, 255, 255, 0.1);
             color: #CCCCCC;
-            text-align: left;
+            text-align: center;
             font-weight: bold;
             font-size: 0.66rem;
             font-family: Helvetica, Arial, Geneva, sans-serif;
+        }
+
+        .left_title_bar {        
+            border: 1px solid [= left_border_color; =];
+        }
+
+        .right_title_bar {        
+            border: 1px solid [= right_border_color; =];
         }
 
         .panel_title {
@@ -381,9 +393,10 @@ site pent [=
         
         .console_row {
             width: 64rem;
-            height: 20rem;
+            height: 15rem;
             text-align: center;
             margin: auto;
+            margin-top: 5rem;
         }
         
         .console_panel {
@@ -391,20 +404,30 @@ site pent [=
             padding: 0.2rem;
             margin: 0;
         }
-
+        
+        .team_panel {
+            display: inline-block;
+        }
+        
         .table_panel {
             display: inline-table;
-        }        
+        }
+        
+        .panel_cell select input {
+            width: 9rem;
+        }       
 
         
         .left_panel {
             margin-left: 0;
             margin-right: 10rem;
+            border: 1px solid [= left_border_color; =];
         }
 
         .right_panel {
             margin-left: 10rem;
             margin-right: 0;
+            border: 1px solid [= right_border_color; =];
         }
 
         .panel_row {
@@ -421,19 +444,38 @@ site pent [=
 
         .panel_cell {
             display: table-cell;
-            padding: 0.5rem 0.25rem;
+            padding: 0 0.25rem 0.5rem 0.25rem;
+        }
+
+        .short_panel_cell {
+            display: table-cell;
+            padding: 0 0.25rem;
+            text-align: left;
+            font-weight: bold;
+            font-size: 0.66rem;
+            font-family: Helvetica, Arial, Geneva, sans-serif;
+        }
+
+        .lone_panel_cell {
+            display: table-cell;
+            text-align: left;
+            padding: 0.125rem;
         }
 
         .visible_panel {        
-            background-color: #339999;
-            background: rgba(255, 255, 255, 0.25);
-            padding: 0.5rem;
+            background: rgba(155, 101, 155, 0.33);
+            padding: 0.25rem 0.33rem;
         }
 
         .button_panel {
-            display: table;
+            width: 22.5rem;
             margin: auto;
             text-align: center;
+            border: 1px solid [= neutral_border_color; =];
+        }
+        
+        .button_panel_section {
+            display: table;
         }
         
         .button_row {
@@ -445,6 +487,11 @@ site pent [=
             padding: 0.25rem 0.5rem;
         }
         
+        .lone_button_div {
+            display: table-cell;
+            padding: 0.25rem 6rem;
+        }
+
         .space_on_left * {
             margin-left: 1rem;
         }
@@ -460,8 +507,8 @@ site pent [=
     |]
 
             
-    dynamic player_title(title) [=
-        [| <div class="player_title"> |]
+    dynamic panel_title_bar(title, boolean is_player_A) [=
+        [| <div class="panel_title_bar [= (is_player_A ? "left_title_bar" : "right_title_bar"); =]"> |]
         title;
         [| </div> |]
     =]
@@ -530,11 +577,16 @@ site pent [=
         sub;
         [| </div> |]
         
-        [| <div class="button_panel visible_panel"><div class="button_row"><div class="button_div"> |]
-        button("cancel", "Cancel");
+        [| <div class="button_panel visible_panel"> |]
+        [| <div class="button_section"><div class="button_row"><div class="button_div"> |]
+        button("back", "Back");
         [| </div><div class="button_div"> |]
-        request_button("choose", "Ok", submit_script);
+        request_button("choose", "Next", submit_script);
         [| </div></div></div> |]
+        [| <div class="button_section"><div class="button_row"><div class="lone_button_div"> |]
+        button("restart", "Start Over");
+        [| </div></div></div> |]
+        [| </div> |]
         
     =]
 
@@ -575,15 +627,18 @@ site pent [=
                  document.getElementById("[= level_cell_id; =]").classList.remove("disabled");
              |] 
 
-             player_title(title);
+             panel_title_bar(title, is_player_A);
 
+             [| <div class="panel_row"><div class="short_panel_cell"></div><div class="short_panel_cell">Name</div></div> |]
              [| <div class="panel_row"><div class="panel_cell left_cell"> |]
              radiobutton(radio_group, "Human", true, "human", human_radiobutton_script);
-             [| </div><div id="[= name_cell_id; =]" class="panel_cell right_cell"> |]
+             [| </div><div id="[= name_cell_id; =]" class="panel_cell left_cell"> |]
              textedit(textedit_name, player.name);
-             [| </div></div><div class="panel_row"><div class="panel_cell left_cell"> |]
+             [| </div></div> |]
+             [| <div class="panel_row"><div class="short_panel_cell"></div><div class="short_panel_cell">Level</div></div> |]
+             [| <div class="panel_row"><div class="panel_cell left_cell"> |]
              radiobutton(radio_group, "Computer", false, "computer", computer_radiobutton_script);
-             [| </div><div id="[= level_cell_id; =]" class="panel_cell right_cell disabled"> |]
+             [| </div><div id="[= level_cell_id; =]" class="panel_cell left_cell disabled"> |]
              dropdown(dropdown_name, computer_player_options, true);
              [| </div></div> |]
         =]
@@ -600,16 +655,30 @@ site pent [=
         player_B_script [/]
        
         radio_group = FIRST_PICK
-        [| <div class="visible_panel left_panel"> |]
+        [| <div class="visible_panel table_panel left_panel"><div class="panel_row"><div class="lone_panel_cell"> |]
         radiobutton(radio_group, "Player A", true, "player_A", player_A_script);
-        [| </div><div class="visible_panel right_panel"> |]
+        [| </div></div></div> |]
+        [| <div class="visible_panel table_panel right_panel"><div class="panel_row"><div class="lone_panel_cell"> |]
         radiobutton(radio_group, "Player B", false, "player_B", player_B_script);
-        [| </div> |]
+        [| </div></div></div> |]
        
     =]
 
     chooser_panel choose_team_panel(pent_game game) [=
         title = "pick teams"
+        
+        dynamic component team_panel(boolean is_team_A) [=
+             component_class = is_team_A ? "left_panel" : "right_panel"
+             id = is_team_A ? "team_A_panel" : "team_B_panel"
+             pent_team team = is_team_A ? game.team_A : game.team_B
+             title = is_team_A ? "Team A" : "Team B"
+             
+             panel_title_bar(title, is_team_A);
+        =]
+        
+        
+        team_panel(true);
+        team_panel(false);
     =]
 
     console_panel game_panel(pent_game game) [=
