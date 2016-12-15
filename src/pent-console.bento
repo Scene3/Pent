@@ -65,7 +65,7 @@ site pent [=
     static param_vals{}{} allowed_vals = {
     
         (CHOOSE_PLAYERS): { 
-            (COMMAND):        [ CHOOSE, STOP, BACK ],
+            (COMMAND):        [ CHOOSE, BACK, START ],
             (PLAYER_A_NAME):  [ NAME ],
             (PLAYER_B_NAME):  [ NAME ],
             (PLAYER_A_LEVEL): [ LEVEL ],
@@ -73,12 +73,12 @@ site pent [=
         },
         
         (CHOOSE_ORDER): { 
-            (COMMAND):    [ STOP, BACK ],
+            (COMMAND):    [ CHOOSE, BACK, START ],
             (FIRST_PICK): [ PLAYER_A, PLAYER_B ]
         },
         
         (CHOOSE_TEAM): { 
-            (COMMAND):    [ STOP, BACK ],
+            (COMMAND):    [ CHOOSE, BACK, START ],
             (TURN):       [ TURN_NUM ],
             (PIECE):      [ ID ]
         },
@@ -219,6 +219,7 @@ site pent [=
             if (phase == CHOOSE_PLAYERS) [=
                 set_phase(BEFORE_GAME);
             =] else if (phase == CHOOSE_ORDER) [=
+                log("going back to " + CHOOSE_PLAYERS);
                 set_phase(CHOOSE_PLAYERS);
             /-- backing up from Choose Team is only available before the first pick --/
             =] else if (phase == CHOOSE_TEAM && game.turn == 1) [=
@@ -342,7 +343,7 @@ site pent [=
 
         .console_title {
             color: #33BBAA;
-            padding: 0.5rem 0 1.5rem 0;
+            padding: 0.5rem 0;
             margin: 0;
             text-align: center;
             font-weight: bold;
@@ -352,7 +353,6 @@ site pent [=
         }
 
         .panel_title_bar {
-            display: table-caption;
             width: 100%;
             padding: 0.125rem;
             background-color: #1F7F7F;
@@ -362,6 +362,11 @@ site pent [=
             font-weight: bold;
             font-size: 0.66rem;
             font-family: Helvetica, Arial, Geneva, sans-serif;
+            margin: 0 0 0.125rem 0;
+        }
+        
+        .table_panel .panel_title_bar {
+            display: table-caption;
         }
 
         .left_title_bar {        
@@ -393,10 +398,9 @@ site pent [=
         
         .console_row {
             width: 64rem;
-            height: 15rem;
+            height: 22rem;
             text-align: center;
             margin: auto;
-            margin-top: 5rem;
         }
         
         .console_panel {
@@ -407,6 +411,9 @@ site pent [=
         
         .team_panel {
             display: inline-block;
+            margin-top: -2rem;
+            width: 19rem;
+            height: 13rem;
         }
         
         .table_panel {
@@ -419,15 +426,23 @@ site pent [=
 
         
         .left_panel {
+            text-align: left;
             margin-left: 0;
             margin-right: 10rem;
             border: 1px solid [= left_border_color; =];
+            position: relative;
+            top: 50%;
+            transform: translateY(-50%);            
         }
 
         .right_panel {
+            text-align: right;
             margin-left: 10rem;
             margin-right: 0;
             border: 1px solid [= right_border_color; =];
+            position: relative;
+            top: 50%;
+            transform: translateY(-50%);            
         }
 
         .panel_row {
@@ -545,27 +560,39 @@ site pent [=
         radio_params{} = {}
         
         dynamic submit_script [|
-                var params = {};
-                [=
-                    for k in submit_params.keys [|
-                        params["[= k; =]"] = "[= submit_params{k}; =]";
+            var params = {};
+            [=
+                for k in submit_params.keys [|
+                    params["[= k; =]"] = "[= submit_params{k}; =]";
+                |]
+                for f in field_params.keys [|
+                    params["[= f; =]"] = encodeURIComponent(document.getElementById("[= field_params{f}; =]").value);
+                |]
+                [| var radioElement; |]
+                for r in radio_params.keys [=
+                    for e in radio_params{r} [|
+                        radioElement = document.getElementById("[= e; =]");
+                        if (radioElement.checked) {
+                            params["[= r; =]"] = encodeURIComponent(radioElement.value);
+                        }
                     |]
-                    for f in field_params.keys [|
-                        params["[= f; =]"] = encodeURIComponent(document.getElementById("[= field_params{f}; =]").value);
-                    |]
-                    [| var radioElement; |]
-                    for r in radio_params.keys [=
-                        for e in radio_params{r} [|
-                            radioElement = document.getElementById("[= e; =]");
-                            if (radioElement.checked) {
-                                params["[= r; =]"] = encodeURIComponent(radioElement.value);
-                            }
-                        |]
-                    =]
-                =]  
-                queryComponentByName("pent_console", "/do", params);
+                =]
+            =]  
+            queryComponentByName("pent_console", "/do", params);
         |]
             
+        dynamic back_script [|
+            var params = {};
+            params["[= COMMAND; =]"] = "[= BACK; =]";
+            queryComponentByName("pent_console", "/do", params);
+        |]
+
+        dynamic restart_script [|
+            var params = {};
+            params["[= COMMAND; =]"] = "[= START; =]";
+            queryComponentByName("pent_console", "/do", params);
+        |]
+
         
         log(" chooser panel " + title + " params: " + field_params);
         
@@ -579,12 +606,12 @@ site pent [=
         
         [| <div class="button_panel visible_panel"> |]
         [| <div class="button_section"><div class="button_row"><div class="button_div"> |]
-        button("back", "Back");
+        request_button("back", "Back", back_script);
         [| </div><div class="button_div"> |]
         request_button("choose", "Next", submit_script);
         [| </div></div></div> |]
         [| <div class="button_section"><div class="button_row"><div class="lone_button_div"> |]
-        button("restart", "Start Over");
+        request_button("restart", "Start Over", restart_script);
         [| </div></div></div> |]
         [| </div> |]
         
@@ -668,7 +695,7 @@ site pent [=
         title = "pick teams"
         
         dynamic component team_panel(boolean is_team_A) [=
-             component_class = is_team_A ? "left_panel" : "right_panel"
+             component_class = "team_panel " + (is_team_A ? "left_panel" : "right_panel")
              id = is_team_A ? "team_A_panel" : "team_B_panel"
              pent_team team = is_team_A ? game.team_A : game.team_B
              title = is_team_A ? "Team A" : "Team B"
