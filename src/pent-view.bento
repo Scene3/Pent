@@ -9,10 +9,13 @@ site pent [=
 
     /---- site-level view options ----/
     
-    int STANDARD_MODE = 0
-    int TEXT_MODE = 1
+    static int STANDARD_MODE = 0
+    static int TEXT_MODE = 1
+    static int TWO_MODE = 2
+    static int THREE_MODE = 3
 
     int view_mode(int mode) = mode 
+    int display_mode(int mode) = mode 
 
 
     /---- piece attributes ----/
@@ -95,6 +98,13 @@ site pent [=
     /---- the main component ----/
 
     dynamic pent_view console_view(pent_game gm, params{}) [=
+        if (display_mode == THREE_MODE) [=
+            three_scene_viewer(gm);
+        =] else if (display_mode == TWO_MODE) [=
+            two_scene_viewer(gm);
+        =] else [=
+            log("unknown display mode: " + display_mode);      
+        =]
         title_view;
         pent_console(gm, params);
     =]

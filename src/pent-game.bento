@@ -10,7 +10,10 @@ site pent [=
     /---- phases of game play ----/
     
     pent_phase [?]
-    
+
+    pent_phase[] valid_pent_phases = [ CHOOSE_PLAYERS, CHOOSE_ORDER, CHOOSE_TEAM, PLAY_GAME, BETWEEN_GAMES ]
+            
+            
     /** When a new game is created, it starts in the Choose Players phase. In the 
      *  Choose Players phase, the user chooses who plays each player, Player A and 
      *  Player B.  By default, the user plays as Player A, and chooses either one 
@@ -121,8 +124,15 @@ site pent [=
         /---- set the phase ----/    
 
         dynamic set_phase(pent_phase pp) [= 
-            log("setting phase to " + pp);
-            eval(phase(: pp :));
+        
+            if (pp in valid_pent_phases) [=
+                log("setting phase to " + pp);
+                eval(phase(: pp :));
+            =] else if (pp) [=
+                redirect illegal_phase(pp, here);
+            =] else [=
+                redirect illegal_phase("(null)", here);
+            =]
         =]
  
         /---- get the phase ----/    

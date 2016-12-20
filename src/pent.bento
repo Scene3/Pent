@@ -56,6 +56,7 @@ site pent [=
     session_init [=
         eval(current_game(new_pent_game));
         view_mode(STANDARD_MODE);
+        display_mode(THREE_MODE);
         three_session_init;
     =]
 
@@ -345,7 +346,6 @@ dynamic test_cons(pent_game gm) [=
         
         log("playing game " + this_game.id);
  
-        scene_viewer(splash_scene);
         console_view(this_game, params);    
     =]
 
@@ -463,6 +463,9 @@ dynamic test_cons(pent_game gm) [=
     
     
     component error_panel(msg, ctx) [=
+        log("Error: " + msg);
+        with (ctx) [= log("Context: " + ctx); =]
+    
         [| <h2>Error: /]            
         msg;
         [| </h2> |]
@@ -477,6 +480,7 @@ dynamic test_cons(pent_game gm) [=
     error_panel("Illegal action for phase: " + msg, ctx) illegal_action_for_phase_error(msg, ctx) [/]
     error_panel("Unable to add piece: " + msg, ctx) unable_to_add_piece(msg, ctx) [/]
     error_panel("Unable to make move: " + msg, ctx) unable_to_add_play(msg, ctx) [/]
+    error_panel("Illegal phase: " + msg, ctx) illegal_phase(msg, ctx) [/]
 
 
     /------- for troubleshooting ------/

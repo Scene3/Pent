@@ -187,6 +187,7 @@ site pent [=
         =] else [=
             log("  ...no params");
         =]
+        log("  ...phase is " + game.phase);
         
 
         /---- implementation ----/
@@ -216,14 +217,20 @@ site pent [=
             =]
  
         =] else if (command == BACK) [=
-            if (phase == CHOOSE_PLAYERS) [=
-                set_phase(BEFORE_GAME);
-            =] else if (phase == CHOOSE_ORDER) [=
+            if (phase == CHOOSE_ORDER) [=
                 log("going back to " + CHOOSE_PLAYERS);
+                eval(gm.player_A(: :));
+                eval(gm.player_B(: :));
+                eval(gm.team_A(: :));
+                eval(gm.team_B(: :));
                 set_phase(CHOOSE_PLAYERS);
-            /-- backing up from Choose Team is only available before the first pick --/
-            =] else if (phase == CHOOSE_TEAM && game.turn == 1) [=
+            =] else if (phase == CHOOSE_TEAM) [=
+                log("going back to " + CHOOSE_ORDER);
+                eval(gm.team_A(: :));
+                eval(gm.team_B(: :));
                 set_phase(CHOOSE_ORDER);
+            =] else [=
+                log("back command not available in phase " + phase);
             =]
 
         =] else if (command == START) [=
@@ -412,8 +419,8 @@ site pent [=
         .team_panel {
             display: inline-block;
             margin-top: -2rem;
-            width: 19rem;
-            height: 13rem;
+            width: 15rem;
+            height: 11rem;
         }
         
         .table_panel {
@@ -674,7 +681,7 @@ site pent [=
     =]
 
     chooser_panel choose_order_panel(pent_game game) [=
-        title = "who goes first?"
+        title = "who plays first/picks second?"
 
         radio_params{} = { (FIRST_PICK): [PLAYER_A_FIRST_RADIO, PLAYER_B_FIRST_RADIO] }
 
@@ -692,7 +699,7 @@ site pent [=
     =]
 
     chooser_panel choose_team_panel(pent_game game) [=
-        title = "pick teams"
+        dynamic title = "choose teams: " + (game.a_picks_next ? "Player A" : "Player B") + "'s pick"
         
         dynamic component team_panel(boolean is_team_A) [=
              component_class = "team_panel " + (is_team_A ? "left_panel" : "right_panel")
@@ -702,7 +709,6 @@ site pent [=
              
              panel_title_bar(title, is_team_A);
         =]
-        
         
         team_panel(true);
         team_panel(false);
