@@ -152,9 +152,13 @@ site pent [=
         pent_game game = gm
         
         /** the current phase **/
-        dynamic pent_phase phase = game.get_phase
-        dynamic set_phase(pent_phase p) = game.set_phase(p)
-     
+        dynamic pent_phase phase(pent_phase p) [= 
+            with (p) [=
+                game.set_phase(p);
+            =]
+            game.get_phase;
+        =]
+        
         /** parameter shortcuts **/
         command = params{COMMAND}
         player_A_name = params{PLAYER_A_NAME}
@@ -213,7 +217,7 @@ site pent [=
 
         if (command == STOP) [=
             if (confirmed) [=
-                game.set_phase(BETWEEN_GAMES);
+                phase(BETWEEN_GAMES);
             =]
  
         =] else if (command == BACK) [=
@@ -223,21 +227,21 @@ site pent [=
                 eval(gm.player_B(: :));
                 eval(gm.team_A(: :));
                 eval(gm.team_B(: :));
-                set_phase(CHOOSE_PLAYERS);
+                phase(CHOOSE_PLAYERS);
             =] else if (phase == CHOOSE_TEAM) [=
                 log("going back to " + CHOOSE_ORDER);
                 eval(gm.team_A(: :));
                 eval(gm.team_B(: :));
-                set_phase(CHOOSE_ORDER);
+                phase(CHOOSE_ORDER);
             =] else [=
                 log("back command not available in phase " + phase);
             =]
 
         =] else if (command == START) [=
-            set_phase(CHOOSE_PLAYERS);
+            phase(CHOOSE_PLAYERS);
 
         =] else if (command == CONTINUE) [=   
-            set_phase(CHOOSE_TEAM);
+            phase(CHOOSE_TEAM);
 
         /---- phase-dependent logic ----/
          

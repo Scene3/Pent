@@ -144,19 +144,19 @@ site pent [=
 
     object_group light_group [=
     
-        point_light(0xDD6666) bright_red_light [=
+        point_light(0xCC1111) bright_red_light [=
             position pos = position(120, 123, 120)
         =]
     
-        point_light(0x66DD66) bright_green_light [=
+        point_light(0x11CC11) bright_green_light [=
             position pos = position(-120, 123, 120)
         =]
     
-        point_light(0x6666DD) bright_blue_light [=
+        point_light(0x1111DD) bright_blue_light [=
             position pos = position(0, 233, -50)
         =]
     
-        point_light(0xCCCC77) bright_yellow_light [=
+        point_light(0xBBBB11) bright_yellow_light [=
             position pos = position(0, 233, 200)
         =]
     
