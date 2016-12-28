@@ -222,9 +222,7 @@ site pent [=
  
         =] else if (command == BACK) [=
             if (phase == CHOOSE_ORDER) [=
-                log("going back to " + CHOOSE_PLAYERS);
-                eval(gm.player_A(: :));
-                eval(gm.player_B(: :));
+                log("going back to " + CHOOSE_PLAYERS + "  player A name: " + gm.player_A.name + "  player B name: " + gm.player_B.name);
                 eval(gm.team_A(: :));
                 eval(gm.team_B(: :));
                 phase(CHOOSE_PLAYERS);
@@ -309,7 +307,7 @@ site pent [=
         log(" ++++<>> phase: " + phase);
          
         if (phase == CHOOSE_PLAYERS) [=
-            log("console showing choose players panel"); 
+            log("console showing choose players panel, player A name: " + game.player_A.name + "  player B name: " + game.player_B.name); 
             choose_players_panel(game);
         =] else if (phase == CHOOSE_ORDER) [=
             log("console showing choose order panel"); 
@@ -671,6 +669,7 @@ site pent [=
              [| <div class="panel_row"><div class="panel_cell left_cell"> |]
              radiobutton(radio_group, "Human", true, "human", human_radiobutton_script);
              [| </div><div id="[= name_cell_id; =]" class="panel_cell left_cell"> |]
+             log("textedit " + textedit_name + " contains name " + player.name); 
              textedit(textedit_name, player.name);
              [| </div></div> |]
              [| <div class="panel_row"><div class="short_panel_cell"></div><div class="short_panel_cell">Level</div></div> |]
