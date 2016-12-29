@@ -192,6 +192,7 @@ site pent [=
             log("  ...no params");
         =]
         log("  ...phase is " + game.phase);
+        log("  ...player A is " + game.player_A.name + " | " + gm.player_A.name);
         
 
         /---- implementation ----/
@@ -222,7 +223,7 @@ site pent [=
  
         =] else if (command == BACK) [=
             if (phase == CHOOSE_ORDER) [=
-                log("going back to " + CHOOSE_PLAYERS + "  player A name: " + gm.player_A.name + "  player B name: " + gm.player_B.name);
+                log("going back to " + CHOOSE_PLAYERS + "  player A name: " + game.player_A.name + "  player B name: " + gm.player_B.name);
                 eval(gm.team_A(: :));
                 eval(gm.team_B(: :));
                 phase(CHOOSE_PLAYERS);
@@ -305,6 +306,7 @@ site pent [=
          **/
          
         log(" ++++<>> phase: " + phase);
+        log(" ++++<>>    player A: " + game.player_A.name + " | " + gm.player_A.name);
          
         if (phase == CHOOSE_PLAYERS) [=
             log("console showing choose players panel, player A name: " + game.player_A.name + "  player B name: " + game.player_B.name); 
