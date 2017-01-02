@@ -628,7 +628,7 @@ site pent [=
         
     =]
 
-    chooser_panel choose_players_panel(pent_game game) [=
+    dynamic chooser_panel choose_players_panel(pent_game game) [=
         title = "choose players"
 
         field_params{} = { (PLAYER_A_NAME): PLAYER_A_NAME_TEXTEDIT,
@@ -685,7 +685,7 @@ site pent [=
         player_panel(false);
     =]
 
-    chooser_panel choose_order_panel(pent_game game) [=
+    dynamic chooser_panel choose_order_panel(pent_game game) [=
         title = "who plays first/picks second?"
 
         radio_params{} = { (FIRST_PICK): [PLAYER_A_FIRST_RADIO, PLAYER_B_FIRST_RADIO] }
@@ -703,7 +703,7 @@ site pent [=
        
     =]
 
-    chooser_panel choose_team_panel(pent_game game) [=
+    dynamic chooser_panel choose_team_panel(pent_game game) [=
         dynamic title = "choose teams: " + (game.a_picks_next ? "Player A" : "Player B") + "'s pick"
         
         dynamic component team_panel(boolean is_team_A) [=
@@ -719,12 +719,12 @@ site pent [=
         team_panel(false);
     =]
 
-    console_panel game_panel(pent_game game) [=
+    dynamic console_panel game_panel(pent_game game) [=
         title = game.player_A.name + " vs. " + game.player_B.name;    
         board_view(game);
     =]
     
-    console_panel game_over_panel [=
+    dynamic console_panel game_over_panel [=
     
     =]
 =]
