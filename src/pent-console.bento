@@ -550,7 +550,7 @@ site pent [=
         title;
     =]
 
-    component console_panel [=
+    dynamic component console_panel [=
         component_class [| 
             console_panel [= owner.type; =]
         |]
