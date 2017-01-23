@@ -663,7 +663,13 @@ site pent [=
                  document.getElementById("[= name_cell_id; =]").classList.add("disabled");
                  document.getElementById("[= dropdown_id; =]").disabled = false;
                  document.getElementById("[= level_cell_id; =]").classList.remove("disabled");
-             |] 
+             |]
+             
+             textedit_input_handler [|
+                 var [= textedit_id; =];
+                 [= textedit_id; =] = document.getElementById("[= textedit_id; =]").value;
+                 console.log("==> input from [= textedit_id; =]: " + [= textedit_id; =]);
+             |]
 
              panel_title_bar(title, is_player_A);
 
@@ -672,7 +678,7 @@ site pent [=
              radiobutton(radio_group, "Human", true, "human", human_radiobutton_script);
              [| </div><div id="[= name_cell_id; =]" class="panel_cell left_cell"> |]
              log("textedit " + textedit_name + " contains name " + player.name); 
-             textedit(textedit_name, player.name);
+             scripted_textedit(textedit_name, player.name, textedit_input_handler);
              [| </div></div> |]
              [| <div class="panel_row"><div class="short_panel_cell"></div><div class="short_panel_cell">Level</div></div> |]
              [| <div class="panel_row"><div class="panel_cell left_cell"> |]
@@ -680,6 +686,7 @@ site pent [=
              [| </div><div id="[= level_cell_id; =]" class="panel_cell left_cell disabled"> |]
              dropdown(dropdown_name, computer_player_options, true);
              [| </div></div> |]
+             [| <script>document.getElementById("[= textedit_id; =]").value = [= textedit_id; =];</script> |]
         =]
         player_panel(true);
         player_panel(false);
