@@ -127,6 +127,22 @@ site pent [=
     
     static PLAYER_A_FIRST_RADIO = "first_player_A_radiobutton"
     static PLAYER_B_FIRST_RADIO = "first_player_B_radiobutton"
+
+    /**
+     * Session values
+     *
+     **/
+    
+    current_player_A_name(nm) = nm
+    current_player_B_name(nm) = nm
+    
+    dynamic set_current_player_name(nm, boolean is_player_A) [=
+        if (is_player_A) [=
+            current_player_A_name(: nm :);
+        =] else [=
+            current_player_B_name(: nm :);
+        =]
+    =]    
     
     /**
      *  Pent Console logic
@@ -161,8 +177,8 @@ site pent [=
         
         /** parameter shortcuts **/
         command = params{COMMAND}
-        player_A_name = params{PLAYER_A_NAME}
-        player_B_name = params{PLAYER_B_NAME}
+        player_A_name = params{PLAYER_A_NAME} ? params{PLAYER_A_NAME} : current_player_A_name
+        player_B_name = params{PLAYER_B_NAME} ? params{PLAYER_B_NAME} : current_player_B_name
         player_A_level = params{PLAYER_A_LEVEL}
         player_B_level = params{PLAYER_B_LEVEL}
         first_pick = params{FIRST_PICK}
@@ -242,48 +258,49 @@ site pent [=
         =] else if (command == CONTINUE) [=   
             phase(CHOOSE_TEAM);
 
-        /---- phase-dependent logic ----/
-         
-        /-- in the Choose Player phase, we accept name/id choices for either player --/
-        =] else if (phase == CHOOSE_PLAYERS) [=
-            if (player_A_name) [=
-                log("setting player A to " + player_A_name);
-                game.set_player(player_A_name, "A", true);
-            =] else if (player_A_level) [=
-                log("setting player A to computer, level " + player_A_level);
-                game.set_player("Computer", player_A_level, true);
-            =]
-            if (player_B_name) [=
-                log("setting player B to " + player_B_name);
-                game.set_player(player_B_name, "B", false);
-            =] else if (player_B_level) [=
-                log("setting player B to computer, level " + player_B_level);
-                game.set_player("Computer", player_B_level, false);
-            =]
-
-        =] else if (phase == CHOOSE_ORDER) [=
-            if (first_pick) [=
-                log("choosing " + first_pick + " to go first");
-                game.set_a_picks_first((first_pick == PLAYER_A));
-            =]
-
-        =] else if (phase == CHOOSE_TEAM) [=
-            if (selected_piece && turn) [=
-                if (turn != game.turn) [=
-                    redirect error("piece selected out of turn");
+        /---- choose command has phase-dependent logic ----/
+        =] else if (command == CHOOSE) [=
+            /-- in the Choose Player phase, we accept name/id choices for either player --/
+            if (phase == CHOOSE_PLAYERS) [=
+                if (player_A_name) [=
+                    log("setting player A to " + player_A_name);
+                    game.set_player(player_A_name, "A", true);
+                =] else if (player_A_level) [=
+                    log("setting player A to computer, level " + player_A_level);
+                    game.set_player("Computer", player_A_level, true);
                 =]
-                game.add_piece_by_id(selected_piece);     
-            =]
-        
-        =] else if (phase == PLAY_GAME) [=
-            if (selected_piece && turn) [=
-                if (turn != game.turn) [=
-                    redirect error("piece selected out of turn");
+                if (player_B_name) [=
+                    log("setting player B to " + player_B_name);
+                    game.set_player(player_B_name, "B", false);
+                =] else if (player_B_level) [=
+                    log("setting player B to computer, level " + player_B_level);
+                    game.set_player("Computer", player_B_level, false);
                 =]
-                game.play_piece_by_id(selected_piece, position, a_plays_next);     
-                
-                if (phase == BETWEEN_GAMES) [=
-                    // game just ended
+    
+            =] else if (phase == CHOOSE_ORDER) [=
+                if (first_pick) [=
+                    log("choosing " + first_pick + " to go first");
+                    game.set_a_picks_first((first_pick == PLAYER_A));
+                =]
+    
+            =] else if (phase == CHOOSE_TEAM) [=
+                if (selected_piece && turn) [=
+                    if (turn != game.turn) [=
+                        redirect error("piece selected out of turn");
+                    =]
+                    game.add_piece_by_id(selected_piece);     
+                =]
+            
+            =] else if (phase == PLAY_GAME) [=
+                if (selected_piece && turn) [=
+                    if (turn != game.turn) [=
+                        redirect error("piece selected out of turn");
+                    =]
+                    game.play_piece_by_id(selected_piece, position, a_plays_next);     
+                    
+                    if (phase == BETWEEN_GAMES) [=
+                        // game just ended
+                    =]
                 =]
             =]
         =]
@@ -304,12 +321,15 @@ site pent [=
          *     -- "game over" splash screen if between games
          *   
          **/
+
+        current_player_A_name(: player_A_name :);
+        current_player_B_name(: player_B_name :);
          
         log(" ++++<>> phase: " + phase);
-        log(" ++++<>>    player A: " + game.player_A.name + " | " + gm.player_A.name);
+        log(" ++++<>>    player A in game: " + game.player_A.name + "  current: " + current_player_A_name);
          
         if (phase == CHOOSE_PLAYERS) [=
-            log("console showing choose players panel, player A name: " + game.player_A.name + "  player B name: " + game.player_B.name); 
+            log("console showing choose players panel, player A name: " + current_player_A_name + "  player B name: " + current_player_B_name); 
             choose_players_panel(game);
         =] else if (phase == CHOOSE_ORDER) [=
             log("console showing choose order panel"); 
@@ -635,11 +655,15 @@ site pent [=
                            (PLAYER_B_NAME): PLAYER_B_NAME_TEXTEDIT,
                            (PLAYER_A_LEVEL): PLAYER_A_LEVEL_DROPDOWN,
                            (PLAYER_B_LEVEL): PLAYER_B_LEVEL_DROPDOWN } 
+                           
+        dynamic player_A_name = game.player_A.name ? game.player_A.name : current_player_A_name                           
+        dynamic player_B_name = game.player_B.name ? game.player_B.name : current_player_B_name                           
         
         dynamic component player_panel(boolean is_player_A) [=
              component_class = "visible_panel table_panel " + (is_player_A ? " left_panel" : " right_panel")
              id = is_player_A ? "player_A_panel" : "player_B_panel"
              pent_player player = is_player_A ? game.player_A : game.player_B
+             player_name = is_player_A ? player_A_name : player_B_name
              title = is_player_A ? "Player A" : "Player B"
              radio_group = is_player_A ? "player_A" : "player_B"
              textedit_name = is_player_A ? PLAYER_A_NAME_TEXTEDIT : PLAYER_B_NAME_TEXTEDIT
@@ -666,8 +690,7 @@ site pent [=
              |]
              
              textedit_input_handler [|
-                 var [= textedit_id; =];
-                 [= textedit_id; =] = document.getElementById("[= textedit_id; =]").value;
+                 var [= textedit_id; =] = document.getElementById("[= textedit_id; =]").value;
                  console.log("==> input from [= textedit_id; =]: " + [= textedit_id; =]);
              |]
 
@@ -677,8 +700,8 @@ site pent [=
              [| <div class="panel_row"><div class="panel_cell left_cell"> |]
              radiobutton(radio_group, "Human", true, "human", human_radiobutton_script);
              [| </div><div id="[= name_cell_id; =]" class="panel_cell left_cell"> |]
-             log("textedit " + textedit_name + " contains name " + player.name); 
-             scripted_textedit(textedit_name, player.name, textedit_input_handler);
+             log("textedit " + textedit_name + " contains name " + player_name); 
+             scripted_textedit(textedit_name, player_name, textedit_input_handler);
              [| </div></div> |]
              [| <div class="panel_row"><div class="short_panel_cell"></div><div class="short_panel_cell">Level</div></div> |]
              [| <div class="panel_row"><div class="panel_cell left_cell"> |]
@@ -686,7 +709,6 @@ site pent [=
              [| </div><div id="[= level_cell_id; =]" class="panel_cell left_cell disabled"> |]
              dropdown(dropdown_name, computer_player_options, true);
              [| </div></div> |]
-             [| <script>document.getElementById("[= textedit_id; =]").value = [= textedit_id; =];</script> |]
         =]
         player_panel(true);
         player_panel(false);
