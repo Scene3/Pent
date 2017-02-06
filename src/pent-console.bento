@@ -136,8 +136,8 @@ site pent [=
     current_player_A_name(nm) = nm
     current_player_B_name(nm) = nm
     
-    dynamic set_current_player_name(nm, boolean is_player_A) [=
-        if (is_player_A) [=
+    dynamic set_current_player_name(key, nm) [=
+        if (key == "player_A_name") [=
             current_player_A_name(: nm :);
         =] else [=
             current_player_B_name(: nm :);
