@@ -140,10 +140,10 @@ site pent [=
         player_A_name = params{"player_A_name"}
         player_B_name = params{"player_B_name"}
         if (player_A_name) [=
-            current_player_A_name(: player_A_name :);
+            eval(current_player_A_name(: player_A_name :));
         =]
         if (player_B_name) [=
-            current_player_B_name(: player_B_name :);
+            eval(current_player_B_name(: player_B_name :));
         =]
     =]    
     
@@ -695,6 +695,7 @@ site pent [=
              textedit_input_handler [|
                  var [= textedit_id; =] = document.getElementById("[= textedit_id; =]").value;
                  console.log("==> input from [= textedit_id; =]: " + [= textedit_id; =]);
+                 informServer("/set_current_player_name", null, null, "[= textedit_id; =]", [= textedit_id; =]);
              |]
 
              panel_title_bar(title, is_player_A);
