@@ -1,7 +1,7 @@
 /---------------------
- -- three_geometries.bento
+ -- three_cameras.bento
  --
- -- Geometries for three.bento
+ -- Cameras for three.bento
  --
  -- Copyright (c) 2012 by Michael St. Hippolyte
  --
@@ -109,6 +109,8 @@ site three [=
 
         sub_script [/]
         sub_funcs [/]
+        
+        controls canvas_controls [?]
 
         /---- the three_component is the rendering canvas. ----/
         canvas_name = canvas_id
@@ -173,29 +175,18 @@ site three [=
 
         /------------- controls --------------/
     
-        dom_event(nm) [=
-           name = nm
-           [| '[= name; =]' |]
-        =]
-        
-        event_handler [=
-            boolean capture = false
-            body [?]
-        =]
-    
-        event_listener(dom_event event, event_handler handler) [=
-            [|
-                document.getElementById([= id; =]).addEventListener([= event; =], function() {[= handler.body; =]}, [= handler.capture; =]);
-            |]            
-        =]
-    
-
-
         dynamic add_controls [=
-        
-        
+            with (canvas_controls) [=
+                canvas_controls.activate(canvas_camera);
+                canvas_controls.add_listeners(canvas_id);
+            =]
         =]
 
+        dynamic declare_controls [=
+            with (canvas_controls) [=
+                canvas_controls.declare;
+            =]
+        =]
 
 
         /-------------------------------/
@@ -253,7 +244,8 @@ site three [=
             /-- declare top-level functions and variables --/
             js_comment_log("declare global variables");
             declare_global_vars;
-
+            declare_controls;
+            
             if (run_scripts_on_load) [=
                 [| function [= default_handler_name("onload"); =]() { |]
             =]
@@ -333,7 +325,7 @@ site three [=
         assign_global_vars [|
             [= canvas_renderer; =] = this_renderer;
             [= canvas_scene; =] = [= this_scene.name; =];
-            [= canvas_camera; =] = [= this_cam.name; =];
+            [= canvas_camera; =] = [= this_scene.cam.name; =];
 
         |]
 
@@ -416,6 +408,10 @@ site three [=
                 post_render();
             |]
         =]
+
+        js_function interact [=
+            body [/]
+        =]
         
         js_function render [=
             body [=
@@ -428,7 +424,6 @@ site three [=
             =]
         =]
 
-        
         js_function post_render [=
             body [/]
         =]
@@ -477,6 +472,277 @@ site three [=
         
         =]
     =]
+
+=]
+/---------------------
+ -- three_controls.bento
+ --
+ -- Controls for three.bento
+ --
+ -- Copyright (c) 2017 by Michael St. Hippolyte
+ --
+ --/
+ 
+site three [=
+
+    /---- interaction model ----/
+
+    dynamic dom_event(nm) [=
+       name = nm
+       [| '[= name; =]' |]
+    =]
+        
+    dynamic event_handler [=
+        boolean capture = false
+        name = "on" + owner.type
+        declare [?]
+    =]
+    
+    dynamic event_listener(element, dom_event event, event_handler handler) [=
+        [/
+            [= element; =].on[= event.name; =] = [= handler.name; =];
+        |]            
+    
+    /----    [|
+            [= element; =].addEventListener([= event; =], [= handler.name; =], [= handler.capture; =]);
+        |]   ----/            
+    =]
+
+    /---- interaction events ----/
+
+    static dom_event("mousedown") MOUSEDOWN [/]
+    static dom_event("mouseup")   MOUSEUP   [/]
+    static dom_event("mousemove") MOUSEMOVE [/]
+
+
+    controls [=
+    
+        declare [?]
+        
+        event_handler mousedown [?]
+        event_handler mouseup [?]
+        event_handler mousemove [?]
+        
+        add_listeners(dom_element) [=
+            with (mousedown) [=
+                event_listener(dom_element, MOUSEDOWN, mousedown);
+            =]
+            with (mouseup) [=
+                event_listener(dom_element, MOUSEUP, mouseup);
+            =]
+            with (mousemove) [=
+                event_listener(dom_element, MOUSEMOVE, mousemove);
+            =]
+        
+        =]
+        
+        activate(cam_var) [/]
+    
+    =]    
+
+    /**
+     * drag_controls is a controls object that enables dragging of objects that have the draggable
+     * property.
+     *
+     * Much of the javascript is borrowed from DragControls.js by zz85 / https://github.com/zz85 
+     *
+     **/
+    
+    controls drag_controls(id, scene s) [=
+        boolean xlock = false
+        boolean ylock = false
+        boolean zlock = false
+        
+        controls_var = id + "_drag_controls"
+
+        declare [/
+            var drag_controls = function( _camera, _objects ) {
+
+                var _domElement = document.getElementById("[= id; =]");
+
+                var _raycaster = new THREE.Raycaster();
+
+                var _mouse = new THREE.Vector3(),
+                    _offset = new THREE.Vector3();
+                var _selected, _hovered;
+
+                var p3subp1 = new THREE.Vector3();
+                var targetposition = new THREE.Vector3();
+                var zerovector = new THREE.Vector3();
+
+                /* Custom Event Handling */
+                var _listeners = {};
+
+                var me = this;
+                this.on = function( event, handler ) {
+                    if ( ! _listeners[ event ] ) {
+                        _listeners[ event ] = [];
+                    }
+                    _listeners[ event ].push( handler );
+                    return me;
+                };
+
+                this.off = function( event, handler ) {
+                    var l = _listeners[ event ];
+                    if ( !l ) {
+                        return me;
+                    }
+                    if ( l.indexOf( handler ) > - 1 ) {
+                        l.splice( handler, 1 );
+                    }
+
+                    return me;
+                };
+
+                var notify = function( event, data, member ) {
+                    var l = _listeners[ event ];
+                    if ( !l ) {
+                        return;
+                    }
+ 
+                    if ( !member ) {
+                        for ( var i = 0; i < l.length; i ++ ) {
+                            l[ i ]( data );
+                        }
+                    }
+                };
+
+                this.setObjects = function( objects ) {
+                    if ( objects instanceof THREE.Scene ) {
+                        _objects = objects.children;
+                    } else {
+                        _objects = objects;
+                    }
+                };
+
+                this.setObjects( _objects );
+
+                this.onmousedown = [= mousedown.declare; =]
+                this.onmouseup =   [= mouseup.declare; =]
+                this.onmousemove = [= mousemove.declare; =]
+                
+                this.enabled = false;
+            }
+        /]
+
+
+
+        event_handler mousedown [=
+           name = controls_var + ".onmousedown"
+           declare [/
+               function( event ) {
+                   event.preventDefault();
+                   _mouse.x = ( event.clientX / _domElement.width ) * 2 - 1;
+                   _mouse.y = - ( event.clientY / _domElement.height ) * 2 + 1;
+                   _raycaster.setFromCamera( _mouse, _camera );
+                   var intersects = _raycaster.intersectObjects( _objects );
+                   var ray = _raycaster.ray;
+                   var normal = ray.direction; // normal ray to the camera position
+                   if ( intersects.length > 0 ) {
+                       _selected = intersects[ 0 ];
+                       _selected.ray = ray;
+                       _selected.normal = normal ;
+                       _offset.copy( _selected.point ).sub( _selected.object.position );
+                       _domElement.style.cursor = 'move';
+                       notify( 'dragstart', _selected );
+                   }
+               }
+           |]
+        =]
+
+        event_handler mouseup [=
+           name = controls_var + ".onmouseup"
+           declare [/
+               function( event ) {
+                   event.preventDefault();
+                   if ( _selected ) {
+                       notify( 'dragend', _selected );
+                       _selected = null;
+                   }
+                   _domElement.style.cursor = 'auto';
+               }
+           |]
+        =]
+
+        event_handler mousemove [=
+           name = controls_var + ".onmousemove"
+           declare [/
+               function( event ) {
+                   event.preventDefault();
+                   _mouse.x = ( event.clientX / _domElement.width ) * 2 - 1;
+                   _mouse.y = - ( event.clientY / _domElement.height ) * 2 + 1;
+                   _raycaster.setFromCamera( _mouse, _camera );
+
+                   var ray = _raycaster.ray;
+                   if ( _selected && me.enabled ) {
+                       var normal = _selected.normal;
+                       var denom = normal.dot( ray.direction );
+                       if ( denom == 0 ) {
+                           console.log( 'no or infinite solutions' );
+                           return;
+                       }
+
+                       var num = normal.dot( p3subp1.copy( _selected.point ).sub( ray.origin ) );
+                       var u = num / denom;
+
+                       targetposition.copy( ray.direction ).multiplyScalar( u ).add( ray.origin ).sub( _offset );
+
+                       var xLock = [= xlock; =];
+                       var yLock = [= ylock; =];
+                       var zLock = [= zlock; =];
+                       var moveX, moveY, moveZ;
+                       if ( xLock ) {
+                           moveX = true;
+                           moveY = false;
+                           moveZ = false;
+                       } else if ( yLock ) {
+                           moveX = false;
+                           moveY = true;
+                           moveZ = false;
+                       } else {
+                           moveX = moveY = moveZ = true;
+                       }
+
+                       if ( moveX ) {
+                           _selected.object.position.x = targetposition.x;
+                       }
+                       if ( moveY ) {
+                           _selected.object.position.y = targetposition.y;
+                       }
+                       if ( moveZ ) {
+                           _selected.object.position.z = targetposition.z;
+                       }
+
+                       notify( 'drag', _selected );
+                       return;
+                   }
+
+                  _raycaster.setFromCamera( _mouse, _camera );
+                  var intersects = _raycaster.intersectObjects( _objects );
+                  if ( intersects.length > 0 ) {
+                      _domElement.style.cursor = 'pointer';
+                      _hovered = intersects[ 0 ];
+                      notify( 'hoveron', _hovered );
+                  } else {
+                      notify( 'hoveroff', _hovered );
+                      _hovered = null;
+                      _domElement.style.cursor = 'auto';
+                  }
+
+               }
+           |]
+        =]
+ 
+        activate(cam_var) [/
+            var [= id; =]_draggable_objs = [ [= for three_obj o in s.draggable_objs [= o.name; ","; =] =] ]; 
+            var [= controls_var; =] = new drag_controls([= cam_var; =], [= id; =]_draggable_objs);
+            [= controls_var; =].enabled = true;    
+        |]
+
+        this;
+    =]
+    
+    
 
 =]
 /---------------------
@@ -548,7 +814,7 @@ site three [=
  -- Main module of three.bento
  -- Bento support for three.js
  --
- -- Copyright (c) 2013-2016 by Michael St. Hippolyte
+ -- Copyright (c) 2013-2017 by Michael St. Hippolyte
  --
  --/
  
@@ -693,16 +959,16 @@ site three [=
         body [?]
 
         /-- declare the function --/
-        declare [|
+        declare [/
             [= debug_log("declaring function " + name + " with " + parameters.count + " parameters"); =]
             function [= name; =]([= item_list(parameters); =]) {
             [= body; =]
             }
-        |]
+        /]
 
 
         /-- call the function --/
-        this generate [| [= name; =](); |]
+        this generate [/ [= name; =](); |]
     =]
 
     dynamic item_list(items[]) [=
@@ -727,7 +993,7 @@ site three [=
         double z = zz
 
         debug_log("...instantiating vector3 of type "+ type + " and x,y,z = " + x + "," + y + "," + z);
-        [| new THREE.Vector3([= x; =], [= y; =], [=z; =]) |]
+        [/ new THREE.Vector3([= x; =], [= y; =], [= z; =]) |]
 
     =] 
 
@@ -739,7 +1005,7 @@ site three [=
     dynamic three_color(c) [=
         keep: int color = c
         
-        [| new THREE.Color([= color; =]) |]
+        [/ new THREE.Color([= color; =]) |]
     =]
 
     /** Base class of objects used in scene construction.  These objects
@@ -767,13 +1033,13 @@ site three [=
         
         /-- check for defined handlers --/
 
-        boolean is_pointable [= with (on_point_to) [= true; =] else [= false; =] =]
-        boolean is_hoverable [= with (on_hover_over) [= true; =] else [= false; =] =]
-        boolean is_draggable [= with (on_drag) [= true; =] else [= false; =] =]
+        dynamic boolean is_pointable [= with (on_point_to) [= true; =] else [= false; =] =]
+        dynamic boolean is_hoverable [= with (on_hover_over) [= true; =] else [= false; =] =]
+        dynamic boolean is_draggable [= with (on_drag) [= log("~~~~~ draggable: " + three_class); true; =] else [= log("~~~~~ not draggable: " + three_class); false; =] =]
 
         three_object[] pointable_objs = [
-                if (is_pointable) [=
-                    owner.def
+                if (owner.owner.is_pointable) [=
+                    owner.owner.def
                 =] else [=
                     for three_object o in objs [=
                         for three_object po in o.pointable_objs [=
@@ -783,10 +1049,37 @@ site three [=
                 =]
             ]
 
-        
-        /-- animation logic, called for each frame --/
+        three_object[] hoverable_objs = [
+                if (owner.owner.is_hoverable) [=
+                    owner.owner.def
+                =] else [=
+                    for three_object o in objs [=
+                        for three_object ho in o.hoverable_objs [=
+                            ho.def
+                        =]
+                    =]
+                =]
+            ]
 
+        three_object[] draggable_objs = [
+                if (owner.owner.is_draggable) [=
+                    owner.owner.def
+                =] else [=
+                    for three_object o in objs [=
+                        for three_object dro in o.draggable_objs [=
+                            dro.def
+                        =]
+                    =]
+                =]
+            ]
+
+        
+        /-- animation logic, called for each frame if defined --/
         next_frame [?]
+
+        /-- interaction logic, called to handle user interaction --/
+        interact [?]
+        
 
         dynamic add(three_object obj) [=
             debug_log("....adding " + obj.name + " to " + name);
@@ -843,7 +1136,7 @@ site three [=
             debug_log("    ...options: " + (string) options);  
             debug_log("    ...decorated options: " + decorate(options));  
 
-            [| new THREE. |]
+            [/ new THREE. |]
             three_class;
             [| ( |]
 
@@ -859,7 +1152,7 @@ site three [=
 
         dynamic set_attributes [=
             debug_log("setting position of " + owner.type + " to " + pos);
-            with (pos) [|
+            with (pos) [/
                 [= name; =].position.set([= pos.x; =], [= pos.y; =], [= pos.z; =]);
             |]            
         =]         
@@ -869,7 +1162,7 @@ site three [=
             if (decl) [=
                 decl;
                 
-            =] else if (three_class) [| 
+            =] else if (three_class) [/ 
                 var [= name; =] = [= construct; =];
             |]
             
@@ -877,9 +1170,15 @@ site three [=
             
             sub;
     
-            with (next_frame) [|
+            with (next_frame) [/
                 [= name; =].next_frame = function () {
                     [= next_frame; =]
+                };
+            |]
+
+            with (interact) [/
+                [= name; =].interact = function () {
+                    [= interact; =]
                 };
             |]
         =]
@@ -969,6 +1268,19 @@ site three [=
     =]
     
 
+    /------------- raycaster -------------/
+
+    dynamic raycaster(),
+                     (vector3 origin, vector3 direction),
+                     (vector3 origin, vector3 direction, near, far) [=
+        three_class = "Raycaster"
+    
+        with (near)        [| new THREE.Raycaster([= origin; =], [= direction; =], [= near; =], [= far; =]) |]
+        else with (origin) [| new THREE.Raycaster([= origin; =], [= direction; =]) |]
+        else               [| new THREE.Raycaster() |]
+    =] 
+
+
     /-------------- the scene ------------/
    
     composite_object scene(three_object[] scene_objs, camera scene_cam, width, height),
@@ -985,6 +1297,11 @@ site three [=
                      o.next_frame;
                  =]
             =]
+        =]
+        
+        interact [=
+        
+        
         =]
 
         keep: three_object objs[] = scene_objs
@@ -1103,6 +1420,9 @@ site three [=
             
             mesh(cube_geometry(7, 7, 7), blue_material) blue_cube [=
                 position pos = position(0, 2, 0)
+                on_drag [=
+                    log("blue_cube.on_drag called");
+                =]
             =]
 
             point_light(0xAAAAAA) soft_light [=
@@ -1131,6 +1451,8 @@ site three [=
                    |]
 
             canvas_id = "tc"
+
+            controls canvas_controls = drag_controls(canvas_id, s)
         =]        
 
         [|
@@ -1149,6 +1471,9 @@ site three [=
         tc(sample_scene);
     =]
     
+    dobjs [= 
+        three_info.sample_scene.draggable_objs;
+    =]
 
 
     /----------- javascript generation utilities -----------/
@@ -1235,7 +1560,7 @@ site three [=
             log(str);
         =]
     =]
-   
+
 =]
 /---------------------
  -- three_materials.bento
