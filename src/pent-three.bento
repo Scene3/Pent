@@ -119,6 +119,11 @@ site pent [=
                               ]
          
 
+        on_drag [=
+            log("piece_3obj.on_drag called");
+        =]
+
+
     =]
     
     
@@ -267,6 +272,8 @@ site pent [=
                    |]
         
             canvas_id = s.name + "_canvas"
+
+            controls canvas_controls = drag_controls(canvas_id, s)
 
             boolean run_scripts_on_load = false
 
