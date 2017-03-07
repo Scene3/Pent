@@ -428,6 +428,7 @@ site pent [=
             padding: 0;
             margin: 0; 
             text-align: center;
+            pointer-events: none;
         }
         
         .console_row {
@@ -514,6 +515,7 @@ site pent [=
         .visible_panel {        
             background: rgba(155, 101, 155, 0.33);
             padding: 0.25rem 0.33rem;
+            pointer-events: visible;
         }
 
         .button_panel {

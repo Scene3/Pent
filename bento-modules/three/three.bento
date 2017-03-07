@@ -635,7 +635,7 @@ site three [=
                    _mouse.x = ( event.clientX / _domElement.width ) * 2 - 1;
                    _mouse.y = - ( event.clientY / _domElement.height ) * 2 + 1;
                    _raycaster.setFromCamera( _mouse, _camera );
-                   var intersects = _raycaster.intersectObjects( _objects );
+                   var intersects = _raycaster.intersectObjects( _objects, true );
                    var ray = _raycaster.ray;
                    var normal = ray.direction; // normal ray to the camera position
                    if ( intersects.length > 0 ) {
@@ -718,7 +718,7 @@ site three [=
                    }
 
                   _raycaster.setFromCamera( _mouse, _camera );
-                  var intersects = _raycaster.intersectObjects( _objects );
+                  var intersects = _raycaster.intersectObjects( _objects, true );
                   if ( intersects.length > 0 ) {
                       _domElement.style.cursor = 'pointer';
                       _hovered = intersects[ 0 ];
