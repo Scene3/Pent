@@ -177,8 +177,14 @@ site three [=
     
         dynamic add_controls [=
             with (canvas_controls) [=
-                canvas_controls.activate(canvas_camera);
+                canvas_controls.attach(canvas_camera);
                 canvas_controls.add_listeners(canvas_id);
+            =]
+        =]
+
+        dynamic activate_controls(boolean flag) [=
+            with (canvas_controls) [=
+                canvas_controls.activate(flag);
             =]
         =]
 
@@ -500,12 +506,8 @@ site three [=
     
     dynamic event_listener(element, dom_event event, event_handler handler) [=
         [/
-            [= element; =].on[= event.name; =] = [= handler.name; =];
-        |]            
-    
-    /----    [|
             [= element; =].addEventListener([= event; =], [= handler.name; =], [= handler.capture; =]);
-        |]   ----/            
+        |]            
     =]
 
     /---- interaction events ----/
@@ -516,6 +518,7 @@ site three [=
 
 
     controls [=
+        boolean enabled_by_default = true;
     
         declare [?]
         
@@ -536,8 +539,10 @@ site three [=
         
         =]
         
-        activate(cam_var) [/]
+        dynamic attach(cam_var) [/]
+        dynamic activate(boolean flag) [/]
     
+        this;
     =]    
 
     /**
@@ -548,10 +553,10 @@ site three [=
      *
      **/
     
-    controls drag_controls(id, scene s) [=
-        boolean xlock = false
-        boolean ylock = false
-        boolean zlock = false
+    controls drag_controls(id, three_object obj) [=
+        boolean x_lock = false
+        boolean y_lock = false
+        boolean z_lock = false
         
         controls_var = id + "_drag_controls"
 
@@ -573,7 +578,7 @@ site three [=
                 /* Custom Event Handling */
                 var _listeners = {};
 
-                var me = this;
+                var _this = this;
                 this.on = function( event, handler ) {
                     if ( ! _listeners[ event ] ) {
                         _listeners[ event ] = [];
@@ -585,13 +590,13 @@ site three [=
                 this.off = function( event, handler ) {
                     var l = _listeners[ event ];
                     if ( !l ) {
-                        return me;
+                        return _this;
                     }
                     if ( l.indexOf( handler ) > - 1 ) {
                         l.splice( handler, 1 );
                     }
 
-                    return me;
+                    return _this;
                 };
 
                 var notify = function( event, data, member ) {
@@ -621,7 +626,7 @@ site three [=
                 this.onmouseup =   [= mouseup.declare; =]
                 this.onmousemove = [= mousemove.declare; =]
                 
-                this.enabled = false;
+                this.enabled = [= enabled_by_default; =];
             }
         /]
 
@@ -631,11 +636,15 @@ site three [=
            name = controls_var + ".onmousedown"
            declare [/
                function( event ) {
+                   if ( _this.enabled === false ) {
+                       return;
+                   }
+                  
                    event.preventDefault();
-                   _mouse.x = ( event.clientX / _domElement.width ) * 2 - 1;
-                   _mouse.y = - ( event.clientY / _domElement.height ) * 2 + 1;
+                   _mouse.x = ( event.offsetX / _domElement.width ) * 2 - 1;
+                   _mouse.y = - ( event.offsetY / _domElement.height ) * 2 + 1;
                    _raycaster.setFromCamera( _mouse, _camera );
-                   var intersects = _raycaster.intersectObjects( _objects, true );
+                   var intersects = _raycaster.intersectObjects( _objects );
                    var ray = _raycaster.ray;
                    var normal = ray.direction; // normal ray to the camera position
                    if ( intersects.length > 0 ) {
@@ -668,13 +677,17 @@ site three [=
            name = controls_var + ".onmousemove"
            declare [/
                function( event ) {
+                   if ( _this.enabled === false ) {
+                       return;
+                   }
+
                    event.preventDefault();
-                   _mouse.x = ( event.clientX / _domElement.width ) * 2 - 1;
-                   _mouse.y = - ( event.clientY / _domElement.height ) * 2 + 1;
+                   _mouse.x = ( event.offsetX / _domElement.width ) * 2 - 1;
+                   _mouse.y = - ( event.offsetY / _domElement.height ) * 2 + 1;
                    _raycaster.setFromCamera( _mouse, _camera );
 
                    var ray = _raycaster.ray;
-                   if ( _selected && me.enabled ) {
+                   if ( _selected ) {
                        var normal = _selected.normal;
                        var denom = normal.dot( ray.direction );
                        if ( denom == 0 ) {
@@ -687,38 +700,24 @@ site three [=
 
                        targetposition.copy( ray.direction ).multiplyScalar( u ).add( ray.origin ).sub( _offset );
 
-                       var xLock = [= xlock; =];
-                       var yLock = [= ylock; =];
-                       var zLock = [= zlock; =];
-                       var moveX, moveY, moveZ;
-                       if ( xLock ) {
-                           moveX = true;
-                           moveY = false;
-                           moveZ = false;
-                       } else if ( yLock ) {
-                           moveX = false;
-                           moveY = true;
-                           moveZ = false;
-                       } else {
-                           moveX = moveY = moveZ = true;
-                       }
-
-                       if ( moveX ) {
-                           _selected.object.position.x = targetposition.x;
-                       }
-                       if ( moveY ) {
-                           _selected.object.position.y = targetposition.y;
-                       }
-                       if ( moveZ ) {
-                           _selected.object.position.z = targetposition.z;
-                       }
+                       [=
+                           if (!x_lock) [/
+                               _selected.object.position.x = targetposition.x;
+                           |]
+                           if (!y_lock) [/
+                               _selected.object.position.y = targetposition.y;
+                           |]
+                           if (!z_lock) [/
+                              _selected.object.position.z = targetposition.z;
+                           |]
+                       =]
 
                        notify( 'drag', _selected );
                        return;
                    }
 
                   _raycaster.setFromCamera( _mouse, _camera );
-                  var intersects = _raycaster.intersectObjects( _objects, true );
+                  var intersects = _raycaster.intersectObjects( _objects );
                   if ( intersects.length > 0 ) {
                       _domElement.style.cursor = 'pointer';
                       _hovered = intersects[ 0 ];
@@ -733,10 +732,13 @@ site three [=
            |]
         =]
  
-        activate(cam_var) [/
-            var [= id; =]_draggable_objs = [ [= for three_obj o in s.draggable_objs [= o.name; ","; =] =] ]; 
+        attach(cam_var) [/
+            var [= id; =]_draggable_objs = [ [= for three_obj o in obj.draggable_objs [= o.name; ","; =] =] ]; 
             var [= controls_var; =] = new drag_controls([= cam_var; =], [= id; =]_draggable_objs);
-            [= controls_var; =].enabled = true;    
+        |]
+        
+        activate(boolean flag) [/
+            [= controls_var; =].enabled = [= flag; =];    
         |]
 
         this;
@@ -1033,9 +1035,9 @@ site three [=
         
         /-- check for defined handlers --/
 
-        dynamic boolean is_pointable [= with (on_point_to) [= true; =] else [= false; =] =]
-        dynamic boolean is_hoverable [= with (on_hover_over) [= true; =] else [= false; =] =]
-        dynamic boolean is_draggable [= with (on_drag) [= log("~~~~~ draggable: " + three_class); true; =] else [= log("~~~~~ not draggable: " + three_class); false; =] =]
+        dynamic boolean is_pointable = on_point_to ?? true : false
+        dynamic boolean is_hoverable = on_hover_over ?? true : false
+        dynamic boolean is_draggable = on_drag ?? true : false
 
         three_object[] pointable_objs = [
                 if (owner.owner.is_pointable) [=
@@ -1154,7 +1156,8 @@ site three [=
             debug_log("setting position of " + owner.type + " to " + pos);
             with (pos) [/
                 [= name; =].position.set([= pos.x; =], [= pos.y; =], [= pos.z; =]);
-            |]            
+            |]
+            sub;            
         =]         
 
         this generate [=
@@ -1192,6 +1195,27 @@ site three [=
 
         three_object objs[] = []
         
+        this set_attributes [=
+        
+            name; 
+            
+            [| .raycast = function(raycaster, intersects) {
+                    var childIntersects = [];
+                    var children = this.children;
+                    for ( var i = 0, len = children.length; i < len; i++ ) {
+                       children[i].raycast(raycaster, childIntersects);
+                       if (childIntersects.length > 0) {
+                           var intersection = childIntersects[0];
+                           intersection.object = this;
+                           intersects.push(intersection);
+                           return;
+                       }
+                    }          
+                };
+            |]
+        
+            sub;
+        =]
         
         this generate [=
             debug_log("composite object " + name + " has " + objs.count + " objs"); 
@@ -1451,8 +1475,12 @@ site three [=
                    |]
 
             canvas_id = "tc"
+            
+            drag_controls(*) my_drag_controls(id, three_object obj) [=
+                boolean z_lock = true
+            =]
 
-            controls canvas_controls = drag_controls(canvas_id, s)
+            controls canvas_controls = my_drag_controls(canvas_id, s)
         =]        
 
         [|
