@@ -177,6 +177,25 @@ site pent [=
             =]
             game.get_phase;
         =]
+
+        dynamic init_for_phase [=
+            pent_phase game_phase = phase
+        
+            [| <script>function init_for_phase() { |]
+            
+            if (game_phase == CHOOSE_TEAM) [/
+                drag_controls.enabled = true;
+
+            |] else if (game_phase == PLAY_GAME) [/
+                drag_controls.enabled = true;
+            
+            |] else [/
+                drag_controls.enabled = false;
+            |]
+        
+            [| }</script> |]
+        =]
+
         
         /** parameter shortcuts **/
         command = params{COMMAND}
@@ -347,8 +366,9 @@ site pent [=
             log("console showing game over screen"); 
             game_over_panel;
         =]
-  
-    =]
+
+        init_for_phase;
+      =]
 
     /**
      *  Pent Console UI
@@ -614,19 +634,19 @@ site pent [=
                     |]
                 =]
             =]  
-            queryComponentByName("pent_console", "/do", params);
+            queryComponentByName("pent_console", "/do", params, init_for_phase);
         |]
             
         dynamic back_script [|
             var params = {};
             params["[= COMMAND; =]"] = "[= BACK; =]";
-            queryComponentByName("pent_console", "/do", params);
+            queryComponentByName("pent_console", "/do", params, init_for_phase);
         |]
 
         dynamic restart_script [|
             var params = {};
             params["[= COMMAND; =]"] = "[= START; =]";
-            queryComponentByName("pent_console", "/do", params);
+            queryComponentByName("pent_console", "/do", params, init_for_phase);
         |]
 
         
