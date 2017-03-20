@@ -166,6 +166,8 @@ site pent [=
     dynamic console pent_console(pent_game gm, params{}) [=
     
         id = "pent_console"
+        
+        controls_var = controls_var_for_game(gm)
     
         /** the current game **/
         pent_game game = gm
@@ -178,23 +180,20 @@ site pent [=
             game.get_phase;
         =]
 
-        dynamic init_for_phase [=
-            pent_phase game_phase = phase
-        
-            [| <script>function init_for_phase() { |]
-            
-            if (game_phase == CHOOSE_TEAM) [/
-                drag_controls.enabled = true;
-
-            |] else if (game_phase == PLAY_GAME) [/
-                drag_controls.enabled = true;
-            
-            |] else [/
-                drag_controls.enabled = false;
-            |]
-        
-            [| }</script> |]
-        =]
+        declare_init_for_phase [|
+            <script>
+            function init_for_phase(phase) {
+                if (phase == "[= CHOOSE_TEAM; =]") { 
+                    [= controls_var; =].enabled = true;
+                } else if (phase == "[= PLAY_GAME; =]") {
+                    [= controls_var; =].enabled = true;
+                } else {
+                    [= controls_var; =].enabled = false;
+                }
+            }
+            </script>
+        |]
+       
 
         
         /** parameter shortcuts **/
@@ -234,6 +233,8 @@ site pent [=
         
 
         /---- implementation ----/
+        
+        declare_init_for_phase;
         
         /**
          *  State logic.
@@ -366,8 +367,6 @@ site pent [=
             log("console showing game over screen"); 
             game_over_panel;
         =]
-
-        init_for_phase;
       =]
 
     /**
@@ -615,8 +614,13 @@ site pent [=
         field_params{} = {}
         radio_params{} = {}
         
+        pent_phase next_phase [?]
+        pent_phase prev_phase [?]
+        pent_phase start_phase = CHOOSE_PLAYERS
+        
         dynamic submit_script [|
             var params = {};
+            var nextPhase = "[= next_phase; =]";
             [=
                 for k in submit_params.keys [|
                     params["[= k; =]"] = "[= submit_params{k}; =]";
@@ -634,19 +638,21 @@ site pent [=
                     |]
                 =]
             =]  
-            queryComponentByName("pent_console", "/do", params, init_for_phase);
+            queryComponentByName("pent_console", "/do", params, init_for_phase, nextPhase);
         |]
             
         dynamic back_script [|
             var params = {};
+            var prevPhase = "[= prev_phase; =]";
             params["[= COMMAND; =]"] = "[= BACK; =]";
-            queryComponentByName("pent_console", "/do", params, init_for_phase);
+            queryComponentByName("pent_console", "/do", params, init_for_phase, prevPhase);
         |]
 
         dynamic restart_script [|
             var params = {};
+            var startPhase = "[= start_phase; =]";
             params["[= COMMAND; =]"] = "[= START; =]";
-            queryComponentByName("pent_console", "/do", params, init_for_phase);
+            queryComponentByName("pent_console", "/do", params, init_for_phase, startPhase));
         |]
 
         
@@ -662,9 +668,17 @@ site pent [=
         
         [| <div class="button_panel visible_panel"> |]
         [| <div class="button_section"><div class="button_row"><div class="button_div"> |]
-        request_button("back", "Back", back_script);
+        with (prev_phase) [=
+            request_button("back", "Back", back_script);
+        =] else [=
+            disabled_button("back", "Back");
+        =]
         [| </div><div class="button_div"> |]
-        request_button("choose", "Next", submit_script);
+        with (next_phase) [=
+            request_button("choose", "Next", submit_script);
+        =] else [=
+            disabled_button("choose", "Next");
+        =]
         [| </div></div></div> |]
         [| <div class="button_section"><div class="button_row"><div class="lone_button_div"> |]
         request_button("restart", "Start Over", restart_script);
@@ -681,9 +695,11 @@ site pent [=
                            (PLAYER_A_LEVEL): PLAYER_A_LEVEL_DROPDOWN,
                            (PLAYER_B_LEVEL): PLAYER_B_LEVEL_DROPDOWN } 
                            
+        pent_phase next_phase = CHOOSE_ORDER
+        
         dynamic player_A_name = game.player_A.name ? game.player_A.name : current_player_A_name                           
         dynamic player_B_name = game.player_B.name ? game.player_B.name : current_player_B_name                           
-        
+
         dynamic component player_panel(boolean is_player_A) [=
              component_class = "visible_panel table_panel " + (is_player_A ? " left_panel" : " right_panel")
              id = is_player_A ? "player_A_panel" : "player_B_panel"
@@ -743,6 +759,9 @@ site pent [=
     dynamic chooser_panel choose_order_panel(pent_game game) [=
         title = "who plays first/picks second?"
 
+        pent_phase next_phase = CHOOSE_TEAM
+        pent_phase prev_phase = CHOOSE_PLAYERS
+
         radio_params{} = { (FIRST_PICK): [PLAYER_A_FIRST_RADIO, PLAYER_B_FIRST_RADIO] }
 
         player_A_script [/]
@@ -761,6 +780,9 @@ site pent [=
     dynamic chooser_panel choose_team_panel(pent_game game) [=
         dynamic title = "choose teams: " + (game.a_picks_next ? "Player A" : "Player B") + "'s pick"
         
+        pent_phase next_phase = PLAY_GAME
+        pent_phase prev_phase = CHOOSE_ORDER
+
         dynamic component team_panel(boolean is_team_A) [=
              component_class = "team_panel " + (is_team_A ? "left_panel" : "right_panel")
              id = is_team_A ? "team_A_panel" : "team_B_panel"
@@ -776,6 +798,7 @@ site pent [=
 
     dynamic console_panel game_panel(pent_game game) [=
         title = game.player_A.name + " vs. " + game.player_B.name;    
+
         board_view(game);
     =]
     

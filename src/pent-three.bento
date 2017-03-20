@@ -252,7 +252,9 @@ site pent [=
     =]
 
 
-
+    dynamic controls_var_for_game(pent_game gm) = scene_for_game(gm).name + "_canvas_drag_controls"
+    
+    
     /---- scene viewer ----/
     
     dynamic component three_scene_viewer(pent_game gm) [= 
