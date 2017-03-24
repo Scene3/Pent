@@ -167,7 +167,8 @@ site pent [=
     
         id = "pent_console"
         
-        controls_var = controls_var_for_game(gm)
+        drag_controls_var = controls_var_for_game(gm, "drag")
+        point_controls_var = controls_var_for_game(gm, "point")
     
         /** the current game **/
         pent_game game = gm
@@ -184,11 +185,14 @@ site pent [=
             <script>
             function init_for_phase(phase) {
                 if (phase == "[= CHOOSE_TEAM; =]") { 
-                    [= controls_var; =].enabled = true;
+                    [= point_controls_var; =].enabled = true;
+                    [= drag_controls_var; =].enabled = false;
                 } else if (phase == "[= PLAY_GAME; =]") {
-                    [= controls_var; =].enabled = true;
+                    [= point_controls_var; =].enabled = false;
+                    [= drag_controls_var; =].enabled = true;
                 } else {
-                    [= controls_var; =].enabled = false;
+                    [= point_controls_var; =].enabled = false;
+                    [= drag_controls_var; =].enabled = false;
                 }
             }
             </script>

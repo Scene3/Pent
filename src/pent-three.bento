@@ -252,7 +252,7 @@ site pent [=
     =]
 
 
-    dynamic controls_var_for_game(pent_game gm) = scene_for_game(gm).name + "_canvas_drag_controls"
+    dynamic controls_var_for_game(pent_game gm, controls_type) = scene_for_game(gm).name + "_canvas_" + controls_type + "_controls"
     
     
     /---- scene viewer ----/
