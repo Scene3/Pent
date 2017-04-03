@@ -110,7 +110,7 @@ site three [=
         sub_script [/]
         sub_funcs [/]
         
-        controls canvas_controls [?]
+        controls[] canvas_controls = []
 
         /---- the three_component is the rendering canvas. ----/
         canvas_name = canvas_id
@@ -176,21 +176,33 @@ site three [=
         /------------- controls --------------/
     
         dynamic add_controls [=
-            with (canvas_controls) [=
-                canvas_controls.attach(canvas_camera);
-                canvas_controls.add_listeners(canvas_id);
+            for controls c in canvas_controls [=
+                c.attach(canvas_camera);
+                c.add_listeners(canvas_id);
             =]
         =]
 
-        dynamic activate_controls(boolean flag) [=
-            with (canvas_controls) [=
-                canvas_controls.activate(flag);
+        dynamic activate_controls(boolean flag),
+                                 (controls_type, boolean flag) [=
+                                 
+            with (controls_type) [=
+                for controls c in canvas_controls [=
+                    if (c.def.is_a(controls_type)) [=
+                        c.activate(flag);
+                        log(controls.type + " activated");
+                    =]
+                =]
+
+            =] else [=
+                for controls c in canvas_controls [=
+                    c.activate(flag);
+                =]
             =]
         =]
 
         dynamic declare_controls [=
-            with (canvas_controls) [=
-                canvas_controls.declare;
+            for controls c in canvas_controls [=
+                c.declare;
             =]
         =]
 
@@ -552,11 +564,16 @@ site three [=
      **/
      
     controls point_controls(id, three_object obj) [=
+        controls_var = id + "_point_controls"
+
         declare [/
             var point_controls = function( _camera, _objects ) {
                 var _domElement = document.getElementById("[= id; =]");
                 var _raycaster = new THREE.Raycaster();
+                var _mouse = new THREE.Vector3(),
+                    _offset = new THREE.Vector3();
                 var _selected, _hovered;
+                var _this = this;
 
                 this.setObjects = function( objects ) {
                     if ( objects instanceof THREE.Scene ) {
@@ -568,13 +585,13 @@ site three [=
 
                 this.setObjects( _objects );
 
-                this.onmousedown = [= mousedown.declare; =]
-                this.onmouseup =   [= mouseup.declare; =]
-                this.onmousemove = [= mousemove.declare; =]
+                this.onmousedown = [= mousedown.declare; =];
+                this.onmouseup =   [= mouseup.declare; =];
+                this.onmousemove = [= mousemove.declare; =];
 
                 this.enabled = [= enabled_by_default; =];
             }
-        |]
+        /]
     
         event_handler mousedown [=
            name = controls_var + ".onmousedown"
@@ -724,9 +741,9 @@ site three [=
 
                 this.setObjects( _objects );
 
-                this.onmousedown = [= mousedown.declare; =]
-                this.onmouseup =   [= mouseup.declare; =]
-                this.onmousemove = [= mousemove.declare; =]
+                this.onmousedown = [= mousedown.declare; =];
+                this.onmouseup =   [= mouseup.declare; =];
+                this.onmousemove = [= mousemove.declare; =];
                 
                 this.enabled = [= enabled_by_default; =];
             }
@@ -1581,7 +1598,7 @@ site three [=
                 boolean z_lock = true
             =]
 
-            controls canvas_controls = my_drag_controls(canvas_id, s)
+            controls[] canvas_controls = [ my_drag_controls(canvas_id, s) ]
         =]        
 
         [|

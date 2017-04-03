@@ -123,6 +123,9 @@ site pent [=
             log("piece_3obj.on_drag called");
         =]
 
+        on_point_to [=
+            log("piece_3obj.on_drag called");
+        =]
 
     =]
     
@@ -277,10 +280,14 @@ site pent [=
 
             dynamic drag_controls(*) my_drag_controls(id, three_object obj) [=
                 boolean z_lock = true
-                dynamic boolean enabled_by_default = (game_phase == CHOOSE_TEAM || game_phase == PLAY_GAME)
+                dynamic boolean enabled_by_default = (game_phase == PLAY_GAME)
             =]
 
-            dynamic controls canvas_controls = my_drag_controls(canvas_id, s)
+            dynamic point_controls(*) my_point_controls(id, three_object obj) [=
+                dynamic boolean enabled_by_default = (game_phase == CHOOSE_TEAM)
+            =]
+
+            controls[] canvas_controls = [ my_drag_controls(canvas_id, s), my_point_controls(canvas_id, s) ]
 
             boolean run_scripts_on_load = false
 
