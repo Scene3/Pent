@@ -278,16 +278,16 @@ site pent [=
         
             canvas_id = s.name + "_canvas"
 
-            dynamic drag_controls(*) my_drag_controls(id, three_object obj) [=
+            dynamic drag_controls(canvas_id, s) my_drag_controls [=
                 boolean z_lock = true
                 dynamic boolean enabled_by_default = (game_phase == PLAY_GAME)
             =]
 
-            dynamic point_controls(*) my_point_controls(id, three_object obj) [=
+            dynamic point_controls(canvas_id, s) my_point_controls [=
                 dynamic boolean enabled_by_default = (game_phase == CHOOSE_TEAM)
             =]
 
-            controls[] canvas_controls = [ my_drag_controls(canvas_id, s), my_point_controls(canvas_id, s) ]
+            controls[] canvas_controls = [ my_drag_controls, my_point_controls ]
 
             boolean run_scripts_on_load = false
 

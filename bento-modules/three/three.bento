@@ -570,8 +570,7 @@ site three [=
             var point_controls = function( _camera, _objects ) {
                 var _domElement = document.getElementById("[= id; =]");
                 var _raycaster = new THREE.Raycaster();
-                var _mouse = new THREE.Vector3(),
-                    _offset = new THREE.Vector3();
+                var _offset = new THREE.Vector3();
                 var _selected, _hovered;
                 var _this = this;
 
@@ -602,7 +601,8 @@ site three [=
                    }
                   
                    event.preventDefault();
-                   _raycaster.setFromCamera( _mouse, _camera );
+                   var mouse = new THREE.Vector2( (event.offsetX / _domElement.width) * 2 - 1, -(event.offsetY / _domElement.height) * 2 + 1 );
+                   _raycaster.setFromCamera( mouse, _camera );
                    var intersects = _raycaster.intersectObjects( _objects );
                    var ray = _raycaster.ray;
                    var normal = ray.direction; // normal ray to the camera position
@@ -639,7 +639,7 @@ site three [=
 
                    event.preventDefault();
                    var mouse = new THREE.Vector2( (event.offsetX / _domElement.width) * 2 - 1, -(event.offsetY / _domElement.height) * 2 + 1 );
-                   _raycaster.setFromCamera( _mouse, _camera );
+                   _raycaster.setFromCamera( mouse, _camera );
                    var intersects = _raycaster.intersectObjects( _objects );
                    if ( intersects.length > 0 ) {
                        _domElement.style.cursor = 'pointer';
@@ -686,8 +686,7 @@ site three [=
 
                 var _raycaster = new THREE.Raycaster();
 
-                var _mouse = new THREE.Vector3(),
-                    _offset = new THREE.Vector3();
+                var _offset = new THREE.Vector3();
                 var _selected, _hovered;
 
                 var p3subp1 = new THREE.Vector3();
@@ -760,9 +759,8 @@ site three [=
                    }
                   
                    event.preventDefault();
-                   _mouse.x = ( event.offsetX / _domElement.width ) * 2 - 1;
-                   _mouse.y = - ( event.offsetY / _domElement.height ) * 2 + 1;
-                   _raycaster.setFromCamera( _mouse, _camera );
+                   var mouse = new THREE.Vector2( (event.offsetX / _domElement.width) * 2 - 1, -(event.offsetY / _domElement.height) * 2 + 1 );
+                   _raycaster.setFromCamera( mouse, _camera );
                    var intersects = _raycaster.intersectObjects( _objects );
                    var ray = _raycaster.ray;
                    var normal = ray.direction; // normal ray to the camera position
@@ -801,9 +799,8 @@ site three [=
                    }
 
                    event.preventDefault();
-                   _mouse.x = ( event.offsetX / _domElement.width ) * 2 - 1;
-                   _mouse.y = - ( event.offsetY / _domElement.height ) * 2 + 1;
-                   _raycaster.setFromCamera( _mouse, _camera );
+                   var mouse = new THREE.Vector2( (event.offsetX / _domElement.width) * 2 - 1, -(event.offsetY / _domElement.height) * 2 + 1 );
+                   _raycaster.setFromCamera( mouse, _camera );
 
                    var ray = _raycaster.ray;
                    if ( _selected ) {
