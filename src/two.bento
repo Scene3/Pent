@@ -57,13 +57,13 @@ site two [=
         
         /-- check for defined handlers --/
 
-        boolean is_pointable [= with (on_point_to) [= true; =] else [= false; =] =]
-        boolean is_hoverable [= with (on_hover_over) [= true; =] else [= false; =] =]
-        boolean is_draggable [= with (on_drag) [= true; =] else [= false; =] =]
+        dynamic boolean is_pointable = on_point_to ?? true : false
+        dynamic boolean is_hoverable = on_hover_over ?? true : false
+        dynamic boolean is_draggable = on_drag ?? true : false
 
         two_object[] pointable_objs = [
-                if (is_pointable) [=
-                    owner.def
+                if (owner.owner.is_pointable) [=
+                    owner.owner.def
                 =] else [=
                     for two_object o in objs [=
                         for two_object po in o.pointable_objs [=
@@ -72,6 +72,31 @@ site two [=
                     =]
                 =]
             ]
+
+        two_object[] hoverable_objs = [
+                if (owner.owner.is_hoverable) [=
+                    owner.owner.def
+                =] else [=
+                    for two_object o in objs [=
+                        for two_object ho in o.hoverable_objs [=
+                            ho.def
+                        =]
+                    =]
+                =]
+            ]
+
+        two_object[] draggable_objs = [
+                if (owner.owner.is_draggable) [=
+                    owner.owner.def
+                =] else [=
+                    for two_object o in objs [=
+                        for two_object dro in o.draggable_objs [=
+                            dro.def
+                        =]
+                    =]
+                =]
+            ]
+
 
         
         /-- animation logic, called for each frame --/

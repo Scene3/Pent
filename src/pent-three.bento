@@ -82,6 +82,7 @@ site pent [=
     
     composite_object piece_3obj(piece p) [=
         pent_position proto = p.protos[0]
+        int id = p.id
         int num_cols = p.width
         int num_rows = p.height
         
