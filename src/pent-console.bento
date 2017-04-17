@@ -371,7 +371,13 @@ site pent [=
             log("console showing game over screen"); 
             game_over_panel;
         =]
-      =]
+    =]
+
+    /** Helper function to send choose piece command to the console. **/
+    dynamic javascript send_choose_piece_command(selected_piece) [=
+        
+    =]
+
 
     /**
      *  Pent Console UI

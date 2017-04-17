@@ -79,7 +79,6 @@ site pent [=
     piece[] pent_team = []
     boolean[6] pent_team_played = [ false, false, false, false, false, false ]
     
-    
 
     /---- a game ----/
 
@@ -119,7 +118,6 @@ site pent [=
             eval(turn);        
             set_phase(CHOOSE_PLAYERS);
         =]      
-
         
         /---- set the phase ----/    
 
@@ -139,8 +137,11 @@ site pent [=
 
         dynamic pent_phase get_phase = phase
  
-                
-                
+        /---- get the turn ----/
+
+        dynamic int get_turn = turn
+
+
         /---- CHOOSE_PLAYERS phase ----/
     
         dynamic set_player(pent_player pp, boolean is_player_a),
@@ -267,10 +268,4 @@ site pent [=
         init;
         this;    
     =]
-
-        
-        
-    
-    
-    
 =]

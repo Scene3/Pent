@@ -120,13 +120,13 @@ site pent [=
                               ]
          
 
-        on_drag [=
-            log("piece_3obj.on_drag called");
-        =]
+        on_drag [|
+            console.log("[= owner.type; =].on_drag called");
+        |]
 
-        on_point_to [=
-            log("piece_3obj.on_drag called");
-        =]
+        on_point_to [|
+            console.log("[= owner.type; =].on_point_to called");
+        |]
 
     =]
     
@@ -266,6 +266,7 @@ site pent [=
 
         scene s = scene_for_game(gm)
         pent_phase game_phase = gm.get_phase
+        int game_turn = gm.get_turn
 
         three_component(s) scene_component [=
             style  [| position: fixed;
@@ -294,7 +295,14 @@ site pent [=
 
             include_scripts[] = [ "/js/lib/three.js", "/js/lib/stats.js" ]
     
-            sub_script [=
+            javascript declare_game_vars [|
+                var phase = [= game_phase; =];
+                var turn = [= game_turn; =];
+            |]    
+
+            javascript sub_script [=
+                declare_game_vars;    
+            
                 if (show_stats) [|
                     stats = new Stats();
                     stats.domElement.style.position = 'absolute';
