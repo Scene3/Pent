@@ -262,11 +262,10 @@ site pent [=
     /---- scene viewer ----/
     
     dynamic component three_scene_viewer(pent_game gm) [= 
-        style [| width: 64rem; margin: auto; |]
+        style [| width: 64rem; margin: auto; z-index: 50; |]
 
         scene s = scene_for_game(gm)
         pent_phase game_phase = gm.get_phase
-        int game_turn = gm.get_turn
 
         three_component(s) scene_component [=
             style  [| position: fixed;
@@ -295,14 +294,7 @@ site pent [=
 
             include_scripts[] = [ "/js/lib/three.js", "/js/lib/stats.js" ]
     
-            javascript declare_game_vars [|
-                var phase = [= game_phase; =];
-                var turn = [= game_turn; =];
-            |]    
-
             javascript sub_script [=
-                declare_game_vars;    
-            
                 if (show_stats) [|
                     stats = new Stats();
                     stats.domElement.style.position = 'absolute';

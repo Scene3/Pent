@@ -98,6 +98,8 @@ site pent [=
     /---- the main component ----/
 
     dynamic pent_view console_view(pent_game gm, params{}) [=
+            title_view;
+            pent_console(gm, params);
         if (display_mode == THREE_MODE) [=
             three_scene_viewer(gm);
         =] else if (display_mode == TWO_MODE) [=
@@ -105,8 +107,6 @@ site pent [=
         =] else [=
             log("unknown display mode: " + display_mode);      
         =]
-        title_view;
-        pent_console(gm, params);
     =]
 
 

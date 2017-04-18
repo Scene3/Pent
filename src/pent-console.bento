@@ -181,8 +181,7 @@ site pent [=
             game.get_phase;
         =]
 
-        declare_init_for_phase [|
-            <script>
+        javascript declare_init_for_phase [|
             function init_for_phase(phase) {
                 if (phase == "[= CHOOSE_TEAM; =]") { 
                     [= point_controls_var; =].enabled = true;
@@ -195,9 +194,12 @@ site pent [=
                     [= drag_controls_var; =].enabled = false;
                 }
             }
-            </script>
         |]
        
+        javascript declare_game_vars [|
+            var phase = "[= game.get_phase; =]";
+            var turn = "[= game.get_turn; =]";
+        |]    
 
         
         /** parameter shortcuts **/
@@ -238,7 +240,11 @@ site pent [=
 
         /---- implementation ----/
         
+        [| <script> |]
         declare_init_for_phase;
+        declare_game_vars;    
+        [| </script> |]
+
         
         /**
          *  State logic.
@@ -374,9 +380,12 @@ site pent [=
     =]
 
     /** Helper function to send choose piece command to the console. **/
-    dynamic javascript send_choose_piece_command(selected_piece) [=
+    dynamic javascript send_choose_piece_command(selected_piece) [/
+        var params = {};
+        params["[= COMMAND; =]"] = "[= CHOOSE; =]";
+        queryComponentByName("pent_console", "/do", params, null, null));
         
-    =]
+    |]
 
 
     /**
