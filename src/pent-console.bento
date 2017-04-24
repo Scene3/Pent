@@ -171,7 +171,7 @@ site pent [=
         point_controls_var = controls_var_for_game(gm, "point")
     
         /** the current game **/
-        pent_game game = gm
+        dynamic pent_game game = gm
         
         /** the current phase **/
         dynamic pent_phase phase(pent_phase p) [= 
@@ -317,6 +317,7 @@ site pent [=
                 =]
     
             =] else if (phase == CHOOSE_TEAM) [=
+                log("choosing piece " + selected_piece + " on turn " + turn);
                 if (selected_piece && turn) [=
                     if (turn != game.turn) [=
                         redirect error("piece selected out of turn");
@@ -380,11 +381,12 @@ site pent [=
     =]
 
     /** Helper function to send choose piece command to the console. **/
-    dynamic javascript send_choose_piece_command(selected_piece) [/
+    dynamic javascript send_choose_piece_command(piece_id) [/
         var params = {};
         params["[= COMMAND; =]"] = "[= CHOOSE; =]";
-        queryComponentByName("pent_console", "/do", params, null, null));
-        
+        params["[= PIECE; =]"] = "[= piece_id; =]";
+        params["[= TURN; =]"] = turn;
+        queryComponentByName("pent_console", "/do", params, null, null);
     |]
 
 

@@ -85,6 +85,7 @@ site pent [=
         int id = p.id
         int num_cols = p.width
         int num_rows = p.height
+        this piece = p
         
         pent_position[] row_masks = [ 
             [ #FF, 0, 0, 0, 0, 0, 0, 0 ],
@@ -126,6 +127,7 @@ site pent [=
 
         on_point_to [|
             console.log("[= owner.type; =].on_point_to called");
+            [= send_choose_piece_command(owner.id); =]
         |]
 
     =]
@@ -193,6 +195,7 @@ site pent [=
         piece_3obj(bar) bar_3obj [/]
         piece_3obj(plus) plus_3obj [/]
 
+        dynamic boolean is_piece_visible(piece p) [?]
        
         int num_cols = 3
         int num_rows = 4
@@ -224,6 +227,11 @@ site pent [=
             =]
         =]
 
+    =]
+
+    set_of_pieces unchosen_pieces(pent_game gm) [=
+        dynamic boolean is_piece_visible(piece p) = !gm.is_chosen(p)
+
         next_frame [=
             vector3(0, 1, 0) up_vector [/]
             dynamic int dir(int col, int row) = (((col + row) & 1) * 2) - 1
@@ -235,18 +243,31 @@ site pent [=
             =]
         =]
     =]
+
+    set_of_pieces team_pieces(pent_game gm, boolean on_team_A) [=
+        dynamic boolean is_piece_visible(piece p) = gm.is_on_team(p, on_team_A)
+        pent_team team = on_team_A ? gm.team_A : gm_team_B
+
+        three_object objs[] = [
+            for piece p in team [= 
+                piece_3obj(p)
+            =]
+        ]
+
+    =]
+
     
     
     scene full_set_scene [=
         three_object[] objs = [
-            set_of_pieces,
+            unchosen_pieces,
             light_group
         ]
 
         camera cam = pent_cam
                     
         next_frame [=
-            set_of_pieces.next_frame;
+            unchosen_pieces.next_frame;
         =]
     =]
 

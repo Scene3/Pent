@@ -139,7 +139,7 @@ site pent [=
  
         /---- get the turn ----/
 
-        dynamic int get_turn = turn
+        dynamic int get_turn = turn ? turn : 0
 
 
         /---- CHOOSE_PLAYERS phase ----/
@@ -190,13 +190,17 @@ site pent [=
         
         /---- CHOOSE_TEAM phase ----/
     
+        dynamic boolean is_chosen(piece p) = (array.contains(team_A, p) || array.contains(team_B, p))
+        
+        dynamic boolean is_on_team(piece p, boolean on_team_A) = (on_team_A ? array.contains(team_A, p) : array.contains(team_B, p))
+        
         dynamic add_piece_by_id(id, boolean to_team_A) [=
             add_piece(pieces[piece.index_for_id(id)], to_team_A);
         =]
         
         dynamic add_piece(piece p, boolean to_team_A) [=
             if (phase == CHOOSE_TEAM) [=
-                if (array.contains(team_A, p) || array.contains(team_B, p)) [=
+                if (is_chosen(p)) [=
                     redirect unable_to_add_piece("piece already chosen", here);
                 =]
             
