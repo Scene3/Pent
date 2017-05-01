@@ -98,8 +98,9 @@ site pent [=
     /---- the main component ----/
 
     dynamic pent_view console_view(pent_game gm, params{}) [=
-            title_view;
-            pent_console(gm, params);
+        title_view;
+        console_script(gm);
+        pent_console(gm, params);
         if (display_mode == THREE_MODE) [=
             three_scene_viewer(gm);
         =] else if (display_mode == TWO_MODE) [=

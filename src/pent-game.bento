@@ -205,8 +205,10 @@ site pent [=
                 =]
             
                 if (to_team_A && team_A.count < 6) [=
+                    log("adding " + p.name + " to team A");
                     eval(team_A(: team_A + p :));
                 =] else if (!to_team_A && team_B.count < 6) [=
+                    log("adding " + p.name + " to team B");
                     eval(team_B(: team_B + p :));
                 =] else [=
                     redirect unable_to_add_piece("team full", here);
