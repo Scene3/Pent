@@ -157,19 +157,19 @@ site pent [=
                 if (phase == "[= CHOOSE_TEAM; =]") { 
                     [= point_controls_var; =].enabled = true;
                     [= drag_controls_var; =].enabled = false;
-                    turn = turn + 1
+                    turn = turn + 1;
+                    if (turn > 12) {
+                        turn = 1;
+                    }
                 } else if (phase == "[= PLAY_GAME; =]") {
                     [= point_controls_var; =].enabled = false;
                     [= drag_controls_var; =].enabled = true;
-                    if (turn >= 12) {
-                        turn = 1;
-                    } else {
-                        turn = turn + 1
-                    }
+                    turn = turn + 1;
                 } else {
                     [= point_controls_var; =].enabled = false;
                     [= drag_controls_var; =].enabled = false;
                 }
+                console.log("init_for_phase phase: " + ph + "  turn: " + turn);
             }
         |]
        
@@ -395,7 +395,7 @@ site pent [=
         params["[= COMMAND; =]"] = "[= CHOOSE; =]";
         params["[= PIECE; =]"] = "[= piece_id; =]";
         params["[= TURN; =]"] = turn;
-        queryComponentByName("pent_console", "/do", params, null, null);
+        queryComponentByName("pent_console", "/do", params, init_for_phase, "[= CHOOSE_TEAM; =]");
     |]
 
 
