@@ -477,10 +477,10 @@ dynamic test_cons(pent_game gm) [=
     
     /-------- defined errors --------------------------/
     
-    error_panel("Illegal action for phase: " + msg, ctx) illegal_action_for_phase_error(msg, ctx) [/]
-    error_panel("Unable to add piece: " + msg, ctx) unable_to_add_piece(msg, ctx) [/]
-    error_panel("Unable to make move: " + msg, ctx) unable_to_add_play(msg, ctx) [/]
-    error_panel("Illegal phase: " + msg, ctx) illegal_phase(msg, ctx) [/]
+    error("Illegal action for phase: " + msg, ctx) illegal_action_for_phase_error(msg, bento_context ctx) [/]
+    error("Unable to add piece: " + msg, ctx) unable_to_add_piece(msg, bento_context ctx) [/]
+    error("Unable to make move: " + msg, ctx) unable_to_add_play(msg, bento_context ctx) [/]
+    error("Illegal phase: " + msg, ctx) illegal_phase(msg, bento_context ctx) [/]
 
 
     /------- for troubleshooting ------/
