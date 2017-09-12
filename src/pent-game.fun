@@ -1,0 +1,277 @@
+/**  pent-game.fun
+ *
+ *   Game logic for Pent.
+ *
+ *
+ **/
+
+site pent {
+
+    /---- phases of game play ----/
+    
+    pent_phase [?]
+
+    pent_phase[] valid_pent_phases = [ CHOOSE_PLAYERS, CHOOSE_ORDER, CHOOSE_TEAM, PLAY_GAME, BETWEEN_GAMES ]
+            
+            
+    /** When a new game is created, it starts in the Choose Players phase. In the 
+     *  Choose Players phase, the user chooses who plays each player, Player A and 
+     *  Player B.  By default, the user plays as Player A, and chooses either one 
+     *  of the available computer opponents or a person playing remotely to play
+     *  Player B.
+     **/ 
+    pent_phase CHOOSE_PLAYERS = "Choose Players"
+
+    /** Once the players are chosen, Player A must choose the order in which the
+     *  players select pieces for their teams.  This also establishes the order of
+     *  play for the Play Game phase; the player that chooses first plays second,
+     *  and the player that chooses second plays first.  If play continues beyond
+     *  a single game, the players alternate order (whoever picked first last game
+     *  picks second this game and vice versa) and this phase is skipped.
+     **/ 
+    pent_phase CHOOSE_ORDER = "Choose Order"
+
+    /** The Choose Team phase involves this players selecting pieces for their
+     *  team.  This is a turn-based phase that continues until all pieces are
+     *  selected and each player has a six-piece team.
+     **/ 
+    pent_phase CHOOSE_TEAM = "Choose Team"
+
+    /** Actual game play begins once the teams are chosen.  The player who went
+     *  second in the Choose Team phase goes first in the Play Game phase, after
+     *  which players alternate playing turns.  In each turn, the player selects
+     *  an unplayed piece from her team and places it on the board such that the
+     *  piece is entirely on the board, aligned such that each square of the
+     *  piece covers exactly one square of the board, and no part of the piece
+     *  overlaps any pieces already on the board.  The Play Game phase continues
+     *  until one of the players is unable to play, either because all of the
+     *  player's pieces have been played, or none of the player's remaining pieces
+     *  fit into the remaining open spaces on the board.
+     **/
+    pent_phase PLAY_GAME = "Play Game"
+
+    /** Immediately after the last piece has been played, the game is declared over,
+     *  the winner is announced, the score is tallied and, if the same two opponents
+     *  played previously, the cumulative results of all games played is displayed.
+     *  This is the Between Games phase.  At this point the player may exit, or
+     *  may accept one of two invitations: an invitation to play again against the 
+     *  same opponent, and an invitation to play against a different opponent.  If
+     *  the invitation to play again with the same opponent is accepted, the 
+     *  application enters the Choose Team phase.  If the invitation to choose 
+     *  another opponent is accepted, the application enters the Choose Players 
+     *  phase.
+     **/
+    pent_phase BETWEEN_GAMES = "Between Games"
+
+    /---- a player ----/
+    
+    //game_player(*) pent_player(player_name, player_id) [/]
+    pent_player(player_name, player_id) {
+        keep: name = player_name
+        keep: id = player_id
+        
+        this;
+    }
+    
+
+    /---- a team ----/
+    
+    piece[] pent_team = []
+    boolean[6] pent_team_played = [ false, false, false, false, false, false ]
+    
+
+    /---- a game ----/
+
+    pent_game(game_id) {
+    
+        /** id for use in service requests **/
+        keep: id = game_id
+    
+        /** the players **/
+        keep: pent_player player_A(pent_player plyr) = plyr
+        keep: pent_player player_B(pent_player plyr) = plyr
+        keep: boolean a_picks_first(boolean flag) = flag
+
+        /** the teams **/
+        keep: pent_team team_A(pent_team tm) = tm
+        keep: pent_team team_B(pent_team tm) = tm
+
+        /** the plays **/
+        keep: play[] plays(play[] pls) = pls
+    
+        /** the game phase and turn **/
+        keep: pent_phase phase(pent_phase pp) = pp
+        keep: int turn(int t) = t
+
+        /--------------------------------------/
+        /--------     the game API     --------/
+        /--------------------------------------/
+
+        /---- set all state values to their initial values ----/
+
+        dynamic init {
+            eval(player_A);
+            eval(player_B);
+            eval(a_picks_first);
+            eval(team_A);
+            eval(team_B);
+            eval(turn);        
+            set_phase(CHOOSE_PLAYERS);
+        }      
+        
+        /---- set the phase ----/    
+
+        dynamic set_phase(pent_phase pp) { 
+        
+            if (pp in valid_pent_phases) {
+                log("setting phase to " + pp);
+                eval(phase(: pp :));
+            } else if (pp) {
+                redirect illegal_phase(pp, here);
+            } else {
+                redirect illegal_phase("(null)", here);
+            }
+        }
+ 
+        /---- get the phase ----/    
+
+        dynamic pent_phase get_phase = phase
+ 
+        /---- get the turn ----/
+
+        dynamic int get_turn = turn ? turn : 0
+
+
+        /---- CHOOSE_PLAYERS phase ----/
+    
+        dynamic set_player(pent_player pp, boolean is_player_a),
+                          (name, id, boolean is_player_a) {
+        
+            if (phase == CHOOSE_PLAYERS) {
+                if (is_player_a) {
+                    with (pp) {
+                        log("set player A in game " + owner.id + " to pent_player name = " + pp.name);
+                        eval(player_A(: pp :));
+                    } else {
+                        log("set player A in game " + owner.id + " to " + name);
+                        eval(player_A(: pent_player(: name, id :) :));
+                    }
+                } else {
+                    with (pp) {
+                        log("set player B in game " + owner.id + " to pent_player name = " + pp.name);
+                        eval(player_B(: pp :));
+                    } else {
+                        log("set player B in game " + owner.id + " to " + name);
+                        eval(player_B(: pent_player(: name, id :) :));
+                    }
+                } 
+                 
+                 /-- if both players are set, advance to the next phase --/
+                 if (player_A && player_B) {
+                     log("both players are set, setting phase to choose order");
+                     set_phase(CHOOSE_ORDER);
+                 }
+            } else {
+                redirect illegal_action_for_phase("set_player", here);
+             }
+        }
+
+        /---- CHOOSE_ORDER phase ----/
+
+        dynamic set_a_picks_first(boolean flag) {
+            if (phase == CHOOSE_ORDER) {
+                eval(a_picks_first(: flag :));
+                eval(turn(: 1 :));
+                set_phase(CHOOSE_TEAM);
+            } else {
+                redirect illegal_action_for_phase("set_a_picks_first", here);
+            }
+        }
+        
+        /---- CHOOSE_TEAM phase ----/
+    
+        dynamic boolean is_chosen(piece p) = (array.contains(team_A, p) || array.contains(team_B, p))
+        
+        dynamic boolean is_on_team(piece p, boolean on_team_A) = (on_team_A ? array.contains(team_A, p) : array.contains(team_B, p))
+        
+        dynamic add_piece_by_id(id, boolean to_team_A) {
+            add_piece(pieces[piece.index_for_id(id)], to_team_A);
+        }
+        
+        dynamic add_piece(piece p, boolean to_team_A) {
+            if (phase == CHOOSE_TEAM) {
+                if (is_chosen(p)) {
+                    redirect unable_to_add_piece("piece already chosen", here);
+                }
+            
+                if (to_team_A && team_A.count < 6) {
+                    log("adding " + p.name + " to team A");
+                    eval(team_A(: team_A + p :));
+                } else if (!to_team_A && team_B.count < 6) {
+                    log("adding " + p.name + " to team B");
+                    eval(team_B(: team_B + p :));
+                } else {
+                    redirect unable_to_add_piece("team full", here);
+                }
+                
+                eval(turn(: team_A.count + team_B.count + 1 :));
+                if (turn == 13) {
+                    eval(turn(: 1 :));
+                    set_phase(PLAY_GAME);
+                }
+            } else {
+                redirect illegal_action_for_phase("add_piece", here);
+            }
+        }
+
+        /---- PLAY_GAME phase ----/
+        
+        /** Returns true if it is currently player A's turn **/
+        dynamic boolean a_goes_next {
+        
+            /-- it's A's turn if the turn is odd and A did not pick first, or
+             -- the turn is even and A did pick first.
+             --/
+            (((turn & 1) && !a_picks_first) || (!(turn & 1) && a_picks_first));
+        }
+
+
+        /** Returns true if piece is unused and is on the right team **/
+        dynamic boolean is_available(piece p) {
+            if (was_played(p)) {
+                false;
+            } else if (array.contains(team_A, p)) {
+                a_goes_next;
+            } else {
+                (!a_goes_next);
+            }
+        }
+        
+        /** Returns true if piece has been played **/
+        dynamic boolean was_played(piece p) {
+            boolean played(boolean b) = b
+            for play ply in plays until played {
+                if (ply.piece == p) {
+                    eval(played(true));
+                }
+            }
+            played;
+        }
+        
+        dynamic add_play(play p) {
+            if (phase == PLAY_GAME) {
+                if (!is_available(p.piece)) {
+                    redirect unable_to_add_play("piece not available", here);
+                }
+                
+                eval(plays(: plays + p :));
+                eval(turn(: turn + 1 :));
+            } else {
+                redirect illegal_action_for_phase("add_play", here);
+            }
+        }
+
+        init;
+        this;    
+    }
+}

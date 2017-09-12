@@ -1,0 +1,838 @@
+/**  pent-console.fun
+ *
+ *   Game console for Pent.
+ *
+ *
+ **/
+
+site pent {
+
+    /** Standard console parameters and events **/
+
+    param_key [?]
+    static param_key COMMAND = "do"
+    static param_key PLAYER_A_NAME = "a_name"
+    static param_key PLAYER_B_NAME = "b_name"
+    static param_key PLAYER_A_LEVEL = "a_level"
+    static param_key PLAYER_B_LEVEL = "b_level"
+    static param_key FIRST_PICK = "first"
+    static param_key PLAYER = "player"
+    static param_key PIECE = "piece"
+    static param_key PUT = "put"
+    static param_key ROTATE = "rot"
+    static param_key FLIP = "flip"
+    static param_key TURN = "turn"
+    static param_key CONFIRM = "confirm"
+         
+
+    /** Standard parameter values.  # means any number.  * means any
+     *  string.
+     **/
+    param_val [?]
+    static param_val START = "start"
+    static param_val STOP = "stop"
+    static param_val BACK = "back"
+    static param_val CONTINUE = "continue"
+    static param_val CHOOSE = "choose"
+    static param_val LEVEL = "*"
+    static param_val NAME = "*"
+    static param_val PLAYER_A = "A"
+    static param_val PLAYER_B = "B"
+    static param_val CELL = "#"
+    static param_val QTR_TURNS = "#"
+    static param_val FLIPS = "#" 
+    static param_val TURN_NUM = "#"
+    static param_val YES = "yes"
+    static param_val NO = "no"
+
+    
+    /** Allowed parameters in each game state. **/
+
+    param_key[] param_keys = []
+    
+    static param_keys{} allowed_params = {
+        (CHOOSE_PLAYERS): [ COMMAND, CONFIRM, PLAYER_A_NAME, PLAYER_A_LEVEL, PLAYER_B_NAME, PLAYER_B_LEVEL ],
+        (CHOOSE_ORDER):   [ COMMAND, CONFIRM, FIRST_PICK ],
+        (CHOOSE_TEAM):    [ COMMAND, CONFIRM, TURN, PIECE ],
+        (PLAY_GAME):      [ COMMAND, CONFIRM, TURN, PIECE, ROTATE, FLIP, PUT ],
+        (BETWEEN_GAMES):  [ COMMAND ]
+    }
+        
+    /** Allowed values for specific parameters in each game state. **/
+
+    param_val[] param_vals = []
+    
+    static param_vals{}{} allowed_vals = {
+    
+        (CHOOSE_PLAYERS): { 
+            (COMMAND):        [ CHOOSE, BACK, START ],
+            (PLAYER_A_NAME):  [ NAME ],
+            (PLAYER_B_NAME):  [ NAME ],
+            (PLAYER_A_LEVEL): [ LEVEL ],
+            (PLAYER_A_LEVEL): [ LEVEL ]
+        },
+        
+        (CHOOSE_ORDER): { 
+            (COMMAND):    [ CHOOSE, BACK, START ],
+            (FIRST_PICK): [ PLAYER_A, PLAYER_B ]
+        },
+        
+        (CHOOSE_TEAM): { 
+            (COMMAND):    [ CHOOSE, BACK, START ],
+            (TURN):       [ TURN_NUM ],
+            (PIECE):      [ ID ]
+        },
+        
+        (PLAY_GAME): { 
+            (COMMAND):    [ STOP ],
+            (TURN):       [ TURN_NUM ],
+            (PIECE):      [ ID ],
+            (PUT):        [ CELL ],
+            (ROTATE):     [ QTR_TURNS ],
+            (FLIP):       [ FLIPS ]
+        },
+        
+        (BETWEEN_GAMES): {
+            (COMMAND):    [ CONTINUE, START ]
+        }
+    }
+       
+    /** A human player is designated by setting the player level to human **/
+    static HUMAN_LEVEL = "human"
+    
+    /** Computer player options **/
+    static VERY_EASY_LEVEL = "very_easy"
+    static EASY_LEVEL = "easy"
+    static MEDIUM_LEVEL = "medium"
+    static HARD_LEVEL = "hard"
+    static VERY_HARD_LEVEL = "very_hard"
+    
+    option[] computer_player_options = [ option("Novice", VERY_EASY_LEVEL, true), 
+                                         option("Beginner", EASY_LEVEL, false),
+                                         option("Average", MEDIUM_LEVEL, false),
+                                         option("Above Average", HARD_LEVEL, false),
+                                         option("Pro", VERY_HARD_LEVEL, false) ]
+    
+    /** input field ids **/
+    static PLAYER_A_NAME_TEXTEDIT = "player_A_name"
+    static PLAYER_B_NAME_TEXTEDIT = "player_B_name"
+
+    static PLAYER_A_LEVEL_DROPDOWN = "player_A_level_dropdown"
+    static PLAYER_B_LEVEL_DROPDOWN = "player_B_level_dropdown"
+    
+    static PLAYER_A_HUMAN_RADIO = "player_A_human_radiobutton"
+    static PLAYER_A_COMPUTER_RADIO = "player_A_computer_radiobutton"
+    static PLAYER_B_HUMAN_RADIO = "player_B_human_radiobutton"
+    static PLAYER_B_COMPUTER_RADIO = "player_B_computer_radiobutton"
+    
+    static PLAYER_A_FIRST_RADIO = "first_player_A_radiobutton"
+    static PLAYER_B_FIRST_RADIO = "first_player_B_radiobutton"
+
+    /**
+     * Session values
+     *
+     **/
+    
+    current_player_A_name(nm) = nm
+    current_player_B_name(nm) = nm
+    
+    dynamic set_current_player_name(params{}) {
+        player_A_name = params["player_A_name"]
+        player_B_name = params["player_B_name"]
+        if (player_A_name) {
+            eval(current_player_A_name(: player_A_name :));
+        }
+        if (player_B_name) {
+            eval(current_player_B_name(: player_B_name :));
+        }
+    }    
+
+    console_script(pent_game game) {
+        drag_controls_var = controls_var_for_game(game, "drag")
+        point_controls_var = controls_var_for_game(game, "point")
+    
+        javascript declare_init_for_phase [/
+            function init_for_phase(ph) {
+                phase = ph;
+                if (phase == "{= CHOOSE_TEAM; =}") { 
+                    {= point_controls_var; =}.enabled = true;
+                    {= drag_controls_var; =}.enabled = false;
+                    turn = turn + 1;
+                    if (turn > 12) {
+                        turn = 1;
+                    }
+                } else if (phase == "{= PLAY_GAME; =}") {
+                    {= point_controls_var; =}.enabled = false;
+                    {= drag_controls_var; =}.enabled = true;
+                    turn = turn + 1;
+                } else {
+                    {= point_controls_var; =}.enabled = false;
+                    {= drag_controls_var; =}.enabled = false;
+                }
+                console.log("init_for_phase phase: " + ph + "  turn: " + turn);
+            }
+        /]
+       
+        javascript declare_game_vars [/
+            var phase = "{= game.get_phase; =}";
+            var turn = {= game.get_turn; =};
+        /]    
+
+        [/ <script> /]
+        declare_game_vars;
+        declare_init_for_phase;
+        [/ </script> /]
+    }
+
+    
+    /**
+     *  Pent Console logic
+     *
+     *  The console plays the role of controller.  It assembles and displays
+     *  a set of view components depending on the state of game, and also
+     *  changes the state of the game in response to events.
+     *
+     **/
+
+    /** console base class **/
+    component console {
+        component_class = "console"
+    }
+
+
+    /** pent-specific console **/
+    dynamic console pent_console(pent_game gm, params{}) {
+    
+        id = "pent_console"
+        
+        /** the current game **/
+        dynamic pent_game game = gm
+        
+        /** the current phase **/
+        dynamic pent_phase phase(pent_phase p) { 
+            with (p) {
+                game.set_phase(p);
+            }
+            game.get_phase;
+        }
+
+        /** parameter shortcuts **/
+        command = params[COMMAND]
+        player_A_name = params[PLAYER_A_NAME] ? params[PLAYER_A_NAME] : current_player_A_name
+        player_B_name = params[PLAYER_B_NAME] ? params[PLAYER_B_NAME] : current_player_B_name
+        player_A_level = params[PLAYER_A_LEVEL]
+        player_B_level = params[PLAYER_B_LEVEL]
+        first_pick = params[FIRST_PICK]
+        selected_player = params[PLAYER]
+        selected_piece = params[PIECE]
+        position = params[PUT]
+        int rotations = (int) params[ROTATE]
+        int flips = (int) params[FLIP]
+        int turn = (int) params[TURN]
+        boolean confirmed = (params[CONFIRM] == YES)
+        
+        dynamic boolean is_odd(int n) = ((n & 1) == 1)
+                
+        dynamic boolean a_picks_next = (is_odd(turn) == game.a_picks_first)
+        dynamic boolean a_plays_next = (is_odd(turn) != game.a_picks_first)
+        
+        /---- log calls ----/
+        log("instantiating pent_console for game " + game.id);
+        if (params) {
+            if (command) {
+                log("  ...command is " + command);
+            } else {
+                log("  ...no command");
+            }
+            log("    ...params: " + params);
+        } else {
+            log("  ...no params");
+        }
+        log("  ...phase is " + game.phase);
+        log("  ...player A is " + game.player_A.name + " | " + gm.player_A.name);
+        log("  ...turn is " + game.get_turn);
+        
+
+        /---- implementation ----/
+        
+        /**
+         *  State logic.
+         *
+         *  The state of both the console and the game changes in response to 
+         *  events, which arrive via params.  Console state includes player
+         *  names and ids, team colors and styles, console configuration, and game
+         *  sequence state (won-lost tally, running scores and player order
+         *  for the current series of games).  Game state includes the current
+         *  phase (game phases are defined in pent-game.fun) as well as the
+         *  current turn (for phases that have turns) and the state of the game
+         *  board.
+         *
+         *  The game object itself handles game state changes in response to the
+         *  game API. So when the console calls the game API to play a piece, for
+         *  example, the game object will determine if the play ends the game,
+         *  and if so will change the phase from PLAY_GAME to BETWEEN_GAMES.
+         *   
+         **/
+
+        if (command == STOP) {
+            if (confirmed) {
+                phase(BETWEEN_GAMES);
+            }
+ 
+        } else if (command == BACK) {
+            if (phase == CHOOSE_ORDER) {
+                log("going back to " + CHOOSE_PLAYERS + "  player A name: " + game.player_A.name + "  player B name: " + gm.player_B.name);
+                eval(gm.team_A(: :));
+                eval(gm.team_B(: :));
+                phase(CHOOSE_PLAYERS);
+            } else if (phase == CHOOSE_TEAM) {
+                log("going back to " + CHOOSE_ORDER);
+                eval(gm.team_A(: :));
+                eval(gm.team_B(: :));
+                phase(CHOOSE_ORDER);
+            } else {
+                log("back command not available in phase " + phase);
+            }
+
+        } else if (command == START) {
+            phase(CHOOSE_PLAYERS);
+
+        } else if (command == CONTINUE) {   
+            phase(CHOOSE_TEAM);
+
+        /---- choose command has phase-dependent logic ----/
+        } else if (command == CHOOSE) {
+            /-- in the Choose Player phase, we accept name/id choices for either player --/
+            if (phase == CHOOSE_PLAYERS) {
+                if (player_A_name) {
+                    log("setting player A to " + player_A_name);
+                    game.set_player(player_A_name, "A", true);
+                } else if (player_A_level) {
+                    log("setting player A to computer, level " + player_A_level);
+                    game.set_player("Computer", player_A_level, true);
+                }
+                if (player_B_name) {
+                    log("setting player B to " + player_B_name);
+                    game.set_player(player_B_name, "B", false);
+                } else if (player_B_level) {
+                    log("setting player B to computer, level " + player_B_level);
+                    game.set_player("Computer", player_B_level, false);
+                }
+    
+            } else if (phase == CHOOSE_ORDER) {
+                if (first_pick) {
+                    log("choosing " + first_pick + " to go first");
+                    game.set_a_picks_first((first_pick == PLAYER_A));
+                }
+    
+            } else if (phase == CHOOSE_TEAM) {
+                log("choosing piece " + selected_piece + " on turn " + turn);
+                if (selected_piece && turn) {
+                    if (turn != game.turn) {
+                        redirect error("piece selected out of turn");
+                    }
+                    game.add_piece_by_id(selected_piece);     
+                }
+            
+            } else if (phase == PLAY_GAME) {
+                if (selected_piece && turn) {
+                    if (turn != game.turn) {
+                        redirect error("piece selected out of turn");
+                    }
+                    game.play_piece_by_id(selected_piece, position, a_plays_next);     
+                    
+                    if (phase == BETWEEN_GAMES) {
+                        // game just ended
+                    }
+                }
+            }
+        }
+         
+        pent_player plyr_A = game.player_A
+        pent_player plyr_B = game.player_B
+         
+        /**
+         *  UI logic.
+         *
+         *  Show the appropriate UI given the state:
+         *
+         *     -- the appropriate chooser panel if choosing players, 
+         *        teams or who goes first  
+         *
+         *     -- title and game board if playing a game
+         *
+         *     -- "game over" splash screen if between games
+         *   
+         **/
+
+        current_player_A_name(: player_A_name :);
+        current_player_B_name(: player_B_name :);
+         
+        log(" ++++<>> phase: " + phase);
+        log(" ++++<>>    player A in game: " + game.player_A.name + "  current: " + current_player_A_name);
+         
+        if (phase == CHOOSE_PLAYERS) {
+            log("console showing choose players panel, player A name: " + current_player_A_name + "  player B name: " + current_player_B_name); 
+            choose_players_panel(game);
+        } else if (phase == CHOOSE_ORDER) {
+            log("console showing choose order panel"); 
+            choose_order_panel(game);
+        } else if (phase == CHOOSE_TEAM) {
+            log("console showing choose team panel"); 
+            choose_team_panel(game);
+        } else if (phase == PLAY_GAME) {
+            log("console showing game " + game.id + " between " + plyr_A.name + " and " + plyr_B.name); 
+            game_panel(game);
+        } else if (phase == BETWEEN_GAMES) {
+            log("console showing game over screen"); 
+            game_over_panel;
+        }
+    }
+
+    /** Helper function to send choose piece command to the console. **/
+    dynamic javascript send_choose_piece_command(piece_id) [|
+        var params = {};
+        params["{= COMMAND; =}"] = "{= CHOOSE; =}";
+        params["{= PIECE; =}"] = "{= piece_id; =}";
+        params["{= TURN; =}"] = turn;
+        queryComponentByName("pent_console", "/do", params, init_for_phase, "{= CHOOSE_TEAM; =}");
+    /]
+
+
+    /**
+     *  Pent Console UI
+     *
+     **/
+     
+    static color left_border_color = "#5599FF"
+    static color right_border_color = "#FF5555"
+    static color neutral_border_color = "#DDDDDD"
+
+    pent_console_style [/
+    
+        #console_view {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            z-index: 100;
+        }
+
+        #console_view div {
+            z-index: 100;
+            position: relative;
+        }        
+
+        .console_title {
+            color: #33BBAA;
+            padding: 0.5rem 0;
+            margin: 0;
+            text-align: center;
+            font-weight: bold;
+            font-size: 1.33rem;
+            font-family: Helvetica, Arial, Geneva, sans-serif;
+            letter-spacing: 1rem;
+        }
+
+        .panel_title_bar {
+            width: 100%;
+            padding: 0.125rem;
+            background-color: #1F7F7F;
+            background: rgba(255, 255, 255, 0.1);
+            color: #CCCCCC;
+            text-align: center;
+            font-weight: bold;
+            font-size: 0.66rem;
+            font-family: Helvetica, Arial, Geneva, sans-serif;
+            margin: 0 0 0.125rem 0;
+        }
+        
+        .table_panel .panel_title_bar {
+            display: table-caption;
+        }
+
+        .left_title_bar {        
+            border: 1px solid {= left_border_color; =};
+        }
+
+        .right_title_bar {        
+            border: 1px solid {= right_border_color; =};
+        }
+
+        .panel_title {
+            margin: 0;
+            padding: 2rem 1rem;
+            color: #CCCCCC;
+            text-align: center;
+            font-weight: bold;
+            font-size: 1.125rem;
+            font-family: Helvetica, Arial, Geneva, sans-serif;
+        }
+        
+        .console {
+            width: 100%;
+            color: #110C0F;
+            font-family: Helvetica, Arial, Geneva, sans-serif;
+            padding: 0;
+            margin: 0; 
+            text-align: center;
+            pointer-events: none;
+        }
+        
+        .console_row {
+            width: 64rem;
+            height: 22rem;
+            text-align: center;
+            margin: auto;
+        }
+        
+        .console_panel {
+            color: #FFFFFF;
+            padding: 0.2rem;
+            margin: 0;
+        }
+        
+        .team_panel {
+            display: inline-block;
+            margin-top: -2rem;
+            width: 15rem;
+            height: 11rem;
+        }
+        
+        .table_panel {
+            display: inline-table;
+        }
+        
+        .panel_cell select input {
+            width: 9rem;
+        }       
+
+        
+        .left_panel {
+            text-align: left;
+            margin-left: 0;
+            margin-right: 10rem;
+            border: 1px solid {= left_border_color; =};
+            position: relative;
+            top: 50%;
+            transform: translateY(-50%);            
+        }
+
+        .right_panel {
+            text-align: right;
+            margin-left: 10rem;
+            margin-right: 0;
+            border: 1px solid {= right_border_color; =};
+            position: relative;
+            top: 50%;
+            transform: translateY(-50%);            
+        }
+
+        .panel_row {
+            display: table-row;
+        }
+
+        .left_cell {
+            text-align: left;
+        }
+
+        .right_cell {
+            text-align: right;
+        }
+
+        .panel_cell {
+            display: table-cell;
+            padding: 0 0.25rem 0.5rem 0.25rem;
+        }
+
+        .short_panel_cell {
+            display: table-cell;
+            padding: 0 0.25rem;
+            text-align: left;
+            font-weight: bold;
+            font-size: 0.66rem;
+            font-family: Helvetica, Arial, Geneva, sans-serif;
+        }
+
+        .lone_panel_cell {
+            display: table-cell;
+            text-align: left;
+            padding: 0.125rem;
+        }
+
+        .visible_panel {        
+            background: rgba(155, 101, 155, 0.33);
+            padding: 0.25rem 0.33rem;
+            pointer-events: visible;
+        }
+
+        .button_panel {
+            width: 22.5rem;
+            margin: auto;
+            text-align: center;
+            border: 1px solid {= neutral_border_color; =};
+        }
+        
+        .button_panel_section {
+            display: table;
+        }
+        
+        .button_row {
+            display: table-row;
+        }
+
+        .button_div {
+            display: table-cell;
+            padding: 0.25rem 0.5rem;
+        }
+        
+        .lone_button_div {
+            display: table-cell;
+            padding: 0.25rem 6rem;
+        }
+
+        .space_on_left * {
+            margin-left: 1rem;
+        }
+        
+        .disabled {
+            color: #CCCCCC;
+        }
+        
+        .textedit {
+            width: 9rem;
+        }
+        
+    /]
+
+            
+    dynamic panel_title_bar(title, boolean is_player_A) {
+        [/ <div class="panel_title_bar {= (is_player_A ? "left_title_bar" : "right_title_bar"); =}"> /]
+        title;
+        [/ </div> /]
+    }
+
+    dynamic panel_title(title) {
+        [/ <div class="panel_title"> /] 
+        title;
+        [/ </div> /]
+    }
+
+    dynamic component console_title(title) {
+        component_class = "console_title"
+        title;
+    }
+
+    dynamic component console_panel {
+        component_class [/ 
+            console_panel {= owner.type; =}
+        /]
+
+        component this_component = owner
+    }
+    
+
+    dynamic console_panel chooser_panel {
+        component_class [/
+            console_panel chooser_panel {= owner.type; =}
+        /]
+        
+        title [/]
+
+        submit_params{} = { (COMMAND): CHOOSE }
+        field_params{} = {}
+        radio_params{} = {}
+        
+        pent_phase next_phase [?]
+        pent_phase prev_phase [?]
+        pent_phase start_phase = CHOOSE_PLAYERS
+        
+        dynamic submit_script [/
+            var params = {};
+            var nextPhase = "{= next_phase; =}";
+            {=
+                for k in submit_params.keys [/
+                    params["{= k; =}"] = "{= submit_params[k]; =}";
+                /]
+                for f in field_params.keys [/
+                    params["{= f; =}"] = encodeURIComponent(document.getElementById("{= field_params[f]; =}").value);
+                /]
+                [/ var radioElement; /]
+                for r in radio_params.keys {=
+                    for e in radio_params[r] [/
+                        radioElement = document.getElementById("{= e; =}");
+                        if (radioElement.checked) {
+                            params["{= r; =}"] = encodeURIComponent(radioElement.value);
+                        }
+                    /]
+                =}
+            =}  
+            queryComponentByName("pent_console", "/do", params, init_for_phase, nextPhase);
+        /]
+            
+        dynamic back_script [/
+            var params = {};
+            var prevPhase = "{= prev_phase; =}";
+            params["{= COMMAND; =}"] = "{= BACK; =}";
+            queryComponentByName("pent_console", "/do", params, init_for_phase, prevPhase);
+        /]
+
+        dynamic restart_script [/
+            var params = {};
+            var startPhase = "{= start_phase; =}";
+            params["{= COMMAND; =}"] = "{= START; =}";
+            queryComponentByName("pent_console", "/do", params, init_for_phase, startPhase));
+        /]
+
+        
+        log(" chooser panel " + title + " params: " + field_params);
+        
+        if (title) {
+            console_title(title);
+        }
+        
+        [/ <div class="console_row"> /]
+        sub;
+        [/ </div> /]
+        
+        [/ <div class="button_panel visible_panel"> /]
+        [/ <div class="button_section"><div class="button_row"><div class="button_div"> /]
+        with (prev_phase) {
+            request_button("back", "Back", back_script);
+        } else {
+            disabled_button("back", "Back");
+        }
+        [/ </div><div class="button_div"> /]
+        with (next_phase) {
+            request_button("choose", "Next", submit_script);
+        } else {
+            disabled_button("choose", "Next");
+        }
+        [/ </div></div></div> /]
+        [/ <div class="button_section"><div class="button_row"><div class="lone_button_div"> /]
+        request_button("restart", "Start Over", restart_script);
+        [/ </div></div></div> /]
+        [/ </div> /]
+        
+    }
+
+    dynamic chooser_panel choose_players_panel(pent_game game) {
+        title = "choose players"
+
+        field_params{} = { (PLAYER_A_NAME): PLAYER_A_NAME_TEXTEDIT,
+                           (PLAYER_B_NAME): PLAYER_B_NAME_TEXTEDIT,
+                           (PLAYER_A_LEVEL): PLAYER_A_LEVEL_DROPDOWN,
+                           (PLAYER_B_LEVEL): PLAYER_B_LEVEL_DROPDOWN } 
+                           
+        pent_phase next_phase = CHOOSE_ORDER
+        
+        dynamic player_A_name = game.player_A.name ? game.player_A.name : current_player_A_name                           
+        dynamic player_B_name = game.player_B.name ? game.player_B.name : current_player_B_name                           
+
+        dynamic component player_panel(boolean is_player_A) {
+             component_class = "visible_panel table_panel " + (is_player_A ? " left_panel" : " right_panel")
+             id = is_player_A ? "player_A_panel" : "player_B_panel"
+             pent_player player = is_player_A ? game.player_A : game.player_B
+             player_name = is_player_A ? player_A_name : player_B_name
+             title = is_player_A ? "Player A" : "Player B"
+             radio_group = is_player_A ? "player_A" : "player_B"
+             textedit_name = is_player_A ? PLAYER_A_NAME_TEXTEDIT : PLAYER_B_NAME_TEXTEDIT
+             dropdown_name = is_player_A ? "player_A_level" : "player_B_level"
+             name_cell_id = is_player_A ? "player_A_name_cell" : "player_B_name_cell"
+             level_cell_id = is_player_A ? "player_A_level_cell" : "player_B_level_cell"
+             textedit_id = textedit_name
+             dropdown_id = dropdown_name + "_dropdown"
+
+             field_ids[] = [ textedit_id, dropdown_id, radio_group ]
+
+             human_radiobutton_script [/ 
+                 document.getElementById("{= dropdown_id; =}").disabled = true;
+                 document.getElementById("{= level_cell_id; =}").classList.add("disabled");
+                 document.getElementById("{= textedit_id; =}").disabled = false;
+                 document.getElementById("{= name_cell_id; =}").classList.remove("disabled");
+             /] 
+        
+             computer_radiobutton_script [/ 
+                 document.getElementById("{= textedit_id; =}").disabled = true;
+                 document.getElementById("{= name_cell_id; =}").classList.add("disabled");
+                 document.getElementById("{= dropdown_id; =}").disabled = false;
+                 document.getElementById("{= level_cell_id; =}").classList.remove("disabled");
+             /]
+             
+             textedit_input_handler [/
+                 var {= textedit_id; =} = document.getElementById("{= textedit_id; =}").value;
+                 console.log("==> input from {= textedit_id; =}: " + {= textedit_id; =});
+                 informServer("/set_current_player_name", null, null, "{= textedit_id; =}", {= textedit_id; =});
+             /]
+
+             panel_title_bar(title, is_player_A);
+
+             [/ <div class="panel_row"><div class="short_panel_cell"></div><div class="short_panel_cell">Name</div></div> /]
+             [/ <div class="panel_row"><div class="panel_cell left_cell"> /]
+             radiobutton(radio_group, "Human", true, "human", human_radiobutton_script);
+             [/ </div><div id="{= name_cell_id; =}" class="panel_cell left_cell"> /]
+             log("textedit " + textedit_name + " contains name " + player_name); 
+             scripted_textedit(textedit_name, player_name, textedit_input_handler);
+             [/ </div></div> /]
+             [/ <div class="panel_row"><div class="short_panel_cell"></div><div class="short_panel_cell">Level</div></div> /]
+             [/ <div class="panel_row"><div class="panel_cell left_cell"> /]
+             radiobutton(radio_group, "Computer", false, "computer", computer_radiobutton_script);
+             [/ </div><div id="{= level_cell_id; =}" class="panel_cell left_cell disabled"> /]
+             dropdown(dropdown_name, computer_player_options, true);
+             [/ </div></div> /]
+        }
+        player_panel(true);
+        player_panel(false);
+    }
+
+    dynamic chooser_panel choose_order_panel(pent_game game) {
+        title = "who plays first/picks second?"
+
+        pent_phase next_phase = CHOOSE_TEAM
+        pent_phase prev_phase = CHOOSE_PLAYERS
+
+        radio_params{} = { (FIRST_PICK): [PLAYER_A_FIRST_RADIO, PLAYER_B_FIRST_RADIO] }
+
+        player_A_script [/]
+        player_B_script [/]
+       
+        radio_group = FIRST_PICK
+        [/ <div class="visible_panel table_panel left_panel"><div class="panel_row"><div class="lone_panel_cell"> /]
+        radiobutton(radio_group, "Player A", true, "player_A", player_A_script);
+        [/ </div></div></div> /]
+        [/ <div class="visible_panel table_panel right_panel"><div class="panel_row"><div class="lone_panel_cell"> /]
+        radiobutton(radio_group, "Player B", false, "player_B", player_B_script);
+        [/ </div></div></div> /]
+       
+    }
+
+    dynamic chooser_panel choose_team_panel(pent_game game) {
+        dynamic title = "choose teams: " + (game.a_picks_next ? "Player A" : "Player B") + "'s pick"
+        
+        pent_phase next_phase = PLAY_GAME
+        pent_phase prev_phase = CHOOSE_ORDER
+
+        dynamic component team_panel(boolean is_team_A) {
+             component_class = "team_panel " + (is_team_A ? "left_panel" : "right_panel")
+             id = is_team_A ? "team_A_panel" : "team_B_panel"
+             pent_team team = is_team_A ? game.team_A : game.team_B
+             title = is_team_A ? "Team A" : "Team B"
+             
+             panel_title_bar(title, is_team_A);
+        }
+        
+        team_panel(true);
+        team_panel(false);
+    }
+
+    dynamic console_panel game_panel(pent_game game) {
+        title = game.player_A.name + " vs. " + game.player_B.name;    
+
+        board_view(game);
+    }
+    
+    dynamic console_panel game_over_panel {
+    
+    }
+}

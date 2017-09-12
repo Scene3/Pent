@@ -1,0 +1,145 @@
+/**  pent-two.fun
+ *
+ *   2D visualization for Pent.
+ *
+ *
+ **/
+
+site pent {
+
+
+    /--- themes ---/
+    
+    pent_2D_theme {
+        keep: float tile_width [?]
+        keep: float solid_tile_width = 0.975 * tile_width
+        
+        this;
+    }
+
+    pent_2D_theme default_2D_theme {
+        float tile_width = 10.0
+    }
+    
+    pent_2D_theme current_2D_theme(pent_2D_theme theme) = theme
+    
+
+
+    /--- positions ---/
+    
+
+
+
+    
+    /--- objects ---/
+    
+    obj2D tile_array {
+    
+        rect[] tiles = []
+    }
+    
+    rect[] piece_2D(piece p) {
+        pent_position proto = p.protos[0]
+        int num_cols = p.width
+        int num_rows = p.height
+        
+        pent_position[] row_masks = [ 
+            [ #FF, 0, 0, 0, 0, 0, 0, 0 ],
+            [ 0, #FF, 0, 0, 0, 0, 0, 0 ],
+            [ 0, 0, #FF, 0, 0, 0, 0, 0 ],
+            [ 0, 0, 0, #FF, 0, 0, 0, 0 ],
+            [ 0, 0, 0, 0, #FF, 0, 0, 0 ],
+            [ 0, 0, 0, 0, 0, #FF, 0, 0 ],
+            [ 0, 0, 0, 0, 0, 0, #FF, 0 ],
+            [ 0, 0, 0, 0, 0, 0, 0, #FF ]
+        ]
+            
+        pent_position[] col_masks = [ 
+            [ #80, #80, #80, #80, #80, #80, #80, #80 ],
+            [ #40, #40, #40, #40, #40, #40, #40, #40 ],
+            [ #20, #20, #20, #20, #20, #20, #20, #20 ],
+            [ #10, #10, #10, #10, #10, #10, #10, #10 ],
+            [ #08, #08, #08, #08, #08, #08, #08, #08 ],
+            [ #04, #04, #04, #04, #04, #04, #04, #04 ],
+            [ #02, #02, #02, #02, #02, #02, #02, #02 ],
+            [ #01, #01, #01, #01, #01, #01, #01, #01 ]
+        ]
+            
+        dynamic boolean has_tile(pent_position piece_proto, int col, int row) = !is_empty(piece_proto & row_masks[row] & col_masks[col]) 
+
+        rect[] tiles = [ for int r from 0 to num_rows {
+                            for int c from 0 to num_cols {
+                                if (has_tile(proto, c, r)) {
+                                    piece_2D_tile(c, r, num_cols, num_rows)
+                                }  
+                            }
+                         }
+                     ]
+         
+
+        tiles;  
+    }
+    
+    
+    dynamic rect piece_2D_tile(int col, int row, int num_cols, int num_rows) {
+                           
+        pent_2D_theme pt = current_theme                           
+        name = "tile_" + row + "_" + col
+        float x1 = (col - (float) num_cols / 2) * pt.tile_width
+        float y1 = (row - (float) num_rows / 2) * pt.tile_width
+        float x2 = x1 + pt.solid_tile_width
+        float y2 = y1 + pt.solid_tile_width
+       
+        
+        rect(x1, y1, x2, y2);
+    }
+    
+     
+
+    piece_2D set_of_2D_pieces {
+    
+        // The pieces.
+          
+        piece_2D(utah) utah_2D [/]
+        piece_2D(faucet) faucet_2D [/]
+        piece_2D(long_L) long_L_2D [/]
+        piece_2D(snake) snake_2D [/]
+        piece_2D(pipe) pipe_2D [/]
+        piece_2D(C_piece) C_piece_2D [/]
+        piece_2D(square_L) square_L_2D [/]
+        piece_2D(T_piece) T_piece_2D [/]
+        piece_2D(stairs) stairs_2D [/]
+        piece_2D(zigzag) zigzag_2D [/]
+        piece_2D(bar) bar_2D [/]
+        piece_2D(plus) plus_2D [/]
+
+        piece_2D[12] pieces = [ utah_2D, faucet_2D, long_L_2D, snake_2D, pipe_2D, C_piece_2D,
+                                square_L_2D, T_piece_2D, stairs_2D, zigzag_2D, bar_2D, plus_2D ]
+       
+        int num_cols = 3
+        int num_rows = 4
+        float col_width = current_theme.tile_width * 5
+        float row_height = current_theme.tile_width * 5
+        float total_width = num_cols * col_width
+        float total_height = num_rows * row_height
+
+        dynamic float x_for_col(int col) = (-total_width / 2) + (col * col_width)
+        dynamic float y_for_row(int row) = (total_height / 2) - (row * row_height)
+        
+        dynamic put_in_slot(piece_2D p, int col, int row) {
+
+        }
+
+        /---- construction ----/
+        
+        for int c from 0 to num_cols {
+            for int r from 0 to num_rows {
+                log("put piece " + pieces[c * num_rows + r].type + " in slot " + c + "," + r);
+                put_in_slot(pieces[c * num_rows + r], c, r);
+            }
+        }
+
+    }
+
+
+}

@@ -1,8 +1,8 @@
 /--
- --   config.bento
+ --   config.fun
  --/
 
-[=
+{
     /** The primary site; requests are directed here by default. **/
     site_config main_site = pent_config
 
@@ -22,7 +22,7 @@
      *  necessarily responds to every interface.  Individual sites may filter out 
      *  some of them.
      **/
-    listen_to[] = [ "127.0.0.1:5555" ]
+    listen_to[] = [ "127.0.0.1:5551" ]
 
     /** Do not handle requests for files with the following extensions; let the server's
      *  default file handling logic handle them.
@@ -37,16 +37,16 @@
     /--- configuration variables queried by the server ---/
     file_base = main_site.filepath
     boolean files_first = main_site.files_first
-    bentopath = main_site.bentopath
+    funpath = main_site.funpath
     sitename = main_site.name
     sitepath = main_site.sitepath
     
     file_separator = "/"
 
     /** A generic website configuration. **/
-    site_config [=
+    site_config {
         name [?]
-        bentopath [?]
+        funpath [?]
         boolean recursive = false;
 
         filepath = "."
@@ -57,19 +57,19 @@
          *  the listen_to array.  If empty, respond to any address.
          **/
         respond_only_to[] = []  
-    =]
+    }
     
    
     /--- config objects for available sites ---/
 
-    site_config pent_config [=
+    site_config pent_config {
         name = "pent"
-        bentopath = "src:bento-modules/three"
+        funpath = "src:fun-modules/three"
         filepath = "."
-    =]    
+    }    
 
     /** The site config table allows lookup of site configuration by name.  It is
      *  generated automatically from the all_sites list.
      **/
-    site_config{} site_config_table = { for site_config sc in all_sites [= sc.name: sc =] }
-=]
+    site_config{} site_config_table = { for site_config sc in all_sites { sc.name: sc } }
+}

@@ -1,0 +1,26 @@
+/**  pent-user.fun
+ *
+ *   User model for Pent.
+ *
+ *
+ **/
+
+site pent {
+
+    user(user_id, user_password, user_email)  {
+        keep: id = user_id
+        keep: password = user_password
+        keep: email = user_email
+    }
+    
+
+    game_player(player_name, player_id) {
+        keep: name = player_name
+        keep: id = player_id
+        
+        this;
+    }
+
+
+
+}

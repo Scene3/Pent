@@ -1,0 +1,382 @@
+/**  pent-three.fun
+ *
+ *   3D visualization for Pent.
+ *
+ *
+ **/
+
+site pent {
+
+    adopt three
+
+
+    /--- initialization ---/
+    
+    three_init {
+        three.set_logging_level(three.LOG_INFO);
+    }
+
+    three_session_init {
+        current_theme(: default_theme :);
+        show_stats(false);
+    }
+
+    /--- themes ---/
+    
+    pent_theme {
+        keep: this material [?]
+        keep: float tile_width [?]
+        keep: float tile_depth [?]
+        keep: float solid_tile_width = 0.975 * tile_width
+        keep: float solid_tile_height = 0.975 * tile_width   
+        keep: float solid_tile_depth = 0.975 * tile_depth
+        
+        this;
+    }
+
+    pent_theme default_theme {
+        this material = jade_material
+        float tile_width = 10.0
+        float tile_depth = 4.0    
+    }
+    
+    pent_theme current_theme(pent_theme theme) = theme
+    
+    boolean show_stats(boolean flag) = flag
+
+
+    /--- positions ---/
+    
+
+
+
+    /--- camera ---/
+    
+    dynamic perspective_camera pent_cam {
+        position pos = position(0, 0, 300)
+        name = "pent_camera"
+        position target = position(0, 0, 0)
+
+        this generate {
+            far(2000);    /--- 1.5 * backdrop.horizon); ---/
+            [/
+                {= name; =}.target = {= target; =}
+            /]
+            sub;
+        }
+    }
+
+
+    /--- materials ---/
+
+    phong_material blue_material {
+        undecorated color = 0x3333CC
+    }
+    
+    phong_material jade_material {
+        undecorated color = 0x448855
+    }
+    
+    
+    /--- objects ---/
+    
+    composite_object piece_3obj(piece p) {
+        pent_position proto = p.protos[0]
+        int id = p.id
+        int num_cols = p.width
+        int num_rows = p.height
+        this piece = p
+        
+        pent_position[] row_masks = [ 
+            [ #FF, 0, 0, 0, 0, 0, 0, 0 ],
+            [ 0, #FF, 0, 0, 0, 0, 0, 0 ],
+            [ 0, 0, #FF, 0, 0, 0, 0, 0 ],
+            [ 0, 0, 0, #FF, 0, 0, 0, 0 ],
+            [ 0, 0, 0, 0, #FF, 0, 0, 0 ],
+            [ 0, 0, 0, 0, 0, #FF, 0, 0 ],
+            [ 0, 0, 0, 0, 0, 0, #FF, 0 ],
+            [ 0, 0, 0, 0, 0, 0, 0, #FF ]
+        ]
+            
+        pent_position[] col_masks = [ 
+            [ #80, #80, #80, #80, #80, #80, #80, #80 ],
+            [ #40, #40, #40, #40, #40, #40, #40, #40 ],
+            [ #20, #20, #20, #20, #20, #20, #20, #20 ],
+            [ #10, #10, #10, #10, #10, #10, #10, #10 ],
+            [ #08, #08, #08, #08, #08, #08, #08, #08 ],
+            [ #04, #04, #04, #04, #04, #04, #04, #04 ],
+            [ #02, #02, #02, #02, #02, #02, #02, #02 ],
+            [ #01, #01, #01, #01, #01, #01, #01, #01 ]
+        ]
+            
+        dynamic boolean has_tile(pent_position piece_proto, int col, int row) = !is_empty(piece_proto & row_masks[row] & col_masks[col]) 
+
+        three_object[] objs = [ for int r from 0 to num_rows {
+                                    for int c from 0 to num_cols {
+                                        if (has_tile(proto, c, r)) {
+                                            piece_tile(c, r, num_cols, num_rows)
+                                        }  
+                                    }
+                                }
+                              ]
+         
+
+        on_drag [/
+            console.log("{= owner.type; =}.on_drag called");
+        /]
+
+        on_point_to [/
+            console.log("{= owner.type; =}.on_point_to called");
+            {= send_choose_piece_command(owner.id); =}
+        /]
+
+    }
+    
+    
+    dynamic mesh piece_tile(int col, int row, int num_cols, int num_rows) {
+                           
+        pent_theme pt = current_theme                           
+        name = "tile_" + row + "_" + col
+        float x = (col - (float) num_cols / 2) * pt.tile_width
+        float y = (row - (float) num_rows / 2) * pt.tile_width
+        float box_width = pt.solid_tile_width
+        float box_height = pt.solid_tile_height
+        float box_depth = pt.tile_depth
+       
+        
+        geometry geo = box_geometry(box_width, box_height, box_depth)
+        material mat = pt.material
+        position pos = position((col - (float) num_cols / 2) * pt.tile_width, (row - (float) num_rows / 2) * pt.tile_width, 0)
+
+    }
+    
+     
+    /--- lights ---/
+
+    object_group light_group {
+    
+        point_light(0xCC1111) bright_red_light {
+            position pos = position(120, 123, 120)
+        }
+    
+        point_light(0x11CC11) bright_green_light {
+            position pos = position(-120, 123, 120)
+        }
+    
+        point_light(0x1111DD) bright_blue_light {
+            position pos = position(0, 233, -50)
+        }
+    
+        point_light(0xBBBB11) bright_yellow_light {
+            position pos = position(0, 233, 200)
+        }
+    
+        ambient_light(0x111111) soft_white_light {
+            position pos = position(0, 0, 100)
+        }
+    }
+
+    object_group set_of_pieces {
+    
+        // The pieces.  These get automatically added to the 
+        // objs array by object_group by dint of being
+        // three_object subclasses.
+          
+        piece_3obj(utah) utah_3obj [/]
+        piece_3obj(faucet) faucet_3obj [/]
+        piece_3obj(long_L) long_L_3obj [/]
+        piece_3obj(snake) snake_3obj [/]
+        piece_3obj(pipe) pipe_3obj [/]
+        piece_3obj(C_piece) C_piece_3obj [/]
+        piece_3obj(square_L) square_L_3obj [/]
+        piece_3obj(T_piece) T_piece_3obj [/]
+        piece_3obj(stairs) stairs_3obj [/]
+        piece_3obj(zigzag) zigzag_3obj [/]
+        piece_3obj(bar) bar_3obj [/]
+        piece_3obj(plus) plus_3obj [/]
+
+        dynamic boolean is_piece_visible(piece p) [?]
+       
+        int num_cols = 3
+        int num_rows = 4
+        float col_width = current_theme.tile_width * 5
+        float row_height = current_theme.tile_width * 5
+        float total_width = num_cols * col_width
+        float total_height = num_rows * row_height
+        float col_padding = col_width / 2
+        float row_padding = row_height / 2
+
+        dynamic float x_for_col(int col) = (-total_width / 2) + (col * col_width) + col_padding
+        dynamic float y_for_row(int row) = (total_height / 2) - (row * row_height) - row_padding 
+        
+        dynamic put_in_slot(three_object obj, int col, int row) {
+            newline;
+            obj.orient(RADIANS_180_DEG, 0, 0);
+            sp;
+            obj.locate(x_for_col(col), y_for_row(row), 0);
+        }
+
+        /---- construction ----/
+
+        this generate {        
+            for int c from 0 to num_cols {
+                for int r from 0 to num_rows {
+                    log("put piece " + objs[c * num_rows + r].type + " in slot " + c + "," + r);
+                    put_in_slot(objs[c * num_rows + r], c, r);
+                }
+            }
+        }
+
+    }
+
+    set_of_pieces unchosen_pieces(pent_game gm) {
+        dynamic boolean is_piece_visible(piece p) = !gm.is_chosen(p)
+
+        next_frame {
+            vector3(0, 1, 0) up_vector [/]
+            dynamic int dir(int col, int row) = (((col + row) & 1) * 2) - 1
+                                                  
+            for int c from 0 to num_cols {
+                for int r from 0 to num_rows {
+                    objs[c * num_rows + r].rotate_on_axis(up_vector, 0.002 * dir(c, r));
+                }
+            }
+        }
+    }
+
+    set_of_pieces team_pieces(pent_game gm, boolean on_team_A) {
+        dynamic boolean is_piece_visible(piece p) = gm.is_on_team(p, on_team_A)
+        pent_team team = on_team_A ? gm.team_A : gm.team_B
+
+        three_object objs[] = [
+            for piece p in team { 
+                piece_3obj(p)
+            }
+        ]
+
+    }
+
+    
+    
+    scene full_set_scene {
+        three_object[] objs = [
+            unchosen_pieces,
+            light_group
+        ]
+
+        camera cam = pent_cam
+                    
+        next_frame {
+            unchosen_pieces.next_frame;
+        }
+    }
+
+
+    dynamic scene scene_for_game(pent_game gm) {
+        full_set_scene;
+    }
+
+
+    dynamic controls_var_for_game(pent_game gm, controls_type) = scene_for_game(gm).name + "_canvas_" + controls_type + "_controls"
+    
+    
+    /---- scene viewer ----/
+    
+    dynamic component three_scene_viewer(pent_game gm) { 
+        style [/ width: 64rem; margin: auto; z-index: 50; /]
+
+        scene s = scene_for_game(gm)
+        pent_phase game_phase = gm.get_phase
+
+        three_component(s) scene_component {
+            style  [/ position: fixed;
+                      top: 2.5rem;
+                      left: 0;
+                      width: 100%;
+                      height: 28rem; 
+                      margin: 0; padding: 0;
+                      z-index: 1;
+                   /]
+        
+            canvas_id = s.name + "_canvas"
+
+            dynamic drag_controls(canvas_id, s) my_drag_controls {
+                boolean z_lock = true
+                dynamic boolean enabled_by_default = (game_phase == PLAY_GAME)
+            }
+
+            dynamic point_controls(canvas_id, s) my_point_controls {
+                dynamic boolean enabled_by_default = (game_phase == CHOOSE_TEAM)
+            }
+
+            controls[] canvas_controls = [ my_drag_controls, my_point_controls ]
+
+            boolean run_scripts_on_load = false
+
+            include_scripts[] = [ "/js/lib/three.js", "/js/lib/stats.js" ]
+    
+            javascript sub_script {
+                if (show_stats) [/
+                    stats = new Stats();
+                    stats.domElement.style.position = 'absolute';
+                    stats.domElement.style.top = '0px';
+                    stats.domElement.style.left = (canvasWidth - 80) + 'px';
+                    {= canvas_container; =}.appendChild(stats.domElement);
+                /]
+            }
+
+            js_function post_render {
+                body {
+                    if (show_stats) [/
+                        stats.update();
+                    /]
+                }
+            }
+            log("    >>> in scene_component with scene " + s.name + " phase " + game_phase);
+        }
+
+        if (!s) {
+            redirect scene_not_specified_error(here)
+        }
+        
+        log("  >> instantiating scene_component with scene " + s.name);
+        scene_component;
+    }
+
+    /---- pseudofiles ----/
+
+    js {
+        lib {
+            three {
+                public js {
+                    include_file("../../3p/lib/three.js");
+                    include_file("../../3p/lib/controls/DragControls.js");
+                }
+            }
+            stats {
+                public js {
+                    include_file("../../3p/lib/stats.min.js");
+                }
+            }
+        }
+    }
+    
+    /---- dev tools ----/
+    
+    position mutable_position(position pos) {
+        keep: double x(xx) = xx
+        keep: double y(yy) = yy
+        keep: double z(zz) = zz
+    
+        dynamic set_x(xval) = eval(x(: xval :))
+        dynamic set_y(yval) = eval(y(: yval :))
+        dynamic set_z(yval) = eval(z(: zval :))
+        
+        set_x(pos.x);
+        set_y(pos.y);
+        set_z(pos.z);
+        
+        this;
+    }
+
+}
