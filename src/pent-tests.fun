@@ -18,31 +18,41 @@ site pent {
 
         label = "Tests"
     
-        [/ <h2>Test Results</h2> /]
+        [| <h2>Test Results</h2> |]
 
         /--- run all the tests in the test runner list ---/
         for test_runner tr in test_runners {                
         
-            [/ <strong>{= tr.name; =}<strong><ol> /]
+            [| <strong>{= tr.name; =}<strong><ol> |]
             
             tr.run;
         
             for test_result rslt in tr.results {
-                [/ <li>{= rslt.name; =}<br> /]
-                if (rslt.result) [/
+                [| <li>{= rslt.name; =}<br> |]
+                if (rslt.result) [|
                     Passed
-                /] else [/
+                |] else [|
                     <span style="color:red">Failed</span>
-                /]
-                [/ <br><ul> /]
-                for msg in rslt.messages [/
+                |]
+                [| <br><ul> |]
+                for msg in rslt.messages [|
                     <li>{= msg; =}</li>
-                /]
-                [/ </ul></li> /]                
+                |]
+                [| </ul></li> |]                
             }
-            [/ </ol> /]
+            [| </ol> |]
         }
     }
+
+test_runner test_tests {
+ test_base test_test {
+     expected = "!"
+     
+     "!";
+     test_log("Ok, ok.");       
+ }
+}
+
 
     test_runner pent_model_tests {
     
@@ -439,6 +449,8 @@ pgt {
             } catch illegal_action_for_phase {
                 "C";
                 test_log("pent_game correctly redirects on call to set_a_picks_first");
+            } catch {
+                test_log("pent_game throws wrong kind of redirect on call to set_a_picks_first");
             }
 
             {
@@ -448,6 +460,8 @@ pgt {
             } catch illegal_action_for_phase {
                 "D";
                 test_log("pent_game correctly redirects on call to add_piece_by_id");
+            } catch {
+                test_log("pent_game throws wrong kind of redirect on call to add_piece_by_id");
             }
         }
 
@@ -476,6 +490,8 @@ pgt {
             } catch illegal_action_for_phase {
                 "B";
                 test_log("pent_game correctly redirects on call to set_a_picks_first");
+            } catch {
+                test_log("pent_game throws wrong kind of redirect on call to set_a_picks_first");
             }
 
             {
@@ -485,6 +501,8 @@ pgt {
             } catch illegal_action_for_phase {
                 "C";
                 test_log("pent_game correctly redirects on call to add_piece_by_id");
+            } catch {
+                test_log("pent_game throws wrong kind of redirect on call to add_piece_by_id");
             }
            
             // now choose players.  To start with, neither player should have a value.
@@ -534,6 +552,8 @@ pgt {
                 
             } catch illegal_action_for_phase {
                 test_log("unable to choose player, got an illegal_action_for_phase redirection");
+            } catch {
+                test_log("unable to choose player, unknown redirection");
             }
                     
             if (pent_game.phase == CHOOSE_ORDER) {
@@ -556,7 +576,7 @@ pgt {
                 "A";
                 test_log("successfully started game and set players");
 
-            } catch illegal_action_for_phase {
+            } catch {
                 test_log("failed to start game and set players");
             }
             
@@ -576,6 +596,8 @@ pgt {
             } catch illegal_action_for_phase {
                 "C";
                 test_log("pent_game correctly redirects on call to add_piece_by_id");
+            } catch {
+                test_log("pent_game throws wrong kind of redirect on call to add_piece_by_id");
             }
 
             
@@ -589,6 +611,8 @@ pgt {
                 }
             } catch illegal_action_for_phase {
                 test_log("pent_game incorrectly redirects on call to set_a_picks_first");
+            } catch {
+                test_log("pent_game throws wrong kind of redirect on call to set_a_picks_first");
             }
 
             // to test choosing the other way, start another game.
@@ -608,7 +632,7 @@ pgt {
                     test_log("in second pent_game, failed to choose player B to pick first");
                 }
 
-            } catch illegal_action_for_phase {
+            } catch {
                 test_log("pent_game incorrectly redirects on second call to set_a_picks_first");
             }
 
@@ -633,7 +657,7 @@ pgt {
                 "A";
                 test_log("successfully started game, set players and chose order");
 
-            } catch illegal_action_for_phase {
+            } catch {
                 test_log("failed to start game, set players and choose order");
             }
             
@@ -653,6 +677,8 @@ pgt {
             } catch illegal_action_for_phase {
                 "C";
                 test_log("pent_game correctly redirects on call to set_player");
+            } catch {
+                test_log("pent_game throws wrong kind of redirect on call to set_player");
             }
 
             {
@@ -662,6 +688,8 @@ pgt {
             } catch illegal_action_for_phase {
                 "D";
                 test_log("pent_game correctly redirects on call to set_a_picks_first");
+            } catch {
+                test_log("pent_game throws wrong kind of redirect on call to set_a_picks_first");
             }
 
             {
@@ -671,6 +699,8 @@ pgt {
 
             } catch illegal_action_for_phase {
                 test_log("pent_game incorrectly redirects on call to add_piece_by_id");
+            } catch {
+                test_log("pent_game throws wrong kind of redirect on call to add_piece_by_id");
             }
 
             {
@@ -680,6 +710,8 @@ pgt {
             } catch unable_to_add_piece {
                 "F";
                 test_log("pent_game correctly redirects when adding the same piece twice");
+            } catch {
+                test_log("pent_game throws wrong kind of redirect when adding the same piece twice");
             }
 
             {
@@ -711,6 +743,8 @@ pgt {
             } catch unable_to_add_piece {
                 "H";
                 test_log("pent_game correctly redirects when attempting to add a seventh piece");
+            } catch {
+                test_log("pent_game throws wrong kind of redirection when attempting to add a seventh piece");
             }
 
             {
@@ -753,7 +787,7 @@ pgt {
                 "A";
                 test_log("successfully started game, set players, chose order and chose teams");
 
-            } catch illegal_action_for_phase {
+            } catch {
                 test_log("failed to start game, set players, choose order and choose teams");
             }
 
@@ -810,7 +844,7 @@ pgt {
 
     /------ informal tests ------/
 
-    show_all_positions(params{}) {
+    public show_all_positions(params{}) {
     
         int ix = params["piece"] ? (int) params["piece"] : 0
         piece p = pieces[ix]
@@ -818,15 +852,15 @@ pgt {
         p.name;
         br; br; 
         p.all_positions.count;
-        [| positions: /]
-        [/ <ol> /]
+        [/ positions: |]
+        [| <ol> |]
         
         for pent_position pos in pieces[ix].all_positions {
-            [/ <li> /]
+            [| <li> |]
             pos;
-            [/ </li> /]
+            [| </li> |]
         }
-        [/ </ol> /]
+        [| </ol> |]
     }
     
     show_pos_count {
@@ -860,149 +894,6 @@ pgt {
         }
     }
 
-
-    hhcb {
-
-            keep: int[] cells = [ for int i from 1 to 3 { i },
-                                   for int j from 1 to 3 { (j + 2) },
-                                      for int i from 0 to 60 { 0 } ]
-            dynamic pent_position cells_to_m = [ 
-                      for int row from 0 to 8 {
-                          cells[row]
-                      }
-                  ]
-
-             cells_to_m;
-    }
-
-    _p_g {
-        keep: pent_player player_A(pent_player plyr) = plyr
-        dynamic set_player {
-            eval(player_A(: pent_player("Abe", "a") :));
-        }
-    }
-        
-
-    test_cached_child {
-    
-        _p_g _pent_game [/]
-
-     /--   if (_pent_game.player_A) {
-            "first access true (wrong)<br>";
-        } else {
-            "first access false (right)<br>";
-        } --/
-        _pent_game.set_player;
-    /---    if (_pent_game.player_A) {
-            "second access true (right)<br>";
-        } else {
-            "second access false (wrong)<br>";
-        } ---/
-        
-        _pent_game.player_A.name;
-    }
-    
-    pser(params{}) {
-        piece param_piece = piece_for_id((int) params["id"]); 
-        piece_serializer(param_piece);
-    }
-    
-    gpn {
-        pent_game pg [/]
-        pent_player cgp = pg.player_A
-            
-        eval(pg);
-        pg.set_player("Al Pha", "a", true);
-    
-        cgp.name;
-        "/";
-        pg.player_A.id;
-        "/";
-        pg.phase;
-    }    
-
-    cmc {
-        pent_position horizontal_half_mask = [ #FF, #FF, #FF, #FF, 0, 0, 0, 0 ]
-        // partial cells to mask
-        pent_board horizontal_half_cells_board {
-            keep: int[] cells = [ for int i from 0 to 32 { (12 - (i % 12)) },
-                                  for int i from 0 to 32 { 0 } ]
-        }
-
-        horizontal_half_mask;
-        br;
-        horizontal_half_cells_board.mask;
-    }
-    
-    pgpg {
-        this pent_game [/]
-        eval(pent_game);
-        pent_game.set_player("Al Pha", "a", true);
-        pent_game.set_player("B Eta", "b", false);
-        pent_game.set_a_picks_first(true);
-
-        for int id from 1 to 12 by 2 {
-            pent_game.add_piece_by_id(id, true);
-            pent_game.add_piece_by_id(id + 1, false);
-        }
-           
-        pent_game.is_available(pent_game.team_B[0]);
-    }
-    
-    idgentest {
-        for int i from 0 to 50 {
-            for long j from 0 to 10 {
-                generate_game_id(i * 10 + j);
-                "&nbsp;&nbsp;&nbsp;&nbsp;";
-            }
-            br;
-        }
-    }
-    
-    plyrs {
-        pent_game pg [/]
-            
-        eval(pg);
-        pg.set_player("Al Pha", "a", true);
-        pg.set_player("B Eta", "b", false);
-        "A: ";
-        pg.player_A.name;
-        "<br>B: ";
-        pg.player_B.name;
-    }
-    
-    ct {
-        this pent_game [/]
-
-        eval(pent_game(generate_game_id(0)));
-        pent_game.set_player("Al Pha", "a", true);
-        pent_game.set_player("B Eta", "b", false);
-        pent_game.set_a_picks_first(true);
-        pent_game.add_piece_by_id(1, true);
-        pent_game.add_piece_by_id(2, false);
-        pent_game.add_piece_by_id(3, true);
-        pent_game.add_piece_by_id(4, false);
-        pent_game.add_piece_by_id(5, true);
-        pent_game.add_piece_by_id(6, false);
-        pent_game.add_piece_by_id(7, true);
-        pent_game.add_piece_by_id(8, false);
-        pent_game.add_piece_by_id(9, true);
-        pent_game.add_piece_by_id(10, false);
-        pent_game.add_piece_by_id(11, true);
-        pent_game.add_piece_by_id(12, false);
-        "A: ";
-        pent_game.team_A.count;
-        "<br>B: ";
-        pent_game.team_B.count;
-    }
-
-    pt {
-        for piece p in pieces and int i from 0 to 1 {
-            p.all_positions.count;
-                log("there is a count");
-        }
-        "ok";
-    }
-            
+          
             
 }

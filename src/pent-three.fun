@@ -13,7 +13,7 @@ site pent {
     /--- initialization ---/
     
     three_init {
-        three.set_logging_level(three.LOG_INFO);
+        three.set_logging_level(three.LOG_DEBUG);
     }
 
     three_session_init {
@@ -59,9 +59,9 @@ site pent {
 
         this generate {
             far(2000);    /--- 1.5 * backdrop.horizon); ---/
-            [/
+            [|
                 {= name; =}.target = {= target; =}
-            /]
+            |]
             sub;
         }
     }
@@ -121,14 +121,14 @@ site pent {
                               ]
          
 
-        on_drag [/
+        on_drag [|
             console.log("{= owner.type; =}.on_drag called");
-        /]
+        |]
 
-        on_point_to [/
+        on_point_to [|
             console.log("{= owner.type; =}.on_point_to called");
             {= send_choose_piece_command(owner.id); =}
-        /]
+        |]
 
     }
     
@@ -283,20 +283,20 @@ site pent {
     /---- scene viewer ----/
     
     dynamic component three_scene_viewer(pent_game gm) { 
-        style [/ width: 64rem; margin: auto; z-index: 50; /]
+        style [| width: 64rem; margin: auto; z-index: 50; |]
 
         scene s = scene_for_game(gm)
         pent_phase game_phase = gm.get_phase
 
         three_component(s) scene_component {
-            style  [/ position: fixed;
+            style  [| position: fixed;
                       top: 2.5rem;
                       left: 0;
                       width: 100%;
                       height: 28rem; 
                       margin: 0; padding: 0;
                       z-index: 1;
-                   /]
+                   |]
         
             canvas_id = s.name + "_canvas"
 
@@ -316,20 +316,20 @@ site pent {
             include_scripts[] = [ "/js/lib/three.js", "/js/lib/stats.js" ]
     
             javascript sub_script {
-                if (show_stats) [/
+                if (show_stats) [|
                     stats = new Stats();
                     stats.domElement.style.position = 'absolute';
                     stats.domElement.style.top = '0px';
                     stats.domElement.style.left = (canvasWidth - 80) + 'px';
                     {= canvas_container; =}.appendChild(stats.domElement);
-                /]
+                |]
             }
 
             js_function post_render {
                 body {
-                    if (show_stats) [/
+                    if (show_stats) [|
                         stats.update();
-                    /]
+                    |]
                 }
             }
             log("    >>> in scene_component with scene " + s.name + " phase " + game_phase);

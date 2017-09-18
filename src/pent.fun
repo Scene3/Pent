@@ -135,7 +135,7 @@ site pent {
             pent_console_style;
         }
         
-        base_style [/ 
+        base_style [| 
             html, body { 
                 width: 100%;
                 height: 100%;
@@ -265,27 +265,27 @@ site pent {
                 font-size: 1.125rem;
                 background-color: #EEFFFF;
             }
-        /]        
+        |]        
  
         component splash_image_holder(img_url) {
             id = "splash_image_holder"
-            [/ <img src="{= img_url; =}"> /]
+            [| <img src="{= img_url; =}"> |]
         }
         
         dynamic component login_splash_box {
             id = "login_splash_box"
             component_class = "centered_container"
             
-            [/ <div class="centered_high_box"> /]
+            [| <div class="centered_high_box"> |]
             splash_image_holder(SPLASH_LOGO);
             login_component(page_name);
-            [/ </div> /]
+            [| </div> |]
         }
         
         component header_bar {
             component_class = "header_bar"
             
-            [/ <img src="{= HEADER_LOGO; =}"> /]
+            [| <img src="{= HEADER_LOGO; =}"> |]
         }
      
         component menu_bar {
@@ -342,12 +342,12 @@ site pent {
         boolean needs_login = true
         boolean needs_admin = true
     
-        [/ <div class="page_wrapper"> /]
+        [| <div class="page_wrapper"> |]
         header_bar;
         menu_bar;
-        [/ <div class="content_box"> /]
+        [| <div class="content_box"> |]
         sub;
-        [/ </div></div> /]
+        [| </div></div> |]
     }
 
     public play_page(*) sample(params{}) {
@@ -364,7 +364,7 @@ site pent {
 
     public dynamic component login_component(params{}),(page_name) {
         goto_page = page_name ? page_name : goto_param
-        goto_param {= with (params) {= params["goto"]; =} else [/ index /] =}
+        goto_param {= with (params) {= params["goto"]; =} else [| index |] =}
         component this_component = owner
         field_ids[] = [ USERNAME_PARAM, PASSWORD_PARAM ]
         submit_params{} = { "goto": goto_page } 
@@ -382,20 +382,20 @@ site pent {
             redirect (goto_page)
             
         } else {
-            [/ <div class="centered_div"><table><tr> /]
-            if (params[USERNAME_PARAM]) [/
+            [| <div class="centered_div"><table><tr> |]
+            if (params[USERNAME_PARAM]) [|
                 <td colspan="2" style="background-color: white; color: red; text-align: center;">Login unsuccessful.  Try again.</td>
-            /] else [/
+            |] else [|
                 <td colospan="2">&nbsp;</td>
-            /]
-            [/ </tr><tr><td><table><tr><td>Username:</td><td> /]
+            |]
+            [| </tr><tr><td><table><tr><td>Username:</td><td> |]
             textedit(USERNAME_PARAM, this_username, 20);
-            [/ </td></tr><tr><td>Password:</td><td> /]
+            [| </td></tr><tr><td>Password:</td><td> |]
             passwordedit(PASSWORD_PARAM, "", 20);
-            [/ </td></tr></table> /]
-            [/ </td><td> /]
+            [| </td></tr></table> |]
+            [| </td><td> |]
             submit_button("login", "Login", "/" + this_component.id, field_ids, submit_params);
-            [/ </td></tr></table></div> /]
+            [| </td></tr></table></div> |]
         }
         
     }    
@@ -416,9 +416,9 @@ site pent {
         boolean needs_login = true
         boolean needs_admin = true
 
-        [/ <h3>log</h3><pre> /]
+        [| <h3>log</h3><pre> |]
         include_file(LOG_FILE);
-        [/ </pre> /]
+        [| </pre> |]
     }
     
     public base_page show_piece(params{}) {
@@ -449,9 +449,9 @@ site pent {
         log("Error: " + msg);
         with (ctx) { log("Context: " + ctx); }
     
-        [/ <h2>Error: |]            
+        [| <h2>Error: |]            
         msg;
-        [/ </h2> /]
+        [| </h2> |]
         
         with (ctx) {
             ctx;
@@ -460,7 +460,7 @@ site pent {
     
     /-------- defined errors --------------------------/
     
-    error(400, "Illegal action for phase: " + msg, ctx) illegal_action_for_phase_error(msg, fun_context ctx) [/]
+    error(400, "Illegal action for phase: " + msg, ctx) illegal_action_for_phase(msg, fun_context ctx) [/]
     error(400, "Unable to add piece: " + msg, ctx) unable_to_add_piece(msg, fun_context ctx) [/]
     error(400, "Unable to make move: " + msg, ctx) unable_to_add_play(msg, fun_context ctx) [/]
     error(400, "Illegal phase: " + msg, ctx) illegal_phase(msg, fun_context ctx) [/]
@@ -477,16 +477,16 @@ site pent {
     }
 
     public dynamic current_info {
-        [/ <table><tr><td>Game id:</td><td> /]
+        [| <table><tr><td>Game id:</td><td> |]
         current_game.id;
-        [/ </td></tr><tr><td>Phase:</td><td> /]
+        [| </td></tr><tr><td>Phase:</td><td> |]
         current_game.phase;
-        [/ </td></tr><tr><td>Player A:</td><td> /]
+        [| </td></tr><tr><td>Player A:</td><td> |]
         current_game.player_A.name;
-        [/ </td></tr><tr><td>Player B:</td><td> /]
+        [| </td></tr><tr><td>Player B:</td><td> |]
         current_game.player_B.name;
-        [/ </td></tr><tr><td>Turn:</td><td> /]
+        [| </td></tr><tr><td>Turn:</td><td> |]
         current_game.turn;
-        [/ </td></tr></table> /]
+        [| </td></tr></table> |]
     }
 }

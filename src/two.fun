@@ -25,11 +25,11 @@ site two {
         /-- base rectangle function.  draw_type can be clear, fill or stroke --/
         dynamic draw_rect(draw_type, rect r) {
             context_name;
-            [/ . /]
+            [| . |]
             draw_type;
-            [/ Rect( /]
+            [| Rect( |]
             rect_args(r);
-            [/ ); /]
+            [| ); |]
         }
     
     
@@ -106,31 +106,31 @@ site two {
         
         dynamic rotate(float x, float y) {
             newline;
-            name; [/ .rotation.x += {= x; =}; /]
-            name; [/ .rotation.y += {= y; =}; /]
+            name; [| .rotation.x += {= x; =}; |]
+            name; [| .rotation.y += {= y; =}; |]
         }
         
         dynamic orient(float x, float y) {
             newline;
-            name; [/ .rotation.x = {= x; =}; /]
-            name; [/ .rotation.y = {= y; =}; /]
+            name; [| .rotation.x = {= x; =}; |]
+            name; [| .rotation.y = {= y; =}; |]
         }
         
         dynamic rotate_on_axis(vector3 axis, float angle) {
             newline;
-            name; [/ .rotateOnAxis({= axis; =},{= angle; =}); /]
+            name; [| .rotateOnAxis({= axis; =},{= angle; =}); |]
         }
 
         dynamic move(float x, float y) {
             newline;
-            name; [/ .position.x += {= x; =}; /]
-            name; [/ .position.y += {= y; =}; /]
+            name; [| .position.x += {= x; =}; |]
+            name; [| .position.y += {= y; =}; |]
         }
 
         dynamic locate(float x, float y) {
             newline;
-            name; [/ .position.x = {= x; =}; /]
-            name; [/ .position.y = {= y; =}; /]
+            name; [| .position.x = {= x; =}; |]
+            name; [| .position.y = {= y; =}; |]
         }
 
         dynamic immutable_field(pos.x, pos.y) set_position {

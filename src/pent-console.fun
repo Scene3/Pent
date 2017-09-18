@@ -151,7 +151,7 @@ site pent {
         drag_controls_var = controls_var_for_game(game, "drag")
         point_controls_var = controls_var_for_game(game, "point")
     
-        javascript declare_init_for_phase [/
+        javascript declare_init_for_phase [|
             function init_for_phase(ph) {
                 phase = ph;
                 if (phase == "{= CHOOSE_TEAM; =}") { 
@@ -171,17 +171,17 @@ site pent {
                 }
                 console.log("init_for_phase phase: " + ph + "  turn: " + turn);
             }
-        /]
+        |]
        
-        javascript declare_game_vars [/
+        javascript declare_game_vars [|
             var phase = "{= game.get_phase; =}";
             var turn = {= game.get_turn; =};
-        /]    
+        |]    
 
-        [/ <script> /]
+        [| <script> |]
         declare_game_vars;
         declare_init_for_phase;
-        [/ </script> /]
+        [| </script> |]
     }
 
     
@@ -390,13 +390,13 @@ site pent {
     }
 
     /** Helper function to send choose piece command to the console. **/
-    dynamic javascript send_choose_piece_command(piece_id) [|
+    dynamic javascript send_choose_piece_command(piece_id) [/
         var params = {};
         params["{= COMMAND; =}"] = "{= CHOOSE; =}";
         params["{= PIECE; =}"] = "{= piece_id; =}";
         params["{= TURN; =}"] = turn;
         queryComponentByName("pent_console", "/do", params, init_for_phase, "{= CHOOSE_TEAM; =}");
-    /]
+    |]
 
 
     /**
@@ -408,7 +408,7 @@ site pent {
     static color right_border_color = "#FF5555"
     static color neutral_border_color = "#DDDDDD"
 
-    pent_console_style [/
+    pent_console_style [|
     
         #console_view {
             position: absolute;
@@ -604,19 +604,19 @@ site pent {
             width: 9rem;
         }
         
-    /]
+    |]
 
             
     dynamic panel_title_bar(title, boolean is_player_A) {
-        [/ <div class="panel_title_bar {= (is_player_A ? "left_title_bar" : "right_title_bar"); =}"> /]
+        [| <div class="panel_title_bar {= (is_player_A ? "left_title_bar" : "right_title_bar"); =}"> |]
         title;
-        [/ </div> /]
+        [| </div> |]
     }
 
     dynamic panel_title(title) {
-        [/ <div class="panel_title"> /] 
+        [| <div class="panel_title"> |] 
         title;
-        [/ </div> /]
+        [| </div> |]
     }
 
     dynamic component console_title(title) {
@@ -625,18 +625,18 @@ site pent {
     }
 
     dynamic component console_panel {
-        component_class [/ 
+        component_class [| 
             console_panel {= owner.type; =}
-        /]
+        |]
 
         component this_component = owner
     }
     
 
     dynamic console_panel chooser_panel {
-        component_class [/
+        component_class [|
             console_panel chooser_panel {= owner.type; =}
-        /]
+        |]
         
         title [/]
 
@@ -648,42 +648,42 @@ site pent {
         pent_phase prev_phase [?]
         pent_phase start_phase = CHOOSE_PLAYERS
         
-        dynamic submit_script [/
+        dynamic submit_script [|
             var params = {};
             var nextPhase = "{= next_phase; =}";
             {=
-                for k in submit_params.keys [/
+                for k in submit_params.keys [|
                     params["{= k; =}"] = "{= submit_params[k]; =}";
-                /]
-                for f in field_params.keys [/
+                |]
+                for f in field_params.keys [|
                     params["{= f; =}"] = encodeURIComponent(document.getElementById("{= field_params[f]; =}").value);
-                /]
-                [/ var radioElement; /]
+                |]
+                [| var radioElement; |]
                 for r in radio_params.keys {=
-                    for e in radio_params[r] [/
+                    for e in radio_params[r] [|
                         radioElement = document.getElementById("{= e; =}");
                         if (radioElement.checked) {
                             params["{= r; =}"] = encodeURIComponent(radioElement.value);
                         }
-                    /]
+                    |]
                 =}
             =}  
             queryComponentByName("pent_console", "/do", params, init_for_phase, nextPhase);
-        /]
+        |]
             
-        dynamic back_script [/
+        dynamic back_script [|
             var params = {};
             var prevPhase = "{= prev_phase; =}";
             params["{= COMMAND; =}"] = "{= BACK; =}";
             queryComponentByName("pent_console", "/do", params, init_for_phase, prevPhase);
-        /]
+        |]
 
-        dynamic restart_script [/
+        dynamic restart_script [|
             var params = {};
             var startPhase = "{= start_phase; =}";
             params["{= COMMAND; =}"] = "{= START; =}";
             queryComponentByName("pent_console", "/do", params, init_for_phase, startPhase));
-        /]
+        |]
 
         
         log(" chooser panel " + title + " params: " + field_params);
@@ -692,28 +692,28 @@ site pent {
             console_title(title);
         }
         
-        [/ <div class="console_row"> /]
+        [| <div class="console_row"> |]
         sub;
-        [/ </div> /]
+        [| </div> |]
         
-        [/ <div class="button_panel visible_panel"> /]
-        [/ <div class="button_section"><div class="button_row"><div class="button_div"> /]
+        [| <div class="button_panel visible_panel"> |]
+        [| <div class="button_section"><div class="button_row"><div class="button_div"> |]
         with (prev_phase) {
             request_button("back", "Back", back_script);
         } else {
             disabled_button("back", "Back");
         }
-        [/ </div><div class="button_div"> /]
+        [| </div><div class="button_div"> |]
         with (next_phase) {
             request_button("choose", "Next", submit_script);
         } else {
             disabled_button("choose", "Next");
         }
-        [/ </div></div></div> /]
-        [/ <div class="button_section"><div class="button_row"><div class="lone_button_div"> /]
+        [| </div></div></div> |]
+        [| <div class="button_section"><div class="button_row"><div class="lone_button_div"> |]
         request_button("restart", "Start Over", restart_script);
-        [/ </div></div></div> /]
-        [/ </div> /]
+        [| </div></div></div> |]
+        [| </div> |]
         
     }
 
@@ -746,41 +746,41 @@ site pent {
 
              field_ids[] = [ textedit_id, dropdown_id, radio_group ]
 
-             human_radiobutton_script [/ 
+             human_radiobutton_script [| 
                  document.getElementById("{= dropdown_id; =}").disabled = true;
                  document.getElementById("{= level_cell_id; =}").classList.add("disabled");
                  document.getElementById("{= textedit_id; =}").disabled = false;
                  document.getElementById("{= name_cell_id; =}").classList.remove("disabled");
-             /] 
+             |] 
         
-             computer_radiobutton_script [/ 
+             computer_radiobutton_script [| 
                  document.getElementById("{= textedit_id; =}").disabled = true;
                  document.getElementById("{= name_cell_id; =}").classList.add("disabled");
                  document.getElementById("{= dropdown_id; =}").disabled = false;
                  document.getElementById("{= level_cell_id; =}").classList.remove("disabled");
-             /]
+             |]
              
-             textedit_input_handler [/
+             textedit_input_handler [|
                  var {= textedit_id; =} = document.getElementById("{= textedit_id; =}").value;
                  console.log("==> input from {= textedit_id; =}: " + {= textedit_id; =});
                  informServer("/set_current_player_name", null, null, "{= textedit_id; =}", {= textedit_id; =});
-             /]
+             |]
 
              panel_title_bar(title, is_player_A);
 
-             [/ <div class="panel_row"><div class="short_panel_cell"></div><div class="short_panel_cell">Name</div></div> /]
-             [/ <div class="panel_row"><div class="panel_cell left_cell"> /]
+             [| <div class="panel_row"><div class="short_panel_cell"></div><div class="short_panel_cell">Name</div></div> |]
+             [| <div class="panel_row"><div class="panel_cell left_cell"> |]
              radiobutton(radio_group, "Human", true, "human", human_radiobutton_script);
-             [/ </div><div id="{= name_cell_id; =}" class="panel_cell left_cell"> /]
+             [| </div><div id="{= name_cell_id; =}" class="panel_cell left_cell"> |]
              log("textedit " + textedit_name + " contains name " + player_name); 
              scripted_textedit(textedit_name, player_name, textedit_input_handler);
-             [/ </div></div> /]
-             [/ <div class="panel_row"><div class="short_panel_cell"></div><div class="short_panel_cell">Level</div></div> /]
-             [/ <div class="panel_row"><div class="panel_cell left_cell"> /]
+             [| </div></div> |]
+             [| <div class="panel_row"><div class="short_panel_cell"></div><div class="short_panel_cell">Level</div></div> |]
+             [| <div class="panel_row"><div class="panel_cell left_cell"> |]
              radiobutton(radio_group, "Computer", false, "computer", computer_radiobutton_script);
-             [/ </div><div id="{= level_cell_id; =}" class="panel_cell left_cell disabled"> /]
+             [| </div><div id="{= level_cell_id; =}" class="panel_cell left_cell disabled"> |]
              dropdown(dropdown_name, computer_player_options, true);
-             [/ </div></div> /]
+             [| </div></div> |]
         }
         player_panel(true);
         player_panel(false);
@@ -798,12 +798,12 @@ site pent {
         player_B_script [/]
        
         radio_group = FIRST_PICK
-        [/ <div class="visible_panel table_panel left_panel"><div class="panel_row"><div class="lone_panel_cell"> /]
+        [| <div class="visible_panel table_panel left_panel"><div class="panel_row"><div class="lone_panel_cell"> |]
         radiobutton(radio_group, "Player A", true, "player_A", player_A_script);
-        [/ </div></div></div> /]
-        [/ <div class="visible_panel table_panel right_panel"><div class="panel_row"><div class="lone_panel_cell"> /]
+        [| </div></div></div> |]
+        [| <div class="visible_panel table_panel right_panel"><div class="panel_row"><div class="lone_panel_cell"> |]
         radiobutton(radio_group, "Player B", false, "player_B", player_B_script);
-        [/ </div></div></div> /]
+        [| </div></div></div> |]
        
     }
 

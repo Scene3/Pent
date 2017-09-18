@@ -23,7 +23,7 @@ site pent {
     
     /---- view css ----/
     
-    pent_view_style [/
+    pent_view_style [|
 
         .view {
             margin: auto;
@@ -92,7 +92,7 @@ site pent {
             height: 20rem;
             margin: auto;
         }
-    /]
+    |]
 
 
     /---- the main component ----/
@@ -114,21 +114,21 @@ site pent {
     /---- view components ----/
 
     dynamic pent_tile(int value), (int value, boolean top, boolean right, boolean bottom, boolean left) {  
-        [/ <div class="pent_tile {= (value ? "filled_cell" : "empty_cell"); =}" |]
+        [| <div class="pent_tile {= (value ? "filled_cell" : "empty_cell"); =}" |]
 
         if (view_mode == STANDARD_MODE) {
-            if (value) [/ 
+            if (value) [| 
                 style="background-color: {= color_for_piece(value); =}; border-color: {= border_color_for_piece(value); =}"
-            /]
+            |]
         }
 
-        [/ > /]        
+        [| > |]        
         
         if (view_mode == TEXT_MODE) { 
             value;
         }
 
-        [/ </div> /]
+        [| </div> |]
     }
         
     dynamic color_for_piece(int id) {
@@ -194,10 +194,10 @@ site pent {
             component_class = "pent_letter"
         }
         
-        pent_letter pent_p [/ P /]
-        pent_letter pent_e [/ E /]
-        pent_letter pent_n [/ N /]
-        pent_letter pent_t [/ T /]
+        pent_letter pent_p [| P |]
+        pent_letter pent_e [| E |]
+        pent_letter pent_n [| N |]
+        pent_letter pent_t [| T |]
         
         pent_p;
         pent_e;
@@ -211,17 +211,17 @@ site pent {
         pent_board board = pent_board(game.plays)
         int[] cells = board.cells
 
-        [/ <table class="pent_board"> /]
+        [| <table class="pent_board"> |]
         for int row = 0 to 8 {
-            [/ <tr> /]
+            [| <tr> |]
             for int col = 0 to 8 {
-                [/ <td> /]
+                [| <td> |]
                 pent_tile(cells[row * 8 + col]);
-                [/ </td> /]
+                [| </td> |]
             }
-            [/ </tr> /]
+            [| </tr> |]
         }
-        [/ </table> /]
+        [| </table> |]
     }
 
     dynamic pent_view piece_view(piece p), (piece p, int pos_index) {
@@ -245,17 +245,17 @@ site pent {
             }
         }        
         
-        [/ <table class="pent_board"> /]
+        [| <table class="pent_board"> |]
         for int row = 0 to 8 {
-            [/ <tr> /]
+            [| <tr> |]
             for int col = 0 to 8 {
-                [/ <td> /]
+                [| <td> |]
                 handle_cell(row * 8 + col);
-                [/ </td> /]
+                [| </td> |]
             }
-            [/ </tr> /]
+            [| </tr> |]
         }
-        [/ </table> /]
+        [| </table> |]
     }
 
 }
