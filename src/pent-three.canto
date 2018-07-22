@@ -349,13 +349,13 @@ site pent {
         lib {
             three {
                 public js {
-                    include_file("../../3p/lib/three.js");
-                    include_file("../../3p/lib/controls/DragControls.js");
+                    include_file("../3p/js/libs/three.js");
+                    include_file("../3p/js/libs/controls/DragControls.js");
                 }
             }
             stats {
                 public js {
-                    include_file("../../3p/lib/stats.min.js");
+                    include_file("../3p/js/libs/stats.min.js");
                 }
             }
         }
